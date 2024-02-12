@@ -20,28 +20,28 @@ func NewPatientUsecase(p domain.PatientRepository, timeout time.Duration) domain
 	}
 }
 
-func (p patientUsecase) GetPatientByID(ctx context.Context, id int64) (*domain.Patient, error) {
+func (p patientUsecase) GetPatientByID(ctx context.Context, id int32) (*domain.Patient, error) {
 	ctx, cancel := context.WithTimeout(ctx, p.contextTimeout)
 	defer cancel()
 
 	return p.patientRepo.GetPatientByID(ctx, id)
 }
 
-func (p patientUsecase) InsertPatient(ctx context.Context, patient *domain.Patient) (int64, error) {
+func (p patientUsecase) InsertPatient(ctx context.Context, patient *domain.Patient) (int32, error) {
 	ctx, cancel := context.WithTimeout(ctx, p.contextTimeout)
 	defer cancel()
 
 	return p.patientRepo.InsertPatient(ctx, patient)
 }
 
-func (p patientUsecase) DeletePatientByID(ctx context.Context, id int64) (int64, error) {
+func (p patientUsecase) DeletePatientByID(ctx context.Context, id int32) (int32, error) {
 	ctx, cancel := context.WithTimeout(ctx, p.contextTimeout)
 	defer cancel()
 
 	return p.patientRepo.DeletePatientByID(ctx, id)
 }
 
-func (p patientUsecase) UpdatePatientByID(ctx context.Context, id int64, patient *domain.Patient) (int64, error) {
+func (p patientUsecase) UpdatePatientByID(ctx context.Context, id int32, patient *domain.Patient) (int32, error) {
 	ctx, cancel := context.WithTimeout(ctx, p.contextTimeout)
 	defer cancel()
 

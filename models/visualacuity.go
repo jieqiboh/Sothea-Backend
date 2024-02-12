@@ -1,13 +1,16 @@
 package models
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type VisualAcuity struct {
-	ID         int64 `json:"id"`
-	LEyeVision int   `json:"leyevision" binding:"required"`
-	REyeVision int   `json:"reyevision" binding:"required"`
-	//AdminID    uint `gorm:"uniqueIndex;not null"` // Foreign key referencing Admin's ID
-	//Admin      Admin
+	ID                     int32   `json:"id"`
+	LEyeVision             *int32  `json:"lEyeVision" binding:"required"`
+	REyeVision             *int32  `json:"rEyeVision" binding:"required"`
+	AdditionalIntervention *string `json:"additionalIntervention"`
+	//AdminID              uint   `gorm:"uniqueIndex;not null"` // Foreign key referencing Admin's ID
+	//Admin                Admin
 }
 
 // TableName specifies the table name for the VisualAcuity model.
@@ -16,7 +19,11 @@ func (VisualAcuity) TableName() string {
 }
 
 // ToString generates a simple string representation of the VisualAcuity struct.
-func (va VisualAcuity) ToString() string {
-	return fmt.Sprintf("ID: %d, LEyeVision: %d, REyeVision: %d",
-		va.ID, va.LEyeVision, va.REyeVision)
+func (va VisualAcuity) String() string {
+	result := fmt.Sprintf("\nVISUAL ACUITY\n")
+	result += fmt.Sprintf("ID: %d\n", va.ID)
+	result += fmt.Sprintf("LEyeVision: %d\n", *va.LEyeVision)
+	result += fmt.Sprintf("REyeVision: %d\n", *va.REyeVision)
+	result += fmt.Sprintf("Additional Intervention: %s\n", SafeDeref(va.AdditionalIntervention))
+	return result
 }

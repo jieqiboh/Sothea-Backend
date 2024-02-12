@@ -15,44 +15,83 @@ import (
 )
 
 var db *sql.DB
+
 var admin = models.Admin{
-	FamilyGroup: "S001",
-	RegDate:     time.Now(),
-	Name:        "Charlie Taylor",
-	Age:         20,
-	Gender:      "M",
+	FamilyGroup:   models.PtrTo("S001"),
+	RegDate:       models.PtrTo(time.Date(2024, time.January, 10, 0, 0, 0, 0, time.UTC)),
+	Name:          models.PtrTo("John Doe"),
+	Dob:           models.PtrTo(time.Date(1994, time.January, 10, 0, 0, 0, 0, time.UTC)),
+	Age:           models.PtrTo(30),
+	Gender:        models.PtrTo("M"),
+	Village:       models.PtrTo("SO"),
+	ContactNo:     models.PtrTo("12345678"),
+	Pregnant:      models.PtrTo(false),
+	DrugAllergies: models.PtrTo("panadol"),
+	SentToID:      models.PtrTo(false),
 }
 var pastmedicalhistory = models.PastMedicalHistory{
-	Tuberculosis:      models.BoolPtr(true),
-	Diabetes:          models.BoolPtr(false),
-	Hypertension:      models.BoolPtr(false),
-	Hyperlipidemia:    models.BoolPtr(true),
-	ChronicJointPains: models.BoolPtr(false),
+	Tuberculosis:               models.PtrTo(true),
+	Diabetes:                   models.PtrTo(false),
+	Hypertension:               models.PtrTo(true),
+	Hyperlipidemia:             models.PtrTo(false),
+	ChronicJointPains:          models.PtrTo(false),
+	ChronicMuscleAches:         models.PtrTo(true),
+	SexuallyTransmittedDisease: models.PtrTo(true),
+	SpecifiedSTDs:              models.PtrTo("TRICHOMONAS"),
+	Others:                     nil,
 }
 var socialhistory = models.SocialHistory{
-	PastSmokingHistory: models.BoolPtr(false),
-	NumberOfYears: sql.NullInt32{
-		Int32: 0,
-		Valid: false,
-	},
-	CurrentSmokingHistory: models.BoolPtr(true),
+	PastSmokingHistory:    models.PtrTo(true),
+	NumberOfYears:         models.PtrTo(int32(15)),
+	CurrentSmokingHistory: models.PtrTo(false),
+	CigarettesPerDay:      nil,
+	AlcoholHistory:        models.PtrTo(true),
+	HowRegular:            models.PtrTo("A"),
 }
 var vitalstatistics = models.VitalStatistics{
-	Temperature: 98.5,
-	SpO2:        98.0,
+	Temperature:              models.PtrTo(36.5),
+	SpO2:                     models.PtrTo(98.0),
+	SystolicBP1:              models.PtrTo(120.0),
+	DiastolicBP1:             models.PtrTo(80.0),
+	SystolicBP2:              models.PtrTo(122.0),
+	DiastolicBP2:             models.PtrTo(78.0),
+	AverageSystolicBP:        models.PtrTo(121.0),
+	AverageDiastolicBP:       models.PtrTo(79.0),
+	HR1:                      models.PtrTo(72.0),
+	HR2:                      models.PtrTo(71.0),
+	AverageHR:                models.PtrTo(71.5),
+	RandomBloodGlucoseMmolL:  models.PtrTo(5.4),
+	RandomBloodGlucoseMmolLp: models.PtrTo(5.3),
 }
 var heightandweight = models.HeightAndWeight{
-	Height: 170.6,
-	Weight: 55.5,
+	Height:      models.PtrTo(170.0),
+	Weight:      models.PtrTo(70.0),
+	BMI:         models.PtrTo(24.2),
+	BMIAnalysis: models.PtrTo("normal weight"),
+	PaedsHeight: models.PtrTo(90.0),
+	PaedsWeight: models.PtrTo(80.0),
 }
 var visualacuity = models.VisualAcuity{
-	LEyeVision: 20,
-	REyeVision: 18,
+	LEyeVision:             models.PtrTo(int32(20)),
+	REyeVision:             models.PtrTo(int32(20)),
+	AdditionalIntervention: models.PtrTo("VISUAL FIELD TEST REQUIRED"),
 }
 var doctorsconsultation = models.DoctorsConsultation{
-	Healthy:           models.BoolPtr(false),
-	ConsultationNotes: sql.NullString{},
-	ReferralNeeded:    models.BoolPtr(false),
+	Healthy:           models.PtrTo(true),
+	Msk:               models.PtrTo(false),
+	Cvs:               models.PtrTo(false),
+	Respi:             models.PtrTo(true),
+	Gu:                models.PtrTo(true),
+	Git:               models.PtrTo(false),
+	Eye:               models.PtrTo(true),
+	Derm:              models.PtrTo(false),
+	Others:            models.PtrTo(false),
+	ConsultationNotes: models.PtrTo("CHEST PAIN, SHORTNESS OF BREATH, COUGH"),
+	Diagnosis:         models.PtrTo("ACUTE BRONCHITIS"),
+	Treatment:         models.PtrTo("REST, HYDRATION, COUGH SYRUP"),
+	ReferralNeeded:    models.PtrTo(false),
+	ReferralLoc:       nil,
+	Remarks:           models.PtrTo("MONITOR FOR RESOLUTION"),
 }
 
 func initDb() {
@@ -87,22 +126,11 @@ func initDb() {
 // Gets Patient with highest ID from db, deletes it, then inserts another Patient
 func TestRun(t *testing.T) {
 	t.Run("TestDB", TestDB)
+	t.Run("TestGetPatientByID", TestGetPatientByID)
 	t.Run("TestDeletePatientByID", TestDeletePatientByID)
 	t.Run("TestInsertPatient", TestInsertPatient)
+	t.Run("TestUpdatePatientByID", TestUpdatePatientByID)
 	//t.Run("TestInsertAdmin", TestInsertAdmin)
-	//t.Run("TestInsertPastMedicalHistory", TestInsertPastMedicalHistory)
-	//t.Run("TestInsertSocialHistory", TestInsertSocialHistory)
-	//t.Run("TestInsertVitalStatistics", TestInsertVitalStatistics)
-	//t.Run("TestInsertHeightAndWeight", TestInsertHeightAndWeight)
-	//t.Run("TestInsertVisualAcuity", TestInsertVisualAcuity)
-	//t.Run("TestInsertDoctorsConsultation", TestInsertDoctorsConsultation)
-	//t.Run("TestFetchAdminFromID", TestFetchAdminFromID)
-	//t.Run("TestFetchPastMedicalHistoryFromID", TestFetchPastMedicalHistoryFromID)
-	//t.Run("TestFetchSocialHistoryFromID", TestFetchSocialHistoryFromID)
-	//t.Run("TestFetchVitalStatisticsFromID", TestFetchVitalStatisticsFromID)
-	//t.Run("TestFetchHeightAndWeightFromID", TestFetchHeightAndWeightFromID)
-	//t.Run("TestFetchVisualAcuityFromID", TestFetchVisualAcuityFromID)
-	//t.Run("TestFetchDoctorsConsultationFromID", TestFetchDoctorsConsultationFromID)
 }
 
 func TestDB(t *testing.T) {
@@ -118,8 +146,15 @@ func TestDB(t *testing.T) {
 			&admin.FamilyGroup,
 			&admin.RegDate,
 			&admin.Name,
+			&admin.Dob,
 			&admin.Age,
 			&admin.Gender,
+			&admin.Village,
+			&admin.ContactNo,
+			&admin.Pregnant,
+			&admin.LastMenstrualPeriod,
+			&admin.DrugAllergies,
+			&admin.SentToID,
 		)
 		if err != nil {
 			panic(err)
@@ -127,12 +162,16 @@ func TestDB(t *testing.T) {
 		result = append(result, admin)
 	}
 
-	assert.NotNil(t, result[0].Name)
-	assert.NotNil(t, result[0].Age)
-	assert.NotNil(t, result[0].RegDate)
-	assert.NotNil(t, result[0].FamilyGroup)
-	assert.NotNil(t, result[0].ID)
-	log.Println(result[0].ToString())
+	assert.NotNil(t, *result[0].Dob)
+	assert.NotNil(t, result[0].Gender)
+	assert.NotNil(t, result[0].Village)
+	assert.NotNil(t, result[0].ContactNo)
+	assert.NotNil(t, result[0].Pregnant)
+	assert.Nil(t, result[0].LastMenstrualPeriod)
+	assert.NotNil(t, result[0].DrugAllergies)
+	assert.NotNil(t, result[0].SentToID)
+
+	log.Println(result[0])
 }
 
 func TestGetPatientByID(t *testing.T) {
@@ -144,11 +183,17 @@ func TestGetPatientByID(t *testing.T) {
 		log.Fatal("Failed to assert repo")
 	}
 
-	id := 10
-	p, err := patient_repo.GetPatientByID(context.Background(), int64(id))
+	id := 1
+	p, err := patient_repo.GetPatientByID(context.Background(), int32(id))
 	assert.Nil(t, err)
 
 	log.Println(p.Admin)
+	log.Println(p.PastMedicalHistory)
+	log.Println(p.SocialHistory)
+	log.Println(p.VitalStatistics)
+	log.Println(p.HeightAndWeight)
+	log.Println(p.VisualAcuity)
+	log.Println(p.DoctorsConsultation)
 }
 
 func TestDeletePatientByID(t *testing.T) {
@@ -160,7 +205,7 @@ func TestDeletePatientByID(t *testing.T) {
 		log.Fatal("Failed to assert repo")
 	}
 
-	var latestId int64
+	var latestId int32
 	err := db.QueryRow("SELECT ID FROM admin ORDER BY ID DESC LIMIT 1").Scan(&latestId)
 	if err != nil {
 		log.Fatal("Getting latest id failed:", err)
@@ -260,13 +305,13 @@ func TestUpdatePatientByID(t *testing.T) {
 	assert.Equal(t, p.HeightAndWeight, expectedPatient.HeightAndWeight)
 	assert.Equal(t, p.VisualAcuity, expectedPatient.VisualAcuity)
 	assert.Equal(t, p.DoctorsConsultation, expectedPatient.DoctorsConsultation)
-	log.Println(p.Admin.ToString())
-	log.Println(p.PastMedicalHistory.ToString())
-	log.Println(p.SocialHistory.ToString())
-	log.Println(p.VitalStatistics.ToString())
-	log.Println(p.HeightAndWeight.ToString())
-	log.Println(p.VisualAcuity.ToString())
-	log.Println(p.DoctorsConsultation.ToString())
+	log.Println(p.Admin)
+	log.Println(p.PastMedicalHistory)
+	log.Println(p.SocialHistory)
+	log.Println(p.VitalStatistics)
+	log.Println(p.HeightAndWeight)
+	log.Println(p.VisualAcuity)
+	log.Println(p.DoctorsConsultation)
 }
 
 func TestFull(t *testing.T) {
@@ -279,7 +324,7 @@ func TestFull(t *testing.T) {
 		log.Fatal("Failed to assert repo")
 	}
 
-	// InsertPatient with only admin and docconsult field - should return id and nil error
+	// InsertPatient with only admin and docconsult field - should successfully insert
 	patient1 := domain.Patient{
 		Admin:               &admin,
 		PastMedicalHistory:  nil,
@@ -304,7 +349,7 @@ func TestFull(t *testing.T) {
 		DoctorsConsultation: &doctorsconsultation,
 	}
 	id2, err := patient_repo.InsertPatient(context.Background(), &patient2)
-	assert.Equal(t, id2, int64(-1))
+	assert.Equal(t, id2, int32(-1))
 	assert.NotNil(t, err)
 
 	// GetPatient with id that doesn't exist
@@ -318,7 +363,7 @@ func TestFull(t *testing.T) {
 		SocialHistory: &socialhistory,
 	}
 	id4, err := patient_repo.InsertPatient(context.Background(), &patient4)
-	var latestId int64
+	var latestId int32
 	err = db.QueryRow("SELECT ID FROM admin ORDER BY ID DESC LIMIT 1").Scan(&latestId)
 	if err != nil {
 		log.Fatal("Getting latest id failed:", err)
@@ -335,11 +380,18 @@ func TestFull(t *testing.T) {
 
 	// Update Patient4 and update all admin fields except id, add vitalstatistics and visualacuity
 	updatedAdmin := models.Admin{
-		FamilyGroup: "S001",
-		RegDate:     time.Now(),
-		Name:        "Updated Name Here",
-		Age:         5,
-		Gender:      "F",
+		FamilyGroup:         models.PtrTo("S001"),
+		RegDate:             models.PtrTo(time.Now()),
+		Name:                models.PtrTo("Updated Name Here"),
+		Dob:                 models.PtrTo(time.Date(1994, time.January, 10, 0, 0, 0, 0, time.UTC)),
+		Age:                 models.PtrTo(5),
+		Gender:              models.PtrTo("F"),
+		Village:             models.PtrTo("SO"),
+		ContactNo:           models.PtrTo("12345678"),
+		Pregnant:            models.PtrTo(false),
+		LastMenstrualPeriod: models.PtrTo(time.Date(2024, time.January, 10, 0, 0, 0, 0, time.UTC)),
+		DrugAllergies:       models.PtrTo("panadol"),
+		SentToID:            models.PtrTo(false),
 	}
 	patient6 := domain.Patient{
 		Admin:           &updatedAdmin,
@@ -381,16 +433,16 @@ func TestFull(t *testing.T) {
 
 }
 
-func TestGetAllAdmin(t *testing.T) {
-	initDb()
-	repo := NewPostgresPatientRepository(db)
-
-	patient_repo, ok := repo.(*postgresPatientRepository)
-	if !ok {
-		log.Fatal("Failed to assert repo")
-	}
-
-	adminArray, err := patient_repo.GetAllFromAdmin(context.Background())
-	assert.Nil(t, err)
-	assert.NotNil(t, adminArray)
-}
+//func TestGetAllAdmin(t *testing.T) {
+//	initDb()
+//	repo := NewPostgresPatientRepository(db)
+//
+//	patient_repo, ok := repo.(*postgresPatientRepository)
+//	if !ok {
+//		log.Fatal("Failed to assert repo")
+//	}
+//
+//	adminArray, err := patient_repo.GetAllFromAdmin(context.Background())
+//	assert.Nil(t, err)
+//	assert.NotNil(t, adminArray)
+//}

@@ -1,16 +1,22 @@
 package models
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type PastMedicalHistory struct {
-	ID                int64 `json:"id" binding:"-"`
-	Tuberculosis      *bool `json:"tuberculosis" validate:"exists"`
-	Diabetes          *bool `json:"diabetes" validate:"exists"`
-	Hyperlipidemia    *bool `json:"hyperlipidemia" validate:"exists"`
-	Hypertension      *bool `json:"hypertension" validate:"exists"`
-	ChronicJointPains *bool `json:"chronicjointpains" validate:"exists"`
-	//AdminID           uint `gorm:"uniqueIndex;not null"` // Foreign key referencing Admin's ID
-	//Admin             Admin
+	ID                         int32   `json:"id" binding:"-"`
+	Tuberculosis               *bool   `json:"tuberculosis" binding:"required"`
+	Diabetes                   *bool   `json:"diabetes" binding:"required"`
+	Hypertension               *bool   `json:"hypertension" binding:"required"`
+	Hyperlipidemia             *bool   `json:"hyperlipidemia" binding:"required"`
+	ChronicJointPains          *bool   `json:"chronicJointPains" binding:"required"`
+	ChronicMuscleAches         *bool   `json:"chronicMuscleAches" binding:"required"`
+	SexuallyTransmittedDisease *bool   `json:"sexuallyTransmittedDisease" binding:"required"`
+	SpecifiedSTDs              *string `json:"specifiedSTDs"`
+	Others                     *string `json:"others"`
+	//AdminID                    uint `gorm:"uniqueIndex;not null"` // Foreign key referencing Admin's ID
+	//Admin                      Admin
 }
 
 // TableName specifies the table name for the PastMedicalHistory model.
@@ -19,7 +25,17 @@ func (PastMedicalHistory) TableName() string {
 }
 
 // ToString generates a simple string representation of the PastMedicalHistory struct.
-func (pmh PastMedicalHistory) ToString() string {
-	return fmt.Sprintf("ID: %d, Tuberculosis: %t, Diabetes: %t, Hypertension: %t, Hyperlipidemia: %t, ChronicJointPains: %t",
-		pmh.ID, *pmh.Tuberculosis, *pmh.Diabetes, *pmh.Hypertension, *pmh.Hyperlipidemia, *pmh.ChronicJointPains)
+func (pmh PastMedicalHistory) String() string {
+	result := fmt.Sprintf("\nPAST MEDICAL HISTORY\n")
+	result += fmt.Sprintf("ID: %d\n", pmh.ID)
+	result += fmt.Sprintf("Tuberculosis: %t\n", *pmh.Tuberculosis)
+	result += fmt.Sprintf("Diabetes: %t\n", *pmh.Diabetes)
+	result += fmt.Sprintf("Hypertension: %t\n", *pmh.Hypertension)
+	result += fmt.Sprintf("Hyperlipidemia: %t\n", *pmh.Hyperlipidemia)
+	result += fmt.Sprintf("ChronicJointPains: %t\n", *pmh.ChronicJointPains)
+	result += fmt.Sprintf("ChronicMuscleAches: %t\n", *pmh.ChronicMuscleAches)
+	result += fmt.Sprintf("SexuallyTransmittedDisease: %t\n", *pmh.SexuallyTransmittedDisease)
+	result += fmt.Sprintf("SpecifiedSTDs: %s\n", SafeDeref(pmh.SpecifiedSTDs))
+	result += fmt.Sprintf("Others: %s\n", SafeDeref(pmh.Others))
+	return result
 }

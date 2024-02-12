@@ -1,16 +1,18 @@
 package models
 
 import (
-	"database/sql"
 	"fmt"
 )
 
 type SocialHistory struct {
-	ID                    int64         `json:"id"`
-	PastSmokingHistory    *bool         `json:"pastsmokinghistory" validate:"exists"`
-	NumberOfYears         sql.NullInt32 `json:"numberofyears"`
-	CurrentSmokingHistory *bool         `json:"currentsmokinghistory" validate:"exists"`
-	//AdminID               uint `gorm:"uniqueIndex;not null"` // Foreign key referencing Admin's ID
+	ID                    int32   `json:"id"`
+	PastSmokingHistory    *bool   `json:"pastSmokingHistory" binding:"required"`
+	NumberOfYears         *int32  `json:"numberOfYears"`
+	CurrentSmokingHistory *bool   `json:"currentSmokingHistory" binding:"required"`
+	CigarettesPerDay      *int32  `json:"cigarettesPerDay"`
+	AlcoholHistory        *bool   `json:"alcoholHistory" binding:"required"`
+	HowRegular            *string `json:"howRegular"`
+	//AdminID               uint    `gorm:"uniqueIndex;not null"` // Foreign key referencing Admin's ID
 	//Admin                 Admin
 }
 
@@ -20,7 +22,14 @@ func (SocialHistory) TableName() string {
 }
 
 // ToString generates a simple string representation of the SocialHistory struct.
-func (sh SocialHistory) ToString() string {
-	return fmt.Sprintf("ID: %d, PastSmokingHistory: %t, NumberOfYears: %d, CurrentSmokingHistory: %t",
-		sh.ID, *sh.PastSmokingHistory, sh.NumberOfYears, *sh.CurrentSmokingHistory)
+func (sh SocialHistory) String() string {
+	result := fmt.Sprintf("\nSOCIAL HISTORY\n")
+	result += fmt.Sprintf("ID: %d\n", sh.ID)
+	result += fmt.Sprintf("Past Smoking History: %t\n", *sh.PastSmokingHistory)
+	result += fmt.Sprintf("Number of Years: %d\n", SafeDeref(sh.NumberOfYears))
+	result += fmt.Sprintf("Current Smoking History: %v\n", *sh.CurrentSmokingHistory)
+	result += fmt.Sprintf("Cigarettes Per Day: %d\n", SafeDeref(sh.CigarettesPerDay))
+	result += fmt.Sprintf("Alcohol History: %t\n", *sh.AlcoholHistory)
+	result += fmt.Sprintf("How Regular: %v\n", SafeDeref(sh.HowRegular))
+	return result
 }
