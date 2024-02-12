@@ -9,6 +9,7 @@
     "village": "SO",
     "contactNo": "12345678",
     "pregnant": false,
+    "lastMenstrualPeriod": null,
     "drugAllergies": "panadol",
     "sentToID": false
   },

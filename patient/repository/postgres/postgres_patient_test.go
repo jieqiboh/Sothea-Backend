@@ -17,117 +17,81 @@ import (
 var db *sql.DB
 
 var admin = models.Admin{
-	FamilyGroup: "S001",
-	RegDate:     time.Date(2024, time.January, 10, 0, 0, 0, 0, time.UTC),
-	Name:        "John Doe",
-	Dob:         time.Date(1994, time.January, 10, 0, 0, 0, 0, time.UTC),
-	Age:         30,
-	Gender:      "M",
-	Village:     "SO",
-	ContactNo:   "12345678",
-	Pregnant:    false,
-	DrugAllergies: sql.NullString{
-		String: "panadol",
-		Valid:  false,
-	},
-	SentToID: false,
+	FamilyGroup:   models.PtrTo("S001"),
+	RegDate:       models.PtrTo(time.Date(2024, time.January, 10, 0, 0, 0, 0, time.UTC)),
+	Name:          models.PtrTo("John Doe"),
+	Dob:           models.PtrTo(time.Date(1994, time.January, 10, 0, 0, 0, 0, time.UTC)),
+	Age:           models.PtrTo(30),
+	Gender:        models.PtrTo("M"),
+	Village:       models.PtrTo("SO"),
+	ContactNo:     models.PtrTo("12345678"),
+	Pregnant:      models.PtrTo(false),
+	DrugAllergies: models.PtrTo("panadol"),
+	SentToID:      models.PtrTo(false),
 }
 var pastmedicalhistory = models.PastMedicalHistory{
-	Tuberculosis:               true,
-	Diabetes:                   false,
-	Hypertension:               true,
-	Hyperlipidemia:             false,
-	ChronicJointPains:          false,
-	ChronicMuscleAches:         true,
-	SexuallyTransmittedDisease: true,
-	SpecifiedSTDs: sql.NullString{
-		String: "TRICHOMONAS",
-		Valid:  true,
-	},
-	Others: sql.NullString{
-		String: "",
-		Valid:  false,
-	},
+	Tuberculosis:               models.PtrTo(true),
+	Diabetes:                   models.PtrTo(false),
+	Hypertension:               models.PtrTo(true),
+	Hyperlipidemia:             models.PtrTo(false),
+	ChronicJointPains:          models.PtrTo(false),
+	ChronicMuscleAches:         models.PtrTo(true),
+	SexuallyTransmittedDisease: models.PtrTo(true),
+	SpecifiedSTDs:              models.PtrTo("TRICHOMONAS"),
+	Others:                     nil,
 }
 var socialhistory = models.SocialHistory{
-	PastSmokingHistory: true,
-	NumberOfYears: sql.NullInt32{
-		Int32: 15,
-		Valid: true,
-	},
-	CurrentSmokingHistory: false,
-	CigarettesPerDay: sql.NullInt32{
-		Int32: 0,
-		Valid: false,
-	},
-	AlcoholHistory: true,
-	HowRegular: sql.NullString{
-		String: "A",
-		Valid:  true,
-	},
+	PastSmokingHistory:    models.PtrTo(true),
+	NumberOfYears:         models.PtrTo(int32(15)),
+	CurrentSmokingHistory: models.PtrTo(false),
+	CigarettesPerDay:      nil,
+	AlcoholHistory:        models.PtrTo(true),
+	HowRegular:            models.PtrTo("A"),
 }
 var vitalstatistics = models.VitalStatistics{
-	Temperature:              36.5,
-	SpO2:                     98,
-	SystolicBP1:              120,
-	DiastolicBP1:             80,
-	SystolicBP2:              122,
-	DiastolicBP2:             78,
-	AverageSystolicBP:        121,
-	AverageDiastolicBP:       79,
-	HR1:                      72,
-	HR2:                      71,
-	AverageHR:                71.5,
-	RandomBloodGlucoseMmolL:  5.4,
-	RandomBloodGlucoseMmolLp: 5.3,
+	Temperature:              models.PtrTo(36.5),
+	SpO2:                     models.PtrTo(98.0),
+	SystolicBP1:              models.PtrTo(120.0),
+	DiastolicBP1:             models.PtrTo(80.0),
+	SystolicBP2:              models.PtrTo(122.0),
+	DiastolicBP2:             models.PtrTo(78.0),
+	AverageSystolicBP:        models.PtrTo(121.0),
+	AverageDiastolicBP:       models.PtrTo(79.0),
+	HR1:                      models.PtrTo(72.0),
+	HR2:                      models.PtrTo(71.0),
+	AverageHR:                models.PtrTo(71.5),
+	RandomBloodGlucoseMmolL:  models.PtrTo(5.4),
+	RandomBloodGlucoseMmolLp: models.PtrTo(5.3),
 }
 var heightandweight = models.HeightAndWeight{
-	Height:      170,
-	Weight:      70,
-	BMI:         24.2,
-	BMIAnalysis: "normal weight",
-	PaedsHeight: 90,
-	PaedsWeight: 80,
+	Height:      models.PtrTo(170.0),
+	Weight:      models.PtrTo(70.0),
+	BMI:         models.PtrTo(24.2),
+	BMIAnalysis: models.PtrTo("normal weight"),
+	PaedsHeight: models.PtrTo(90.0),
+	PaedsWeight: models.PtrTo(80.0),
 }
 var visualacuity = models.VisualAcuity{
-	LEyeVision: 20,
-	REyeVision: 20,
-	AdditionalIntervention: sql.NullString{
-		String: "VISUAL FIELD TEST REQUIRED",
-		Valid:  true,
-	},
+	LEyeVision:             models.PtrTo(int32(20)),
+	REyeVision:             models.PtrTo(int32(20)),
+	AdditionalIntervention: models.PtrTo("VISUAL FIELD TEST REQUIRED"),
 }
 var doctorsconsultation = models.DoctorsConsultation{
-	Healthy: true,
-	Msk:     false,
-	Cvs:     false,
-	Respi:   true,
-	Gu:      true,
-	Git:     false,
-	Eye:     true,
-	Derm:    false,
-	Others:  false,
-	ConsultationNotes: sql.NullString{
-		String: "CHEST PAIN, SHORTNESS OF BREATH, COUGH",
-		Valid:  true,
-	},
-	Diagnosis: sql.NullString{
-		String: "ACUTE BRONCHITIS",
-		Valid:  true,
-	},
-	Treatment: sql.NullString{
-		String: "REST, HYDRATION, COUGH SYRUP",
-		Valid:  true,
-	},
-	ReferralNeeded: false,
-	ReferralLoc: sql.NullString{
-		String: "",
-		Valid:  false,
-	},
-	Remarks: sql.NullString{
-		String: "MONITOR FOR RESOLUTION",
-		Valid:  true,
-	},
+	Healthy:           models.PtrTo(true),
+	Msk:               models.PtrTo(false),
+	Cvs:               models.PtrTo(false),
+	Respi:             models.PtrTo(true),
+	Gu:                models.PtrTo(true),
+	Git:               models.PtrTo(false),
+	Eye:               models.PtrTo(true),
+	Derm:              models.PtrTo(false),
+	Others:            models.PtrTo(false),
+	ConsultationNotes: models.PtrTo("CHEST PAIN, SHORTNESS OF BREATH, COUGH"),
+	Diagnosis:         models.PtrTo("ACUTE BRONCHITIS"),
+	Treatment:         models.PtrTo("REST, HYDRATION, COUGH SYRUP"),
+	ReferralNeeded:    models.PtrTo(false),
+	ReferralLoc:       nil,
+	Remarks:           models.PtrTo("MONITOR FOR RESOLUTION"),
 }
 
 func initDb() {
@@ -162,8 +126,10 @@ func initDb() {
 // Gets Patient with highest ID from db, deletes it, then inserts another Patient
 func TestRun(t *testing.T) {
 	t.Run("TestDB", TestDB)
+	t.Run("TestGetPatientByID", TestGetPatientByID)
 	t.Run("TestDeletePatientByID", TestDeletePatientByID)
 	t.Run("TestInsertPatient", TestInsertPatient)
+	t.Run("TestUpdatePatientByID", TestUpdatePatientByID)
 	//t.Run("TestInsertAdmin", TestInsertAdmin)
 }
 
@@ -196,13 +162,12 @@ func TestDB(t *testing.T) {
 		result = append(result, admin)
 	}
 
-	assert.NotNil(t, result[0].Dob)
+	assert.NotNil(t, *result[0].Dob)
 	assert.NotNil(t, result[0].Gender)
 	assert.NotNil(t, result[0].Village)
 	assert.NotNil(t, result[0].ContactNo)
 	assert.NotNil(t, result[0].Pregnant)
-	lastMenstrualPeriod, _ := result[0].LastMenstrualPeriod.Value()
-	assert.Nil(t, lastMenstrualPeriod)
+	assert.Nil(t, result[0].LastMenstrualPeriod)
 	assert.NotNil(t, result[0].DrugAllergies)
 	assert.NotNil(t, result[0].SentToID)
 
@@ -277,189 +242,196 @@ func TestInsertPatient(t *testing.T) {
 
 }
 
-//func TestUpdatePatientByID(t *testing.T) {
-//	initDb()
-//	repo := NewPostgresPatientRepository(db)
-//
-//	patient_repo, ok := repo.(*postgresPatientRepository)
-//	if !ok {
-//		log.Fatal("Failed to assert repo")
-//	}
-//
-//	patient := domain.Patient{
-//		Admin:               &admin,
-//		PastMedicalHistory:  nil,
-//		SocialHistory:       nil,
-//		VitalStatistics:     nil,
-//		HeightAndWeight:     &heightandweight,
-//		VisualAcuity:        &visualacuity,
-//		DoctorsConsultation: &doctorsconsultation,
-//	}
-//
-//	id, err := patient_repo.InsertPatient(context.Background(), &patient)
-//	assert.Nil(t, err)
-//	log.Println("Patient Successfully inserted with id: ", id)
-//	admin.ID = id
-//	pastmedicalhistory.ID = id
-//	socialhistory.ID = id
-//	vitalstatistics.ID = id
-//	heightandweight.ID = id
-//	visualacuity.ID = id
-//	doctorsconsultation.ID = id
-//
-//	updatePatient := domain.Patient{
-//		Admin:               &admin,
-//		PastMedicalHistory:  &pastmedicalhistory,
-//		SocialHistory:       &socialhistory,
-//		VitalStatistics:     &vitalstatistics,
-//		HeightAndWeight:     &heightandweight,
-//		VisualAcuity:        &visualacuity,
-//		DoctorsConsultation: nil,
-//	}
-//	id, err = patient_repo.UpdatePatientByID(context.Background(), id, &updatePatient)
-//
-//	assert.Nil(t, err)
-//	log.Println("Patient Successfully Updated with id: ", id)
-//
-//	p, err := patient_repo.GetPatientByID(context.Background(), id)
-//	assert.Nil(t, err)
-//
-//	expectedPatient := domain.Patient{
-//		Admin:               &admin,
-//		PastMedicalHistory:  &pastmedicalhistory,
-//		SocialHistory:       &socialhistory,
-//		VitalStatistics:     &vitalstatistics,
-//		HeightAndWeight:     &heightandweight,
-//		VisualAcuity:        &visualacuity,
-//		DoctorsConsultation: &doctorsconsultation,
-//	}
-//	// Time is not equal
-//	assert.Equal(t, p.PastMedicalHistory, expectedPatient.PastMedicalHistory)
-//	assert.Equal(t, p.SocialHistory, expectedPatient.SocialHistory)
-//	assert.Equal(t, p.VitalStatistics, expectedPatient.VitalStatistics)
-//	assert.Equal(t, p.HeightAndWeight, expectedPatient.HeightAndWeight)
-//	assert.Equal(t, p.VisualAcuity, expectedPatient.VisualAcuity)
-//	assert.Equal(t, p.DoctorsConsultation, expectedPatient.DoctorsConsultation)
-//	log.Println(p.Admin.ToString())
-//	log.Println(p.PastMedicalHistory.ToString())
-//	log.Println(p.SocialHistory.ToString())
-//	log.Println(p.VitalStatistics.ToString())
-//	log.Println(p.HeightAndWeight.ToString())
-//	log.Println(p.VisualAcuity.ToString())
-//	log.Println(p.DoctorsConsultation.ToString())
-//}
+func TestUpdatePatientByID(t *testing.T) {
+	initDb()
+	repo := NewPostgresPatientRepository(db)
 
-//func TestFull(t *testing.T) {
-//	// Tests some edge cases and ensures desired behaviour is maintained
-//	initDb()
-//	repo := NewPostgresPatientRepository(db)
-//
-//	patient_repo, ok := repo.(*postgresPatientRepository)
-//	if !ok {
-//		log.Fatal("Failed to assert repo")
-//	}
-//
-//	// InsertPatient with only admin and docconsult field - should return id and nil error
-//	patient1 := domain.Patient{
-//		Admin:               &admin,
-//		PastMedicalHistory:  nil,
-//		SocialHistory:       nil,
-//		VitalStatistics:     nil,
-//		HeightAndWeight:     nil,
-//		VisualAcuity:        nil,
-//		DoctorsConsultation: &doctorsconsultation,
-//	}
-//	id1, err := patient_repo.InsertPatient(context.Background(), &patient1)
-//	assert.NotNil(t, id1)
-//	assert.Nil(t, err)
-//
-//	// InsertPatient with no admin field - should return -1 and error
-//	patient2 := domain.Patient{
-//		Admin:               nil,
-//		PastMedicalHistory:  nil,
-//		SocialHistory:       nil,
-//		VitalStatistics:     &vitalstatistics,
-//		HeightAndWeight:     nil,
-//		VisualAcuity:        nil,
-//		DoctorsConsultation: &doctorsconsultation,
-//	}
-//	id2, err := patient_repo.InsertPatient(context.Background(), &patient2)
-//	assert.Equal(t, id2, int64(-1))
-//	assert.NotNil(t, err)
-//
-//	// GetPatient with id that doesn't exist
-//	patient3, err := patient_repo.GetPatientByID(context.Background(), -1)
-//	assert.Nil(t, patient3)
-//	assert.NotNil(t, err)
-//
-//	// GetPatient with only admin and socialhistory field filled in
-//	patient4 := domain.Patient{
-//		Admin:         &admin,
-//		SocialHistory: &socialhistory,
-//	}
-//	id4, err := patient_repo.InsertPatient(context.Background(), &patient4)
-//	var latestId int64
-//	err = db.QueryRow("SELECT ID FROM admin ORDER BY ID DESC LIMIT 1").Scan(&latestId)
-//	if err != nil {
-//		log.Fatal("Getting latest id failed:", err)
-//	}
-//	patient5, err := patient_repo.GetPatientByID(context.Background(), latestId)
-//	assert.Nil(t, err)
-//	assert.Nil(t, patient5.PastMedicalHistory)
-//	assert.Nil(t, patient5.VitalStatistics)
-//	assert.Nil(t, patient5.HeightAndWeight)
-//	assert.Nil(t, patient5.VisualAcuity)
-//	assert.Nil(t, patient5.DoctorsConsultation)
-//	assert.NotNil(t, patient5.Admin)
-//	assert.NotNil(t, patient5.SocialHistory)
-//
-//	// Update Patient4 and update all admin fields except id, add vitalstatistics and visualacuity
-//	updatedAdmin := models.Admin{
-//		FamilyGroup: "S001",
-//		RegDate:     time.Now(),
-//		Name:        "Updated Name Here",
-//		Age:         5,
-//		Gender:      "F",
-//	}
-//	patient6 := domain.Patient{
-//		Admin:           &updatedAdmin,
-//		VitalStatistics: &vitalstatistics,
-//		VisualAcuity:    &visualacuity,
-//	}
-//	id6, err := patient_repo.UpdatePatientByID(context.Background(), id4, &patient6)
-//	assert.NotNil(t, id6)
-//	assert.Nil(t, err)
-//
-//	updatedPatient6, err := patient_repo.GetPatientByID(context.Background(), id6)
-//	assert.Nil(t, err)
-//	assert.NotNil(t, updatedPatient6.Admin)
-//	assert.NotNil(t, updatedPatient6.SocialHistory)
-//	assert.NotNil(t, updatedPatient6.VitalStatistics)
-//	assert.NotNil(t, updatedPatient6.VisualAcuity)
-//	assert.Nil(t, updatedPatient6.PastMedicalHistory)
-//	assert.Nil(t, updatedPatient6.HeightAndWeight)
-//	assert.Nil(t, updatedPatient6.DoctorsConsultation)
-//	assert.Equal(t, updatedAdmin.FamilyGroup, updatedPatient6.Admin.FamilyGroup)
-//	assert.Equal(t, updatedAdmin.Name, updatedPatient6.Admin.Name)
-//	assert.Equal(t, updatedAdmin.Age, updatedPatient6.Admin.Age)
-//	assert.Equal(t, updatedAdmin.Gender, updatedPatient6.Admin.Gender)
-//
-//	// Update Patient6 admin id, should fail
-//	//updatedAdmin = models.Admin{
-//	//	ID: int64(10000),
-//	//}
-//	//patient7 := domain.Patient{
-//	//	Admin: &updatedAdmin,
-//	//}
-//	//id7, err := patient_repo.UpdatePatientByID(context.Background(), id6, &patient7)
-//	//assert.Equal(t, int64(-1), id7)
-//	//assert.NotNil(t, err)
-//
-//	// Update a non-existing patient, should fail
-//
-//	// Delete Patient4
-//
-//}
+	patient_repo, ok := repo.(*postgresPatientRepository)
+	if !ok {
+		log.Fatal("Failed to assert repo")
+	}
+
+	patient := domain.Patient{
+		Admin:               &admin,
+		PastMedicalHistory:  nil,
+		SocialHistory:       nil,
+		VitalStatistics:     nil,
+		HeightAndWeight:     &heightandweight,
+		VisualAcuity:        &visualacuity,
+		DoctorsConsultation: &doctorsconsultation,
+	}
+
+	id, err := patient_repo.InsertPatient(context.Background(), &patient)
+	assert.Nil(t, err)
+	log.Println("Patient Successfully inserted with id: ", id)
+	admin.ID = id
+	pastmedicalhistory.ID = id
+	socialhistory.ID = id
+	vitalstatistics.ID = id
+	heightandweight.ID = id
+	visualacuity.ID = id
+	doctorsconsultation.ID = id
+
+	updatePatient := domain.Patient{
+		Admin:               &admin,
+		PastMedicalHistory:  &pastmedicalhistory,
+		SocialHistory:       &socialhistory,
+		VitalStatistics:     &vitalstatistics,
+		HeightAndWeight:     &heightandweight,
+		VisualAcuity:        &visualacuity,
+		DoctorsConsultation: nil,
+	}
+	id, err = patient_repo.UpdatePatientByID(context.Background(), id, &updatePatient)
+
+	assert.Nil(t, err)
+	log.Println("Patient Successfully Updated with id: ", id)
+
+	p, err := patient_repo.GetPatientByID(context.Background(), id)
+	assert.Nil(t, err)
+
+	expectedPatient := domain.Patient{
+		Admin:               &admin,
+		PastMedicalHistory:  &pastmedicalhistory,
+		SocialHistory:       &socialhistory,
+		VitalStatistics:     &vitalstatistics,
+		HeightAndWeight:     &heightandweight,
+		VisualAcuity:        &visualacuity,
+		DoctorsConsultation: &doctorsconsultation,
+	}
+	// Time is not equal
+	assert.Equal(t, p.PastMedicalHistory, expectedPatient.PastMedicalHistory)
+	assert.Equal(t, p.SocialHistory, expectedPatient.SocialHistory)
+	assert.Equal(t, p.VitalStatistics, expectedPatient.VitalStatistics)
+	assert.Equal(t, p.HeightAndWeight, expectedPatient.HeightAndWeight)
+	assert.Equal(t, p.VisualAcuity, expectedPatient.VisualAcuity)
+	assert.Equal(t, p.DoctorsConsultation, expectedPatient.DoctorsConsultation)
+	log.Println(p.Admin)
+	log.Println(p.PastMedicalHistory)
+	log.Println(p.SocialHistory)
+	log.Println(p.VitalStatistics)
+	log.Println(p.HeightAndWeight)
+	log.Println(p.VisualAcuity)
+	log.Println(p.DoctorsConsultation)
+}
+
+func TestFull(t *testing.T) {
+	// Tests some edge cases and ensures desired behaviour is maintained
+	initDb()
+	repo := NewPostgresPatientRepository(db)
+
+	patient_repo, ok := repo.(*postgresPatientRepository)
+	if !ok {
+		log.Fatal("Failed to assert repo")
+	}
+
+	// InsertPatient with only admin and docconsult field - should successfully insert
+	patient1 := domain.Patient{
+		Admin:               &admin,
+		PastMedicalHistory:  nil,
+		SocialHistory:       nil,
+		VitalStatistics:     nil,
+		HeightAndWeight:     nil,
+		VisualAcuity:        nil,
+		DoctorsConsultation: &doctorsconsultation,
+	}
+	id1, err := patient_repo.InsertPatient(context.Background(), &patient1)
+	assert.NotNil(t, id1)
+	assert.Nil(t, err)
+
+	// InsertPatient with no admin field - should return -1 and error
+	patient2 := domain.Patient{
+		Admin:               nil,
+		PastMedicalHistory:  nil,
+		SocialHistory:       nil,
+		VitalStatistics:     &vitalstatistics,
+		HeightAndWeight:     nil,
+		VisualAcuity:        nil,
+		DoctorsConsultation: &doctorsconsultation,
+	}
+	id2, err := patient_repo.InsertPatient(context.Background(), &patient2)
+	assert.Equal(t, id2, int32(-1))
+	assert.NotNil(t, err)
+
+	// GetPatient with id that doesn't exist
+	patient3, err := patient_repo.GetPatientByID(context.Background(), -1)
+	assert.Nil(t, patient3)
+	assert.NotNil(t, err)
+
+	// GetPatient with only admin and socialhistory field filled in
+	patient4 := domain.Patient{
+		Admin:         &admin,
+		SocialHistory: &socialhistory,
+	}
+	id4, err := patient_repo.InsertPatient(context.Background(), &patient4)
+	var latestId int32
+	err = db.QueryRow("SELECT ID FROM admin ORDER BY ID DESC LIMIT 1").Scan(&latestId)
+	if err != nil {
+		log.Fatal("Getting latest id failed:", err)
+	}
+	patient5, err := patient_repo.GetPatientByID(context.Background(), latestId)
+	assert.Nil(t, err)
+	assert.Nil(t, patient5.PastMedicalHistory)
+	assert.Nil(t, patient5.VitalStatistics)
+	assert.Nil(t, patient5.HeightAndWeight)
+	assert.Nil(t, patient5.VisualAcuity)
+	assert.Nil(t, patient5.DoctorsConsultation)
+	assert.NotNil(t, patient5.Admin)
+	assert.NotNil(t, patient5.SocialHistory)
+
+	// Update Patient4 and update all admin fields except id, add vitalstatistics and visualacuity
+	updatedAdmin := models.Admin{
+		FamilyGroup:         models.PtrTo("S001"),
+		RegDate:             models.PtrTo(time.Now()),
+		Name:                models.PtrTo("Updated Name Here"),
+		Dob:                 models.PtrTo(time.Date(1994, time.January, 10, 0, 0, 0, 0, time.UTC)),
+		Age:                 models.PtrTo(5),
+		Gender:              models.PtrTo("F"),
+		Village:             models.PtrTo("SO"),
+		ContactNo:           models.PtrTo("12345678"),
+		Pregnant:            models.PtrTo(false),
+		LastMenstrualPeriod: models.PtrTo(time.Date(2024, time.January, 10, 0, 0, 0, 0, time.UTC)),
+		DrugAllergies:       models.PtrTo("panadol"),
+		SentToID:            models.PtrTo(false),
+	}
+	patient6 := domain.Patient{
+		Admin:           &updatedAdmin,
+		VitalStatistics: &vitalstatistics,
+		VisualAcuity:    &visualacuity,
+	}
+	id6, err := patient_repo.UpdatePatientByID(context.Background(), id4, &patient6)
+	assert.NotNil(t, id6)
+	assert.Nil(t, err)
+
+	updatedPatient6, err := patient_repo.GetPatientByID(context.Background(), id6)
+	assert.Nil(t, err)
+	assert.NotNil(t, updatedPatient6.Admin)
+	assert.NotNil(t, updatedPatient6.SocialHistory)
+	assert.NotNil(t, updatedPatient6.VitalStatistics)
+	assert.NotNil(t, updatedPatient6.VisualAcuity)
+	assert.Nil(t, updatedPatient6.PastMedicalHistory)
+	assert.Nil(t, updatedPatient6.HeightAndWeight)
+	assert.Nil(t, updatedPatient6.DoctorsConsultation)
+	assert.Equal(t, updatedAdmin.FamilyGroup, updatedPatient6.Admin.FamilyGroup)
+	assert.Equal(t, updatedAdmin.Name, updatedPatient6.Admin.Name)
+	assert.Equal(t, updatedAdmin.Age, updatedPatient6.Admin.Age)
+	assert.Equal(t, updatedAdmin.Gender, updatedPatient6.Admin.Gender)
+
+	// Update Patient6 admin id, should fail
+	//updatedAdmin = models.Admin{
+	//	ID: int64(10000),
+	//}
+	//patient7 := domain.Patient{
+	//	Admin: &updatedAdmin,
+	//}
+	//id7, err := patient_repo.UpdatePatientByID(context.Background(), id6, &patient7)
+	//assert.Equal(t, int64(-1), id7)
+	//assert.NotNil(t, err)
+
+	// Update a non-existing patient, should fail
+
+	// Delete Patient4
+
+}
 
 //func TestGetAllAdmin(t *testing.T) {
 //	initDb()

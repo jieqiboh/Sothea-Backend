@@ -1,18 +1,17 @@
 package models
 
 import (
-	"database/sql"
 	"fmt"
 )
 
 type SocialHistory struct {
-	ID                    int32          `json:"id"`
-	PastSmokingHistory    bool           `json:"pastSmokingHistory" validate:"exists"`
-	NumberOfYears         sql.NullInt32  `json:"numberOfYears"`
-	CurrentSmokingHistory bool           `json:"currentSmokingHistory" validate:"exists"`
-	CigarettesPerDay      sql.NullInt32  `json:"cigarettesPerDay"`
-	AlcoholHistory        bool           `json:"alcoholHistory" validate:"exists"`
-	HowRegular            sql.NullString `json:"howRegular"`
+	ID                    int32   `json:"id"`
+	PastSmokingHistory    *bool   `json:"pastSmokingHistory" binding:"required"`
+	NumberOfYears         *int32  `json:"numberOfYears"`
+	CurrentSmokingHistory *bool   `json:"currentSmokingHistory" binding:"required"`
+	CigarettesPerDay      *int32  `json:"cigarettesPerDay"`
+	AlcoholHistory        *bool   `json:"alcoholHistory" binding:"required"`
+	HowRegular            *string `json:"howRegular"`
 	//AdminID               uint    `gorm:"uniqueIndex;not null"` // Foreign key referencing Admin's ID
 	//Admin                 Admin
 }
@@ -24,13 +23,13 @@ func (SocialHistory) TableName() string {
 
 // ToString generates a simple string representation of the SocialHistory struct.
 func (sh SocialHistory) String() string {
-	// todo: handle errors
-	numberOfYears, _ := sh.NumberOfYears.Value()
-	cigarettesPerDay, _ := sh.CigarettesPerDay.Value()
-	howRegular, _ := sh.HowRegular.Value()
-
-	return fmt.Sprintf("ID: %d\nPastSmokingHistory: %t\nNumberOfYears: %v\nCurrentSmokingHistory: %t\nCigarettesPerDay: %v\n"+
-		"AlcoholHistory: %t\nHowRegular: %v",
-		sh.ID, sh.PastSmokingHistory, numberOfYears, sh.CurrentSmokingHistory, cigarettesPerDay,
-		sh.AlcoholHistory, howRegular)
+	result := fmt.Sprintf("\nSOCIAL HISTORY\n")
+	result += fmt.Sprintf("ID: %d\n", sh.ID)
+	result += fmt.Sprintf("Past Smoking History: %t\n", *sh.PastSmokingHistory)
+	result += fmt.Sprintf("Number of Years: %d\n", SafeDeref(sh.NumberOfYears))
+	result += fmt.Sprintf("Current Smoking History: %v\n", *sh.CurrentSmokingHistory)
+	result += fmt.Sprintf("Cigarettes Per Day: %d\n", SafeDeref(sh.CigarettesPerDay))
+	result += fmt.Sprintf("Alcohol History: %t\n", *sh.AlcoholHistory)
+	result += fmt.Sprintf("How Regular: %v\n", SafeDeref(sh.HowRegular))
+	return result
 }

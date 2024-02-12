@@ -22,6 +22,9 @@ func NewPatientHandler(e *gin.Engine, us domain.PatientUseCase) {
 	handler := &PatientHandler{
 		AUsecase: us,
 	}
+	e.GET("/ping", func(c *gin.Context) {
+		c.String(200, "pong")
+	})
 	e.GET("/patient/:id", handler.GetPatientByID)
 	e.POST("/patient", handler.InsertPatient)
 	e.DELETE("/patient/:id", handler.DeletePatientByID)

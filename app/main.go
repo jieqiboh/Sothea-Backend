@@ -56,15 +56,4 @@ func main() {
 	patientUseCase := _patientUseCase.NewPatientUsecase(patientRepo, 2*time.Second)
 	_patientHttpDelivery.NewPatientHandler(router, patientUseCase)
 	router.Run("localhost:9090")
-	//e := echo.New()
-	//middL := _articleHttpDeliveryMiddleware.InitMiddleware()
-	//e.Use(middL.CORS)
-	//authorRepo := _authorRepo.NewMysqlAuthorRepository(dbConn)
-	//ar := _articleRepo.NewMysqlArticleRepository(dbConn)
-	//
-	//timeoutContext := time.Duration(viper.GetInt("context.timeout")) * time.Second
-	//au := _articleUcase.NewArticleUsecase(ar, authorRepo, timeoutContext)
-	//_articleHttpDelivery.NewArticleHandler(e, au)
-	//
-	//log.Fatal(e.Start(viper.GetString("server.address"))) //nolint
 }

@@ -1,21 +1,20 @@
 package models
 
 import (
-	"database/sql"
 	"fmt"
 )
 
 type PastMedicalHistory struct {
-	ID                         int32          `json:"id" binding:"-"`
-	Tuberculosis               bool           `json:"tuberculosis" validate:"exists"`
-	Diabetes                   bool           `json:"diabetes" validate:"exists"`
-	Hypertension               bool           `json:"hypertension" validate:"exists"`
-	Hyperlipidemia             bool           `json:"hyperlipidemia" validate:"exists"`
-	ChronicJointPains          bool           `json:"chronicJointPains" validate:"exists"`
-	ChronicMuscleAches         bool           `json:"chronicMuscleAches" validate:"exists"`
-	SexuallyTransmittedDisease bool           `json:"sexuallyTransmittedDisease" validate:"exists"`
-	SpecifiedSTDs              sql.NullString `json:"specifiedSTDs"`
-	Others                     sql.NullString `json:"others"`
+	ID                         int32   `json:"id" binding:"-"`
+	Tuberculosis               *bool   `json:"tuberculosis" binding:"required"`
+	Diabetes                   *bool   `json:"diabetes" binding:"required"`
+	Hypertension               *bool   `json:"hypertension" binding:"required"`
+	Hyperlipidemia             *bool   `json:"hyperlipidemia" binding:"required"`
+	ChronicJointPains          *bool   `json:"chronicJointPains" binding:"required"`
+	ChronicMuscleAches         *bool   `json:"chronicMuscleAches" binding:"required"`
+	SexuallyTransmittedDisease *bool   `json:"sexuallyTransmittedDisease" binding:"required"`
+	SpecifiedSTDs              *string `json:"specifiedSTDs"`
+	Others                     *string `json:"others"`
 	//AdminID                    uint `gorm:"uniqueIndex;not null"` // Foreign key referencing Admin's ID
 	//Admin                      Admin
 }
@@ -27,11 +26,16 @@ func (PastMedicalHistory) TableName() string {
 
 // ToString generates a simple string representation of the PastMedicalHistory struct.
 func (pmh PastMedicalHistory) String() string {
-	// todo: handle errors
-	specifiedSTDs, _ := pmh.SpecifiedSTDs.Value()
-	others, _ := pmh.Others.Value()
-	return fmt.Sprintf("ID: %d\nTuberculosis: %t\nDiabetes: %t\nHypertension: %t\nHyperlipidemia: %t\nChronicJointPains: %t\n"+
-		"ChronicMuscleAches: %t\nSexuallyTransmittedDisease: %t\nSpecifiedSTDs: %s\nOthers: %s",
-		pmh.ID, pmh.Tuberculosis, pmh.Diabetes, pmh.Hypertension, pmh.Hyperlipidemia, pmh.ChronicJointPains,
-		pmh.ChronicMuscleAches, pmh.SexuallyTransmittedDisease, specifiedSTDs, others)
+	result := fmt.Sprintf("\nPAST MEDICAL HISTORY\n")
+	result += fmt.Sprintf("ID: %d\n", pmh.ID)
+	result += fmt.Sprintf("Tuberculosis: %t\n", *pmh.Tuberculosis)
+	result += fmt.Sprintf("Diabetes: %t\n", *pmh.Diabetes)
+	result += fmt.Sprintf("Hypertension: %t\n", *pmh.Hypertension)
+	result += fmt.Sprintf("Hyperlipidemia: %t\n", *pmh.Hyperlipidemia)
+	result += fmt.Sprintf("ChronicJointPains: %t\n", *pmh.ChronicJointPains)
+	result += fmt.Sprintf("ChronicMuscleAches: %t\n", *pmh.ChronicMuscleAches)
+	result += fmt.Sprintf("SexuallyTransmittedDisease: %t\n", *pmh.SexuallyTransmittedDisease)
+	result += fmt.Sprintf("SpecifiedSTDs: %s\n", SafeDeref(pmh.SpecifiedSTDs))
+	result += fmt.Sprintf("Others: %s\n", SafeDeref(pmh.Others))
+	return result
 }

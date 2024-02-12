@@ -366,103 +366,169 @@ func (p *postgresPatientRepository) UpdatePatientByID(ctx context.Context, id in
 	// Defer a rollback in case anything fails.
 	defer tx.Rollback()
 
-	admin := patient.Admin
-	pastmedicalhistory := patient.PastMedicalHistory
+	a := patient.Admin
+	pmh := patient.PastMedicalHistory
 	socialhistory := patient.SocialHistory
-	vitalstatistics := patient.VitalStatistics
-	heightandweight := patient.HeightAndWeight
-	visualacuity := patient.VisualAcuity
-	doctorsconsultation := patient.DoctorsConsultation
+	vs := patient.VitalStatistics
+	haw := patient.HeightAndWeight
+	va := patient.VisualAcuity
+	dc := patient.DoctorsConsultation
 
-	// Check that patient exists
+	// Check that patient exists already
 	rows := tx.QueryRowContext(ctx, "SELECT * FROM admin WHERE id = $1;", id)
 	prevAdmin := models.Admin{}
-	err = rows.Scan(&prevAdmin.ID, &prevAdmin.FamilyGroup, &prevAdmin.RegDate, &prevAdmin.Name, &prevAdmin.Age, &prevAdmin.Gender)
+	err = rows.Scan(
+		&prevAdmin.ID,
+		&prevAdmin.FamilyGroup,
+		&prevAdmin.RegDate,
+		&prevAdmin.Name,
+		&prevAdmin.Dob,
+		&prevAdmin.Age,
+		&prevAdmin.Gender,
+		&prevAdmin.Village,
+		&prevAdmin.ContactNo,
+		&prevAdmin.Pregnant,
+		&prevAdmin.LastMenstrualPeriod,
+		&prevAdmin.DrugAllergies,
+		&prevAdmin.SentToID,
+	)
+
 	if err != nil {
 		return fail(err)
 	}
-	if admin != nil { // Update admin
-		_, err = tx.ExecContext(ctx, `UPDATE admin SET family_group = $1, reg_date = $2, name = $3, age = $4, gender = $5 WHERE id = $6`,
-			admin.FamilyGroup, admin.RegDate.Format("2006-01-02"), admin.Name, admin.Age, admin.Gender, id)
+	if a != nil { // Update admin
+		_, err = tx.ExecContext(ctx, `UPDATE admin SET family_group = $1, reg_date = $2, name = $3, dob = $4, age = $5, 
+		gender = $6, village = $7, contact_no = $8, pregnant = $9, last_menstrual_period = $10, drug_allergies = $11,
+		sent_to_id = $12 WHERE id = $13`, a.FamilyGroup, a.RegDate, a.Name, a.Dob, a.Age, a.Gender, a.Village, a.ContactNo,
+			a.Pregnant, a.LastMenstrualPeriod, a.DrugAllergies, a.SentToID, id)
 		if err != nil {
 			return fail(err)
 		}
 	}
-	if pastmedicalhistory != nil { // Update pastmedicalhistory
-		_, err = tx.ExecContext(ctx, `INSERT INTO pastmedicalhistory (id, tuberculosis, diabetes, hypertension, hyperlipidemia, chronicjointpains) 
-											  VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT(id)  DO UPDATE SET
-												tuberculosis = $2, 
-												diabetes = $3,
-												hypertension = $4,
-												hyperlipidemia = $5,
-												chronicjointpains = $6`,
-			id, pastmedicalhistory.Tuberculosis, pastmedicalhistory.Diabetes, pastmedicalhistory.Hypertension, pastmedicalhistory.Hyperlipidemia, pastmedicalhistory.ChronicJointPains)
+	if pmh != nil { // Update pastmedicalhistory
+		_, err = tx.ExecContext(ctx, `
+		INSERT INTO pastmedicalhistory (id, tuberculosis, diabetes, hypertension, hyperlipidemia, chronic_joint_pains,
+										 chronic_muscle_aches, sexually_transmitted_disease, specified_stds, others) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
+		ON CONFLICT (id) DO UPDATE SET
+			tuberculosis = $2, 
+			diabetes = $3,
+			hypertension = $4,
+			hyperlipidemia = $5,
+			chronic_joint_pains = $6,
+			chronic_muscle_aches = $7,
+			sexually_transmitted_disease = $8,
+			specified_stds = $9,
+			others = $10
+		`, id, pmh.Tuberculosis, pmh.Diabetes, pmh.Hypertension, pmh.Hyperlipidemia,
+			pmh.ChronicJointPains, pmh.ChronicMuscleAches, pmh.SexuallyTransmittedDisease,
+			pmh.SpecifiedSTDs, pmh.Others)
 		if err != nil {
 			return fail(err)
 		}
 	}
 	if socialhistory != nil {
-		_, err = tx.ExecContext(ctx, `INSERT INTO socialhistory (id, past_smoking_history, no_of_years, current_smoking_history) 
-		VALUES ($1, $2, $3, $4) 
-		ON CONFLICT(id) 
-		DO UPDATE SET
+		_, err = tx.ExecContext(ctx, `
+		INSERT INTO socialhistory (id, past_smoking_history, no_of_years, current_smoking_history, cigarettes_per_day, 
+		alcohol_history, how_regular) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7) 
+		ON CONFLICT (id) DO UPDATE SET
 			past_smoking_history = $2,
 			no_of_years = $3,
-			current_smoking_history = $4`,
-			id, socialhistory.PastSmokingHistory, socialhistory.NumberOfYears, socialhistory.CurrentSmokingHistory)
+			current_smoking_history = $4,
+			cigarettes_per_day = $5,
+			alcohol_history = $6,
+			how_regular = $7
+		`, id, socialhistory.PastSmokingHistory, socialhistory.NumberOfYears, socialhistory.CurrentSmokingHistory,
+			socialhistory.CigarettesPerDay, socialhistory.AlcoholHistory, socialhistory.HowRegular)
 
 		if err != nil {
 			return fail(err)
 		}
 	}
-	if vitalstatistics != nil {
-		_, err = tx.ExecContext(ctx, `INSERT INTO vitalstatistics (id, temperature, spO2) 
-		VALUES ($1, $2, $3) 
-		ON CONFLICT(id) 
-		DO UPDATE SET
+	if vs != nil {
+		_, err = tx.ExecContext(ctx, `
+		INSERT INTO vitalstatistics (id, temperature, spO2, systolic_bp1, diastolic_bp1, systolic_bp2, diastolic_bp2, 
+		avg_systolic_bp, avg_diastolic_bp, hr1, hr2, avg_hr, rand_blood_glucose_mmolL, rand_blood_glucose_mmolLp) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) 
+		ON CONFLICT (id) DO UPDATE SET
 			temperature = $2,
-			spO2 = $3`,
-			id, vitalstatistics.Temperature, vitalstatistics.SpO2)
+			spO2 = $3,
+			systolic_bp1 = $4,
+			diastolic_bp1 = $5,
+			systolic_bp2 = $6,
+			diastolic_bp2 = $7,
+			avg_systolic_bp = $8,
+			avg_diastolic_bp = $9,
+			hr1 = $10,
+			hr2 = $11,
+			avg_hr = $12,
+			rand_blood_glucose_mmolL = $13,
+			rand_blood_glucose_mmolLp = $14
+		`, id, vs.Temperature, vs.SpO2, vs.SystolicBP1, vs.DiastolicBP1, vs.SystolicBP2, vs.DiastolicBP2,
+			vs.AverageSystolicBP, vs.AverageDiastolicBP, vs.HR1, vs.HR2, vs.AverageHR, vs.RandomBloodGlucoseMmolL,
+			vs.RandomBloodGlucoseMmolLp)
 
 		if err != nil {
 			return fail(err)
 		}
 	}
-	if heightandweight != nil {
-		_, err = tx.ExecContext(ctx, `INSERT INTO heightandweight (id, height, weight) 
-		VALUES ($1, $2, $3) 
-		ON CONFLICT(id) 
-		DO UPDATE SET
+	if haw != nil {
+		_, err = tx.ExecContext(ctx, `
+		INSERT INTO heightandweight (id, height, weight, bmi, bmi_analysis, paeds_height, paeds_weight) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7) 
+		ON CONFLICT (id) DO UPDATE SET
 			height = $2,
-			weight = $3`,
-			id, heightandweight.Height, heightandweight.Weight)
+			weight = $3,
+			bmi = $4,
+			bmi_analysis = $5,
+			paeds_height = $6,
+			paeds_weight = $7
+		`, id, haw.Height, haw.Weight, haw.BMI, haw.BMIAnalysis, haw.PaedsHeight, haw.PaedsWeight)
 
 		if err != nil {
 			return fail(err)
 		}
 	}
-	if visualacuity != nil {
-		_, err = tx.ExecContext(ctx, `INSERT INTO visualacuity (id, l_eyevision, r_eyevision) 
-		VALUES ($1, $2, $3) 
-		ON CONFLICT(id) 
-		DO UPDATE SET
-			l_eyevision = $2,
-			r_eyevision = $3`,
-			id, visualacuity.LEyeVision, visualacuity.REyeVision)
-
-		if err != nil {
-			return fail(err)
-		}
-	}
-	if doctorsconsultation != nil {
-		_, err = tx.ExecContext(ctx, `INSERT INTO doctorsconsultation (id, healthy, consultation_notes, referral_needed) 
+	if va != nil {
+		_, err = tx.ExecContext(ctx, `
+		INSERT INTO visualacuity (id, l_eye_vision, r_eye_vision, additional_intervention) 
 		VALUES ($1, $2, $3, $4) 
+		ON CONFLICT (id) DO UPDATE SET
+			l_eye_vision = $2,
+			r_eye_vision = $3,
+			additional_intervention = $4
+		`, id, va.LEyeVision, va.REyeVision, va.AdditionalIntervention)
+
+		if err != nil {
+			return fail(err)
+		}
+	}
+	if dc != nil {
+		_, err = tx.ExecContext(ctx, `
+		INSERT INTO doctorsconsultation (id, healthy, msk, cvs, respi, gu, git, eye, derm, others, 
+		consultation_notes, diagnosis, treatment, referral_needed, referral_loc, remarks) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) 
 		ON CONFLICT(id) 
 		DO UPDATE SET
 			healthy = $2,
-			consultation_notes = $3,
-			referral_needed = $4`,
-			id, doctorsconsultation.Healthy, doctorsconsultation.ConsultationNotes, doctorsconsultation.ReferralNeeded)
+			msk = $3,
+			cvs = $4,
+			respi = $5,
+			gu = $6,
+			git = $7,
+			eye = $8,
+			derm = $9,
+			others = $10,
+			consultation_notes = $11,
+			diagnosis = $12,
+			treatment = $13,
+			referral_needed = $14,
+			referral_loc = $15,
+			remarks = $16
+		`,
+			id, dc.Healthy, dc.Msk, dc.Cvs, dc.Respi, dc.Gu, dc.Git, dc.Eye, dc.Derm, dc.Others, dc.ConsultationNotes,
+			dc.Diagnosis, dc.Treatment, dc.ReferralNeeded, dc.ReferralLoc, dc.Remarks)
 
 		if err != nil {
 			return fail(err)

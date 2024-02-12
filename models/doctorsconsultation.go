@@ -1,27 +1,26 @@
 package models
 
 import (
-	"database/sql"
 	"fmt"
 )
 
 type DoctorsConsultation struct {
-	ID                int32          `json:"id" binding:"-"`
-	Healthy           bool           `json:"healthy" validate:"exists"`
-	Msk               bool           `json:"msk" validate:"exists"`
-	Cvs               bool           `json:"cvs" validate:"exists"`
-	Respi             bool           `json:"respi" validate:"exists"`
-	Gu                bool           `json:"gu" validate:"exists"`
-	Git               bool           `json:"git" validate:"exists"`
-	Eye               bool           `json:"eye" validate:"exists"`
-	Derm              bool           `json:"derm" validate:"exists"`
-	Others            bool           `json:"others" validate:"exists"`
-	ConsultationNotes sql.NullString `json:"consultationNotes"`
-	Diagnosis         sql.NullString `json:"diagnosis"`
-	Treatment         sql.NullString `json:"treatment"`
-	ReferralNeeded    bool           `json:"referralNeeded" validate:"exists"`
-	ReferralLoc       sql.NullString `json:"referralLoc"`
-	Remarks           sql.NullString `json:"remarks"`
+	ID                int32   `json:"id" binding:"-"`
+	Healthy           *bool   `json:"healthy" binding:"required"`
+	Msk               *bool   `json:"msk" binding:"required"`
+	Cvs               *bool   `json:"cvs" binding:"required"`
+	Respi             *bool   `json:"respi" binding:"required"`
+	Gu                *bool   `json:"gu" binding:"required"`
+	Git               *bool   `json:"git" binding:"required"`
+	Eye               *bool   `json:"eye" binding:"required"`
+	Derm              *bool   `json:"derm" binding:"required"`
+	Others            *bool   `json:"others" binding:"required"`
+	ConsultationNotes *string `json:"consultationNotes"`
+	Diagnosis         *string `json:"diagnosis"`
+	Treatment         *string `json:"treatment"`
+	ReferralNeeded    *bool   `json:"referralNeeded" binding:"required"`
+	ReferralLoc       *string `json:"referralLoc"`
+	Remarks           *string `json:"remarks"`
 	// AdminID           uint    // Foreign key referencing Admin's ID
 	// Admin             Admin
 }
@@ -32,16 +31,23 @@ func (DoctorsConsultation) TableName() string {
 }
 
 // ToString generates a simple string representation of the DoctorsConsultation struct.
-func (d DoctorsConsultation) String() string {
-	// todo: handle errors
-	consultationNotes, _ := d.ConsultationNotes.Value()
-	diagnosis, _ := d.Diagnosis.Value()
-	treatment, _ := d.Treatment.Value()
-	referralLoc, _ := d.ReferralLoc.Value()
-	remarks, _ := d.Remarks.Value()
-
-	return fmt.Sprintf("ID: %d\nHealthy: %t\nMsk: %t\nCvs: %t\nRespi: %t\nGu: %t\nGit: %t\nEye: %t\nDerm: %t\nOthers: "+
-		"%t\nConsultationNotes: %s\nDiagnosis: %s\nTreatment: %s\nReferralNeeded: %t\nReferralLoc: %s\nRemarks: %s",
-		d.ID, d.Healthy, d.Msk, d.Cvs, d.Respi, d.Gu, d.Git, d.Eye, d.Derm, d.Others,
-		consultationNotes, diagnosis, treatment, d.ReferralNeeded, referralLoc, remarks)
+func (dc DoctorsConsultation) String() string {
+	result := fmt.Sprintf("\nDOCTOR'S CONSULTATION\n")
+	result += fmt.Sprintf("ID: %d\n", dc.ID)
+	result += fmt.Sprintf("Healthy: %t\n", *dc.Healthy)
+	result += fmt.Sprintf("Msk: %t\n", *dc.Msk)
+	result += fmt.Sprintf("Cvs: %t\n", *dc.Cvs)
+	result += fmt.Sprintf("Respi: %t\n", *dc.Respi)
+	result += fmt.Sprintf("Gu: %t\n", *dc.Gu)
+	result += fmt.Sprintf("Git: %t\n", *dc.Git)
+	result += fmt.Sprintf("Eye: %t\n", *dc.Eye)
+	result += fmt.Sprintf("Derm: %t\n", *dc.Derm)
+	result += fmt.Sprintf("Others: %t\n", *dc.Others)
+	result += fmt.Sprintf("ConsultationNotes: %s\n", SafeDeref(dc.ConsultationNotes))
+	result += fmt.Sprintf("Diagnosis: %s\n", SafeDeref(dc.Diagnosis))
+	result += fmt.Sprintf("Treatment: %s\n", SafeDeref(dc.Treatment))
+	result += fmt.Sprintf("ReferralNeeded: %t\n", *dc.ReferralNeeded)
+	result += fmt.Sprintf("ReferralLoc: %s\n", SafeDeref(dc.ReferralLoc))
+	result += fmt.Sprintf("Remarks: %s\n", SafeDeref(dc.Remarks))
+	return result
 }
