@@ -20,7 +20,7 @@ func NewPostgresPatientRepository(conn *sql.DB) domain.PatientRepository {
 }
 
 // GetPatientByID returns a Patient struct based on ID. Only guaranteed field is Admin
-func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int64) (res *domain.Patient, err error) {
+func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int32) (res *domain.Patient, err error) {
 	// Create a helper function for preparing failure results.
 	fail := func(err error) (*domain.Patient, error) {
 		return nil, fmt.Errorf("GetPatientByID: %v", err)
@@ -37,7 +37,21 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int64
 
 	rows := tx.QueryRowContext(ctx, "SELECT * FROM admin WHERE id = $1;", id)
 	admin := models.Admin{}
-	err = rows.Scan(&admin.ID, &admin.FamilyGroup, &admin.RegDate, &admin.Name, &admin.Age, &admin.Gender)
+	err = rows.Scan(
+		&admin.ID,
+		&admin.FamilyGroup,
+		&admin.RegDate,
+		&admin.Name,
+		&admin.Dob,
+		&admin.Age,
+		&admin.Gender,
+		&admin.Village,
+		&admin.ContactNo,
+		&admin.Pregnant,
+		&admin.LastMenstrualPeriod,
+		&admin.DrugAllergies,
+		&admin.SentToID,
+	)
 	if err != nil {
 		return fail(err)
 	}
@@ -51,6 +65,10 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int64
 		&pastmedicalhistory.Hypertension,
 		&pastmedicalhistory.Hyperlipidemia,
 		&pastmedicalhistory.ChronicJointPains,
+		&pastmedicalhistory.ChronicMuscleAches,
+		&pastmedicalhistory.SexuallyTransmittedDisease,
+		&pastmedicalhistory.SpecifiedSTDs,
+		&pastmedicalhistory.Others,
 	)
 	if errors.Is(sql.ErrNoRows, err) {
 		pastmedicalhistory = nil
@@ -65,6 +83,9 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int64
 		&socialhistory.PastSmokingHistory,
 		&socialhistory.NumberOfYears,
 		&socialhistory.CurrentSmokingHistory,
+		&socialhistory.CigarettesPerDay,
+		&socialhistory.AlcoholHistory,
+		&socialhistory.HowRegular,
 	)
 	if errors.Is(sql.ErrNoRows, err) {
 		socialhistory = nil
@@ -78,6 +99,17 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int64
 		&vitalstatistics.ID,
 		&vitalstatistics.Temperature,
 		&vitalstatistics.SpO2,
+		&vitalstatistics.SystolicBP1,
+		&vitalstatistics.DiastolicBP1,
+		&vitalstatistics.SystolicBP2,
+		&vitalstatistics.DiastolicBP2,
+		&vitalstatistics.AverageSystolicBP,
+		&vitalstatistics.AverageDiastolicBP,
+		&vitalstatistics.HR1,
+		&vitalstatistics.HR2,
+		&vitalstatistics.AverageHR,
+		&vitalstatistics.RandomBloodGlucoseMmolL,
+		&vitalstatistics.RandomBloodGlucoseMmolLp,
 	)
 	if errors.Is(sql.ErrNoRows, err) {
 		vitalstatistics = nil
@@ -91,6 +123,10 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int64
 		&heightandweight.ID,
 		&heightandweight.Height,
 		&heightandweight.Weight,
+		&heightandweight.BMI,
+		&heightandweight.BMIAnalysis,
+		&heightandweight.PaedsHeight,
+		&heightandweight.PaedsWeight,
 	)
 	if errors.Is(sql.ErrNoRows, err) {
 		heightandweight = nil
@@ -104,6 +140,7 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int64
 		&visualacuity.ID,
 		&visualacuity.LEyeVision,
 		&visualacuity.REyeVision,
+		&visualacuity.AdditionalIntervention,
 	)
 	if errors.Is(sql.ErrNoRows, err) {
 		visualacuity = nil
@@ -116,8 +153,20 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int64
 	err = rows.Scan(
 		&doctorsconsultation.ID,
 		&doctorsconsultation.Healthy,
+		&doctorsconsultation.Msk,
+		&doctorsconsultation.Cvs,
+		&doctorsconsultation.Respi,
+		&doctorsconsultation.Gu,
+		&doctorsconsultation.Git,
+		&doctorsconsultation.Eye,
+		&doctorsconsultation.Derm,
+		&doctorsconsultation.Others,
 		&doctorsconsultation.ConsultationNotes,
+		&doctorsconsultation.Diagnosis,
+		&doctorsconsultation.Treatment,
 		&doctorsconsultation.ReferralNeeded,
+		&doctorsconsultation.ReferralLoc,
+		&doctorsconsultation.Remarks,
 	)
 	if errors.Is(sql.ErrNoRows, err) {
 		doctorsconsultation = nil
@@ -143,9 +192,9 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int64
 }
 
 // InsertPatient inserts a Patient and returns the new id if successful. Only required field is Admin
-func (p *postgresPatientRepository) InsertPatient(ctx context.Context, patient *domain.Patient) (int64, error) {
+func (p *postgresPatientRepository) InsertPatient(ctx context.Context, patient *domain.Patient) (int32, error) {
 	// Create a helper function for preparing failure results.
-	fail := func(err error) (int64, error) {
+	fail := func(err error) (int32, error) {
 		return -1, fmt.Errorf("InsertPatient: %v", err)
 	}
 
@@ -166,54 +215,78 @@ func (p *postgresPatientRepository) InsertPatient(ctx context.Context, patient *
 	visualacuity := patient.VisualAcuity
 	doctorsconsultation := patient.DoctorsConsultation
 
-	var patientid int64
+	var patientid int32
 	if admin == nil {
 		return fail(errors.New("Admin field cannot be nil"))
 	}
-	rows := tx.QueryRowContext(ctx, `INSERT INTO admin (family_group, reg_date, name, age, gender) VALUES ($1, $2, $3, $4, $5) RETURNING id`,
-		admin.FamilyGroup, admin.RegDate.Format("2006-01-02"), admin.Name, admin.Age, admin.Gender)
+	rows := tx.QueryRowContext(ctx, `INSERT INTO admin (family_group, reg_date, name, dob, age, gender, village, 
+	contact_no, pregnant, last_menstrual_period, drug_allergies, sent_to_id) 
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id`,
+		admin.FamilyGroup, admin.RegDate, admin.Name, admin.Dob, admin.Age, admin.Gender, admin.Village, admin.ContactNo,
+		admin.Pregnant, admin.LastMenstrualPeriod, admin.DrugAllergies, admin.SentToID)
 	err = rows.Scan(&patientid)
 	if err != nil {
 		return fail(err)
 	}
 	if pastmedicalhistory != nil {
-		_, err = tx.ExecContext(ctx, `INSERT INTO pastmedicalhistory (id, tuberculosis, diabetes, hypertension, hyperlipidemia, chronicjointpains) VALUES ($1, $2, $3, $4, $5, $6)`,
-			patientid, pastmedicalhistory.Tuberculosis, pastmedicalhistory.Diabetes, pastmedicalhistory.Hypertension, pastmedicalhistory.Hyperlipidemia, pastmedicalhistory.ChronicJointPains)
+		_, err = tx.ExecContext(ctx, `INSERT INTO pastmedicalhistory (id, tuberculosis, diabetes, hypertension, 
+		hyperlipidemia, chronic_joint_pains, chronic_muscle_aches, sexually_transmitted_disease, specified_stds, others) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+			patientid, pastmedicalhistory.Tuberculosis, pastmedicalhistory.Diabetes, pastmedicalhistory.Hypertension,
+			pastmedicalhistory.Hyperlipidemia, pastmedicalhistory.ChronicJointPains, pastmedicalhistory.ChronicMuscleAches,
+			pastmedicalhistory.SexuallyTransmittedDisease, pastmedicalhistory.SpecifiedSTDs, pastmedicalhistory.Others)
 		if err != nil {
 			return fail(err)
 		}
 	}
 	if socialhistory != nil {
-		_, err = tx.ExecContext(ctx, `INSERT INTO socialhistory (id, past_smoking_history, no_of_years, current_smoking_history) VALUES ($1, $2, $3, $4)`,
-			patientid, socialhistory.PastSmokingHistory, socialhistory.NumberOfYears, socialhistory.CurrentSmokingHistory)
+		_, err = tx.ExecContext(ctx, `INSERT INTO socialhistory (id, past_smoking_history, no_of_years, 
+		current_smoking_history, cigarettes_per_day, alcohol_history, how_regular) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+			patientid, socialhistory.PastSmokingHistory, socialhistory.NumberOfYears, socialhistory.CurrentSmokingHistory,
+			socialhistory.CigarettesPerDay, socialhistory.AlcoholHistory, socialhistory.HowRegular)
 		if err != nil {
 			return fail(err)
 		}
 	}
 	if vitalstatistics != nil {
-		_, err = tx.ExecContext(ctx, `INSERT INTO vitalstatistics (id, temperature, SpO2) VALUES ($1, $2, $3)`,
-			patientid, vitalstatistics.Temperature, vitalstatistics.SpO2)
+		_, err = tx.ExecContext(ctx, `INSERT INTO vitalstatistics (id, temperature, spo2, systolic_bp1, 
+diastolic_bp1, systolic_bp2, diastolic_bp2, avg_systolic_bp, avg_diastolic_bp, hr1, hr2, avg_hr, 
+rand_blood_glucose_mmolL, rand_blood_glucose_mmolLp) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+			patientid, vitalstatistics.Temperature, vitalstatistics.SpO2, vitalstatistics.SystolicBP1,
+			vitalstatistics.DiastolicBP1, vitalstatistics.SystolicBP2, vitalstatistics.DiastolicBP2,
+			vitalstatistics.AverageSystolicBP, vitalstatistics.AverageDiastolicBP, vitalstatistics.HR1,
+			vitalstatistics.HR2, vitalstatistics.AverageHR, vitalstatistics.RandomBloodGlucoseMmolL,
+			vitalstatistics.RandomBloodGlucoseMmolLp)
 		if err != nil {
 			return fail(err)
 		}
 	}
 	if heightandweight != nil {
-		_, err = tx.ExecContext(ctx, `INSERT INTO heightandweight (id, height, weight) VALUES ($1, $2, $3) RETURNING id`,
-			patientid, heightandweight.Height, heightandweight.Weight)
+		_, err = tx.ExecContext(ctx, `INSERT INTO heightandweight (id, height, weight, bmi, bmi_analysis, 
+		paeds_height, paeds_weight) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+			patientid, heightandweight.Height, heightandweight.Weight, heightandweight.BMI,
+			heightandweight.BMIAnalysis, heightandweight.PaedsHeight, heightandweight.PaedsWeight)
 		if err != nil {
 			return fail(err)
 		}
 	}
 	if visualacuity != nil {
-		_, err = tx.ExecContext(ctx, `INSERT INTO visualacuity (id, l_eyevision, r_eyevision) VALUES ($1, $2, $3)`,
-			patientid, visualacuity.LEyeVision, visualacuity.REyeVision)
+		_, err = tx.ExecContext(ctx, `INSERT INTO visualacuity (id, l_eye_vision, r_eye_vision, 
+		additional_intervention) VALUES ($1, $2, $3, $4)`,
+			patientid, visualacuity.LEyeVision, visualacuity.REyeVision, visualacuity.AdditionalIntervention)
 		if err != nil {
 			return fail(err)
 		}
 	}
 	if doctorsconsultation != nil {
-		_, err = tx.ExecContext(ctx, `INSERT INTO doctorsconsultation (id, healthy, consultation_notes, referral_needed) VALUES ($1, $2, $3, $4) RETURNING id`,
-			patientid, doctorsconsultation.Healthy, doctorsconsultation.ConsultationNotes, doctorsconsultation.ReferralNeeded)
+		_, err = tx.ExecContext(ctx, `INSERT INTO doctorsconsultation (id, healthy, msk, cvs, respi, gu, git, eye, 
+		derm, others, consultation_notes, diagnosis, treatment, referral_needed, referral_loc, remarks) VALUES ($1, $2, 
+		$3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
+			patientid, doctorsconsultation.Healthy, doctorsconsultation.Msk, doctorsconsultation.Cvs,
+			doctorsconsultation.Respi, doctorsconsultation.Gu, doctorsconsultation.Git,
+			doctorsconsultation.Eye, doctorsconsultation.Derm, doctorsconsultation.Others,
+			doctorsconsultation.ConsultationNotes, doctorsconsultation.Diagnosis, doctorsconsultation.Treatment,
+			doctorsconsultation.ReferralNeeded, doctorsconsultation.ReferralLoc, doctorsconsultation.Remarks)
 		if err != nil {
 			return fail(err)
 		}
@@ -225,9 +298,9 @@ func (p *postgresPatientRepository) InsertPatient(ctx context.Context, patient *
 	return patientid, nil
 }
 
-func (p *postgresPatientRepository) DeletePatientByID(ctx context.Context, id int64) (int64, error) {
+func (p *postgresPatientRepository) DeletePatientByID(ctx context.Context, id int32) (int32, error) {
 	// Create a helper function for preparing failure results.
-	fail := func(err error) (int64, error) {
+	fail := func(err error) (int32, error) {
 		return -1, fmt.Errorf("DeletePatientByID: %v", err)
 	}
 
@@ -276,11 +349,11 @@ func (p *postgresPatientRepository) DeletePatientByID(ctx context.Context, id in
 }
 
 // UpdatePatientByID updates an already existing patient, filling out or overriding any of its fields
-func (p *postgresPatientRepository) UpdatePatientByID(ctx context.Context, id int64, patient *domain.Patient) (int64, error) {
+func (p *postgresPatientRepository) UpdatePatientByID(ctx context.Context, id int32, patient *domain.Patient) (int32, error) {
 	// Checks that a patient exists by searching for admin field
 	// Then for each non-nil field in patient, updates it
 	// Create a helper function for preparing failure results.
-	fail := func(err error) (int64, error) {
+	fail := func(err error) (int32, error) {
 		return -1, fmt.Errorf("InsertPatient: %v", err)
 	}
 

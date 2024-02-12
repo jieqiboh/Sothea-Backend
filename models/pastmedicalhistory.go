@@ -1,16 +1,23 @@
 package models
 
-import "fmt"
+import (
+	"database/sql"
+	"fmt"
+)
 
 type PastMedicalHistory struct {
-	ID                int64 `json:"id" binding:"-"`
-	Tuberculosis      *bool `json:"tuberculosis" validate:"exists"`
-	Diabetes          *bool `json:"diabetes" validate:"exists"`
-	Hyperlipidemia    *bool `json:"hyperlipidemia" validate:"exists"`
-	Hypertension      *bool `json:"hypertension" validate:"exists"`
-	ChronicJointPains *bool `json:"chronicjointpains" validate:"exists"`
-	//AdminID           uint `gorm:"uniqueIndex;not null"` // Foreign key referencing Admin's ID
-	//Admin             Admin
+	ID                         int32          `json:"id" binding:"-"`
+	Tuberculosis               bool           `json:"tuberculosis" validate:"exists"`
+	Diabetes                   bool           `json:"diabetes" validate:"exists"`
+	Hypertension               bool           `json:"hypertension" validate:"exists"`
+	Hyperlipidemia             bool           `json:"hyperlipidemia" validate:"exists"`
+	ChronicJointPains          bool           `json:"chronicJointPains" validate:"exists"`
+	ChronicMuscleAches         bool           `json:"chronicMuscleAches" validate:"exists"`
+	SexuallyTransmittedDisease bool           `json:"sexuallyTransmittedDisease" validate:"exists"`
+	SpecifiedSTDs              sql.NullString `json:"specifiedSTDs"`
+	Others                     sql.NullString `json:"others"`
+	//AdminID                    uint `gorm:"uniqueIndex;not null"` // Foreign key referencing Admin's ID
+	//Admin                      Admin
 }
 
 // TableName specifies the table name for the PastMedicalHistory model.
@@ -19,7 +26,12 @@ func (PastMedicalHistory) TableName() string {
 }
 
 // ToString generates a simple string representation of the PastMedicalHistory struct.
-func (pmh PastMedicalHistory) ToString() string {
-	return fmt.Sprintf("ID: %d, Tuberculosis: %t, Diabetes: %t, Hypertension: %t, Hyperlipidemia: %t, ChronicJointPains: %t",
-		pmh.ID, *pmh.Tuberculosis, *pmh.Diabetes, *pmh.Hypertension, *pmh.Hyperlipidemia, *pmh.ChronicJointPains)
+func (pmh PastMedicalHistory) String() string {
+	// todo: handle errors
+	specifiedSTDs, _ := pmh.SpecifiedSTDs.Value()
+	others, _ := pmh.Others.Value()
+	return fmt.Sprintf("ID: %d\nTuberculosis: %t\nDiabetes: %t\nHypertension: %t\nHyperlipidemia: %t\nChronicJointPains: %t\n"+
+		"ChronicMuscleAches: %t\nSexuallyTransmittedDisease: %t\nSpecifiedSTDs: %s\nOthers: %s",
+		pmh.ID, pmh.Tuberculosis, pmh.Diabetes, pmh.Hypertension, pmh.Hyperlipidemia, pmh.ChronicJointPains,
+		pmh.ChronicMuscleAches, pmh.SexuallyTransmittedDisease, specifiedSTDs, others)
 }

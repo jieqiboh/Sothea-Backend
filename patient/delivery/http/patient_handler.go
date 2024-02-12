@@ -36,7 +36,7 @@ func (p *PatientHandler) GetPatientByID(c *gin.Context) {
 		return
 	}
 
-	id := int64(idP)
+	id := int32(idP)
 	ctx := c.Request.Context()
 
 	patient, err := p.AUsecase.GetPatientByID(ctx, id)
@@ -72,7 +72,7 @@ func (p *PatientHandler) DeletePatientByID(c *gin.Context) {
 		return
 	}
 
-	id := int64(idP)
+	id := int32(idP)
 	ctx := c.Request.Context()
 
 	id, err = p.AUsecase.DeletePatientByID(ctx, id)
@@ -90,7 +90,7 @@ func (p *PatientHandler) UpdatePatientByID(c *gin.Context) {
 		c.JSON(http.StatusNotFound, domain.ErrNotFound.Error())
 	}
 
-	id := int64(idP)
+	id := int32(idP)
 	ctx := c.Request.Context()
 
 	var patient domain.Patient

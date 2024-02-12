@@ -1,0 +1,79 @@
+{
+  "admin": {
+    "familyGroup": "S001",
+    "regDate": "2024-01-10T00:00:00Z",
+    "name": "John Doe",
+    "dob": "1994-01-10T00:00:00Z",
+    "age": 30,
+    "gender": "M",
+    "village": "SO",
+    "contactNo": "12345678",
+    "pregnant": false,
+    "drugAllergies": "panadol",
+    "sentToID": false
+  },
+  "pastMedicalHistory": {
+    "tuberculosis": true,
+    "diabetes": false,
+    "hypertension": true,
+    "hyperlipidemia": false,
+    "chronicJointPains": false,
+    "chronicMuscleAches": true,
+    "sexuallyTransmittedDisease": true,
+    "specifiedSTDs": "TRICHOMONAS",
+    "others": "None"
+  },
+  "socialHistory": {
+    "pastSmokingHistory": true,
+    "numberOfYears": 15,
+    "currentSmokingHistory": false,
+    "cigarettesPerDay": null,
+    "alcoholHistory": true,
+    "howRegular": "A"
+  },
+  "vitalStatistics": {
+    "temperature": 36.5,
+    "spO2": 98,
+    "systolicBP1": 120,
+    "diastolicBP1": 80,
+    "systolicBP2": 122,
+    "diastolicBP2": 78,
+    "averageSystolicBP": 121,
+    "averageDiastolicBP": 79,
+    "hr1": 72,
+    "hr2": 71,
+    "averageHR": 71.5,
+    "randomBloodGlucoseMmolL": 5.4,
+    "randomBloodGlucoseMmolLp": 5.3
+  },
+  "heightAndWeight": {
+    "height": 170,
+    "weight": 70,
+    "bmi": 24.2,
+    "bmiAnalysis": "normal weight",
+    "paedsHeight": 90,
+    "paedsWeight": 80
+  },
+  "visualAcuity": {
+    "lEyeVision": 20,
+    "rEyeVision": 20,
+    "additionalIntervention": "VISUAL FIELD TEST REQUIRED"
+  },
+  "doctorsConsultation": {
+    "healthy": true,
+    "msk": false,
+    "cvs": false,
+    "respi": true,
+    "gu": true,
+    "git": false,
+    "eye": true,
+    "derm": false,
+    "others": false,
+    "consultationNotes": "CHEST PAIN, SHORTNESS OF BREATH, COUGH",
+    "diagnosis": "ACUTE BRONCHITIS",
+    "treatment": "REST, HYDRATION, COUGH SYRUP",
+    "referralNeeded": false,
+    "referralLoc": null,
+    "remarks": "MONITOR FOR RESOLUTION"
+  }
+}
