@@ -1,4 +1,4 @@
-package models
+package entities
 
 // PtrTo is a generic method for creating a pointer to a primitive type, used when manually creating a models object
 func PtrTo[T any](v T) *T {

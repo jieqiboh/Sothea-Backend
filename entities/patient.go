@@ -1,19 +1,18 @@
-package domain
+package entities
 
 import (
 	"context"
-	"github.com/jieqiboh/sothea_backend/models"
 )
 
 // Use pointers so that some structs are optional
 type Patient struct {
-	Admin               *models.Admin               `json:"admin"`
-	PastMedicalHistory  *models.PastMedicalHistory  `json:"pastmedicalhistory"`
-	SocialHistory       *models.SocialHistory       `json:"socialhistory"`
-	VitalStatistics     *models.VitalStatistics     `json:"vitalstatistics"`
-	HeightAndWeight     *models.HeightAndWeight     `json:"heightandweight"`
-	VisualAcuity        *models.VisualAcuity        `json:"visualacuity"`
-	DoctorsConsultation *models.DoctorsConsultation `json:"doctorsconsultation"`
+	Admin               *Admin               `json:"admin"`
+	PastMedicalHistory  *PastMedicalHistory  `json:"pastmedicalhistory"`
+	SocialHistory       *SocialHistory       `json:"socialhistory"`
+	VitalStatistics     *VitalStatistics     `json:"vitalstatistics"`
+	HeightAndWeight     *HeightAndWeight     `json:"heightandweight"`
+	VisualAcuity        *VisualAcuity        `json:"visualacuity"`
+	DoctorsConsultation *DoctorsConsultation `json:"doctorsconsultation"`
 }
 
 type PatientUseCase interface {
@@ -21,7 +20,7 @@ type PatientUseCase interface {
 	DeletePatientByID(ctx context.Context, id int32) (int32, error) // Deletes a Patient by ID
 	UpdatePatientByID(ctx context.Context, id int32, patient *Patient) (int32, error)
 	InsertPatient(ctx context.Context, patient *Patient) (int32, error) // Creates a new patient and inserts in database
-	GetAllFromAdmin(ctx context.Context) ([]models.Admin, error)
+	GetAllFromAdmin(ctx context.Context) ([]Admin, error)
 }
 
 type PatientRepository interface {
@@ -29,5 +28,5 @@ type PatientRepository interface {
 	DeletePatientByID(ctx context.Context, id int32) (int32, error) // Deletes a Patient by ID
 	UpdatePatientByID(ctx context.Context, id int32, patient *Patient) (int32, error)
 	InsertPatient(ctx context.Context, patient *Patient) (int32, error) // Creates a new patient and inserts in database
-	GetAllFromAdmin(ctx context.Context) ([]models.Admin, error)        // returns all entries from a given category
+	GetAllFromAdmin(ctx context.Context) ([]Admin, error)               // returns all entries from a given category
 }

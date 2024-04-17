@@ -5,8 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/jieqiboh/sothea_backend/domain"
-	"github.com/jieqiboh/sothea_backend/models"
+	"github.com/jieqiboh/sothea_backend/entities"
 	_ "github.com/lib/pq"
 )
 
@@ -15,14 +14,14 @@ type postgresPatientRepository struct {
 }
 
 // NewPostgresPatientRepository will create an object that represent the patient.Repository interface
-func NewPostgresPatientRepository(conn *sql.DB) domain.PatientRepository {
+func NewPostgresPatientRepository(conn *sql.DB) entities.PatientRepository {
 	return &postgresPatientRepository{conn}
 }
 
 // GetPatientByID returns a Patient struct based on ID. Only guaranteed field is Admin
-func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int32) (res *domain.Patient, err error) {
+func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int32) (res *entities.Patient, err error) {
 	// Create a helper function for preparing failure results.
-	fail := func(err error) (*domain.Patient, error) {
+	fail := func(err error) (*entities.Patient, error) {
 		return nil, fmt.Errorf("GetPatientByID: %v", err)
 	}
 
@@ -36,7 +35,7 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int32
 	defer tx.Rollback()
 
 	rows := tx.QueryRowContext(ctx, "SELECT * FROM admin WHERE id = $1;", id)
-	admin := models.Admin{}
+	admin := entities.Admin{}
 	err = rows.Scan(
 		&admin.ID,
 		&admin.FamilyGroup,
@@ -57,7 +56,7 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int32
 	}
 
 	rows = tx.QueryRowContext(ctx, "SELECT * FROM pastmedicalhistory WHERE pastmedicalhistory.id = $1;", id)
-	pastmedicalhistory := &models.PastMedicalHistory{}
+	pastmedicalhistory := &entities.PastMedicalHistory{}
 	err = rows.Scan(
 		&pastmedicalhistory.ID,
 		&pastmedicalhistory.Tuberculosis,
@@ -77,7 +76,7 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int32
 	}
 
 	rows = tx.QueryRowContext(ctx, "SELECT * FROM socialhistory WHERE socialhistory.id = $1;", id)
-	socialhistory := &models.SocialHistory{}
+	socialhistory := &entities.SocialHistory{}
 	err = rows.Scan(
 		&socialhistory.ID,
 		&socialhistory.PastSmokingHistory,
@@ -94,7 +93,7 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int32
 	}
 
 	rows = tx.QueryRowContext(ctx, "SELECT * FROM vitalstatistics WHERE vitalstatistics.id = $1;", id)
-	vitalstatistics := &models.VitalStatistics{}
+	vitalstatistics := &entities.VitalStatistics{}
 	err = rows.Scan(
 		&vitalstatistics.ID,
 		&vitalstatistics.Temperature,
@@ -118,7 +117,7 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int32
 	}
 
 	rows = tx.QueryRowContext(ctx, "SELECT * FROM heightandweight WHERE heightandweight.id = $1;", id)
-	heightandweight := &models.HeightAndWeight{}
+	heightandweight := &entities.HeightAndWeight{}
 	err = rows.Scan(
 		&heightandweight.ID,
 		&heightandweight.Height,
@@ -135,7 +134,7 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int32
 	}
 
 	rows = tx.QueryRowContext(ctx, "SELECT * FROM visualacuity WHERE visualacuity.id = $1;", id)
-	visualacuity := &models.VisualAcuity{}
+	visualacuity := &entities.VisualAcuity{}
 	err = rows.Scan(
 		&visualacuity.ID,
 		&visualacuity.LEyeVision,
@@ -149,7 +148,7 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int32
 	}
 
 	rows = tx.QueryRowContext(ctx, "SELECT * FROM doctorsconsultation WHERE doctorsconsultation.id = $1;", id)
-	doctorsconsultation := &models.DoctorsConsultation{}
+	doctorsconsultation := &entities.DoctorsConsultation{}
 	err = rows.Scan(
 		&doctorsconsultation.ID,
 		&doctorsconsultation.Healthy,
@@ -174,7 +173,7 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int32
 		return fail(err)
 	}
 
-	patient := domain.Patient{
+	patient := entities.Patient{
 		Admin:               &admin,
 		PastMedicalHistory:  pastmedicalhistory,
 		SocialHistory:       socialhistory,
@@ -192,7 +191,7 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int32
 }
 
 // InsertPatient inserts a Patient and returns the new id if successful. Only required field is Admin
-func (p *postgresPatientRepository) InsertPatient(ctx context.Context, patient *domain.Patient) (int32, error) {
+func (p *postgresPatientRepository) InsertPatient(ctx context.Context, patient *entities.Patient) (int32, error) {
 	// Create a helper function for preparing failure results.
 	fail := func(err error) (int32, error) {
 		return -1, fmt.Errorf("InsertPatient: %v", err)
@@ -349,7 +348,7 @@ func (p *postgresPatientRepository) DeletePatientByID(ctx context.Context, id in
 }
 
 // UpdatePatientByID updates an already existing patient, filling out or overriding any of its fields
-func (p *postgresPatientRepository) UpdatePatientByID(ctx context.Context, id int32, patient *domain.Patient) (int32, error) {
+func (p *postgresPatientRepository) UpdatePatientByID(ctx context.Context, id int32, patient *entities.Patient) (int32, error) {
 	// Checks that a patient exists by searching for admin field
 	// Then for each non-nil field in patient, updates it
 	// Create a helper function for preparing failure results.
@@ -376,7 +375,7 @@ func (p *postgresPatientRepository) UpdatePatientByID(ctx context.Context, id in
 
 	// Check that patient exists already
 	rows := tx.QueryRowContext(ctx, "SELECT * FROM admin WHERE id = $1;", id)
-	prevAdmin := models.Admin{}
+	prevAdmin := entities.Admin{}
 	err = rows.Scan(
 		&prevAdmin.ID,
 		&prevAdmin.FamilyGroup,
@@ -541,9 +540,9 @@ func (p *postgresPatientRepository) UpdatePatientByID(ctx context.Context, id in
 	return id, nil
 }
 
-func (p *postgresPatientRepository) GetAllFromAdmin(ctx context.Context) ([]models.Admin, error) {
+func (p *postgresPatientRepository) GetAllFromAdmin(ctx context.Context) ([]entities.Admin, error) {
 	var rows *sql.Rows
-	result := make([]models.Admin, 0)
+	result := make([]entities.Admin, 0)
 	query := "SELECT * FROM admin"
 	rows, err := p.Conn.QueryContext(ctx, query)
 	if err != nil {
@@ -553,7 +552,7 @@ func (p *postgresPatientRepository) GetAllFromAdmin(ctx context.Context) ([]mode
 	defer rows.Close()
 
 	for rows.Next() {
-		admin := models.Admin{}
+		admin := entities.Admin{}
 		err = rows.Scan(&admin.ID, &admin.FamilyGroup, &admin.RegDate, &admin.Name, &admin.Age, &admin.Gender)
 
 		if err != nil {

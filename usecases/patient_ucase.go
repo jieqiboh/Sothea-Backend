@@ -1,33 +1,32 @@
-package usecase
+package usecases
 
 import (
 	"context"
-	"github.com/jieqiboh/sothea_backend/domain"
-	"github.com/jieqiboh/sothea_backend/models"
+	"github.com/jieqiboh/sothea_backend/entities"
 	"time"
 )
 
 type patientUsecase struct {
-	patientRepo    domain.PatientRepository
+	patientRepo    entities.PatientRepository
 	contextTimeout time.Duration
 }
 
 // NewPatientUseCase
-func NewPatientUsecase(p domain.PatientRepository, timeout time.Duration) domain.PatientUseCase {
+func NewPatientUsecase(p entities.PatientRepository, timeout time.Duration) entities.PatientUseCase {
 	return &patientUsecase{
 		patientRepo:    p,
 		contextTimeout: timeout,
 	}
 }
 
-func (p patientUsecase) GetPatientByID(ctx context.Context, id int32) (*domain.Patient, error) {
+func (p patientUsecase) GetPatientByID(ctx context.Context, id int32) (*entities.Patient, error) {
 	ctx, cancel := context.WithTimeout(ctx, p.contextTimeout)
 	defer cancel()
 
 	return p.patientRepo.GetPatientByID(ctx, id)
 }
 
-func (p patientUsecase) InsertPatient(ctx context.Context, patient *domain.Patient) (int32, error) {
+func (p patientUsecase) InsertPatient(ctx context.Context, patient *entities.Patient) (int32, error) {
 	ctx, cancel := context.WithTimeout(ctx, p.contextTimeout)
 	defer cancel()
 
@@ -41,14 +40,14 @@ func (p patientUsecase) DeletePatientByID(ctx context.Context, id int32) (int32,
 	return p.patientRepo.DeletePatientByID(ctx, id)
 }
 
-func (p patientUsecase) UpdatePatientByID(ctx context.Context, id int32, patient *domain.Patient) (int32, error) {
+func (p patientUsecase) UpdatePatientByID(ctx context.Context, id int32, patient *entities.Patient) (int32, error) {
 	ctx, cancel := context.WithTimeout(ctx, p.contextTimeout)
 	defer cancel()
 
 	return p.patientRepo.UpdatePatientByID(ctx, id, patient)
 }
 
-func (p patientUsecase) GetAllFromAdmin(ctx context.Context) ([]models.Admin, error) {
+func (p patientUsecase) GetAllFromAdmin(ctx context.Context) ([]entities.Admin, error) {
 	ctx, cancel := context.WithTimeout(ctx, p.contextTimeout)
 	defer cancel()
 

@@ -1,8 +1,9 @@
-package http
+package controllers
 
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/jieqiboh/sothea_backend/domain"
+	"github.com/jieqiboh/sothea_backend/entities"
 	"net/http"
 	"strconv"
 )
@@ -14,11 +15,11 @@ type ResponseError struct {
 
 // PatientHandler represent the httphandler for patient
 type PatientHandler struct {
-	AUsecase domain.PatientUseCase
+	AUsecase entities.PatientUseCase
 }
 
 // NewPatientHandler will initialize the patients/ resources endpoint
-func NewPatientHandler(e *gin.Engine, us domain.PatientUseCase) {
+func NewPatientHandler(e *gin.Engine, us entities.PatientUseCase) {
 	handler := &PatientHandler{
 		AUsecase: us,
 	}
@@ -52,7 +53,7 @@ func (p *PatientHandler) GetPatientByID(c *gin.Context) {
 }
 
 func (p *PatientHandler) InsertPatient(c *gin.Context) {
-	var patient domain.Patient
+	var patient entities.Patient
 	if err := c.ShouldBindJSON(&patient); err != nil {
 		c.JSON(http.StatusBadRequest, ResponseError{Message: err.Error()})
 		return
@@ -96,7 +97,7 @@ func (p *PatientHandler) UpdatePatientByID(c *gin.Context) {
 	id := int32(idP)
 	ctx := c.Request.Context()
 
-	var patient domain.Patient
+	var patient entities.Patient
 	if err := c.ShouldBindJSON(&patient); err != nil {
 		c.JSON(http.StatusBadRequest, ResponseError{Message: err.Error()})
 		return

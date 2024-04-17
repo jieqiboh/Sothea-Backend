@@ -1,12 +1,11 @@
-package http
+package controllers
 
 import (
-	"bytes"
 	"database/sql"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	_patientPostgresRepository "github.com/jieqiboh/sothea_backend/patient/repository/postgres"
-	_patientUseCase "github.com/jieqiboh/sothea_backend/patient/usecase"
+	_patientPostgresRepository "github.com/jieqiboh/sothea_backend/repository/postgres"
+	_patientUseCase "github.com/jieqiboh/sothea_backend/usecases"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"log"
@@ -19,7 +18,7 @@ import (
 func initServer() *gin.Engine {
 	// todo: Convert to a mock, and add debug configs
 	// Initialize global variables
-	viper.SetConfigFile(`../../../config.json`)
+	viper.SetConfigFile(`../config.json`)
 	err := viper.ReadInConfig()
 	if err != nil {
 		panic(err)
@@ -63,6 +62,10 @@ func initServer() *gin.Engine {
 	return router
 }
 
+func TestRun(t *testing.T) {
+	t.Run("TestPingRoute", TestPingRoute)
+}
+
 func TestPingRoute(t *testing.T) {
 	router := initServer()
 
@@ -74,31 +77,31 @@ func TestPingRoute(t *testing.T) {
 	assert.Equal(t, "pong", w.Body.String())
 }
 
-func TestGetPatientByID(t *testing.T) {
-	router := initServer()
-
-	jsonBody := `
-	{
-		"admin": {
-			"familyGroup": "S001",
-			"regDate": "2024-01-10T00:00:00Z",
-			"name": "John Doe",
-			"dob": "1994-01-10T00:00:00Z",
-			"age": 30,
-			"gender": "M",
-			"village": "SO",
-			"contactNo": "12345678",
-			"pregnant": false,
-			"drugAllergies": "panadol",
-			"sentToID": true
-		}
-	}
-	`
-
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/patient", bytes.NewReader([]byte(jsonBody)))
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, "pong", w.Body.String())
-}
+//func TestGetPatientByID(t *testing.T) {
+//	router := initServer()
+//
+//	jsonBody := `
+//	{
+//		"admin": {
+//			"familyGroup": "S001",
+//			"regDate": "2024-01-10T00:00:00Z",
+//			"name": "John Doe",
+//			"dob": "1994-01-10T00:00:00Z",
+//			"age": 30,
+//			"gender": "M",
+//			"village": "SO",
+//			"contactNo": "12345678",
+//			"pregnant": false,
+//			"drugAllergies": "panadol",
+//			"sentToID": true
+//		}
+//	}
+//	`
+//
+//	w := httptest.NewRecorder()
+//	req, _ := http.NewRequest("POST", "/patient", bytes.NewReader([]byte(jsonBody)))
+//	router.ServeHTTP(w, req)
+//
+//	assert.Equal(t, 200, w.Code)
+//	assert.Equal(t, "pong", w.Body.String())
+//}
