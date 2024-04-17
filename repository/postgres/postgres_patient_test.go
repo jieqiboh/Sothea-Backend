@@ -4,8 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/jieqiboh/sothea_backend/domain"
-	"github.com/jieqiboh/sothea_backend/models"
+	"github.com/jieqiboh/sothea_backend/entities"
 	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
@@ -16,87 +15,87 @@ import (
 
 var db *sql.DB
 
-var admin = models.Admin{
-	FamilyGroup:   models.PtrTo("S001"),
-	RegDate:       models.PtrTo(time.Date(2024, time.January, 10, 0, 0, 0, 0, time.UTC)),
-	Name:          models.PtrTo("John Doe"),
-	Dob:           models.PtrTo(time.Date(1994, time.January, 10, 0, 0, 0, 0, time.UTC)),
-	Age:           models.PtrTo(30),
-	Gender:        models.PtrTo("M"),
-	Village:       models.PtrTo("SO"),
-	ContactNo:     models.PtrTo("12345678"),
-	Pregnant:      models.PtrTo(false),
-	DrugAllergies: models.PtrTo("panadol"),
-	SentToID:      models.PtrTo(false),
+var admin = entities.Admin{
+	FamilyGroup:   entities.PtrTo("S001"),
+	RegDate:       entities.PtrTo(time.Date(2024, time.January, 10, 0, 0, 0, 0, time.UTC)),
+	Name:          entities.PtrTo("John Doe"),
+	Dob:           entities.PtrTo(time.Date(1994, time.January, 10, 0, 0, 0, 0, time.UTC)),
+	Age:           entities.PtrTo(30),
+	Gender:        entities.PtrTo("M"),
+	Village:       entities.PtrTo("SO"),
+	ContactNo:     entities.PtrTo("12345678"),
+	Pregnant:      entities.PtrTo(false),
+	DrugAllergies: entities.PtrTo("panadol"),
+	SentToID:      entities.PtrTo(false),
 }
-var pastmedicalhistory = models.PastMedicalHistory{
-	Tuberculosis:               models.PtrTo(true),
-	Diabetes:                   models.PtrTo(false),
-	Hypertension:               models.PtrTo(true),
-	Hyperlipidemia:             models.PtrTo(false),
-	ChronicJointPains:          models.PtrTo(false),
-	ChronicMuscleAches:         models.PtrTo(true),
-	SexuallyTransmittedDisease: models.PtrTo(true),
-	SpecifiedSTDs:              models.PtrTo("TRICHOMONAS"),
+var pastmedicalhistory = entities.PastMedicalHistory{
+	Tuberculosis:               entities.PtrTo(true),
+	Diabetes:                   entities.PtrTo(false),
+	Hypertension:               entities.PtrTo(true),
+	Hyperlipidemia:             entities.PtrTo(false),
+	ChronicJointPains:          entities.PtrTo(false),
+	ChronicMuscleAches:         entities.PtrTo(true),
+	SexuallyTransmittedDisease: entities.PtrTo(true),
+	SpecifiedSTDs:              entities.PtrTo("TRICHOMONAS"),
 	Others:                     nil,
 }
-var socialhistory = models.SocialHistory{
-	PastSmokingHistory:    models.PtrTo(true),
-	NumberOfYears:         models.PtrTo(int32(15)),
-	CurrentSmokingHistory: models.PtrTo(false),
+var socialhistory = entities.SocialHistory{
+	PastSmokingHistory:    entities.PtrTo(true),
+	NumberOfYears:         entities.PtrTo(int32(15)),
+	CurrentSmokingHistory: entities.PtrTo(false),
 	CigarettesPerDay:      nil,
-	AlcoholHistory:        models.PtrTo(true),
-	HowRegular:            models.PtrTo("A"),
+	AlcoholHistory:        entities.PtrTo(true),
+	HowRegular:            entities.PtrTo("A"),
 }
-var vitalstatistics = models.VitalStatistics{
-	Temperature:              models.PtrTo(36.5),
-	SpO2:                     models.PtrTo(98.0),
-	SystolicBP1:              models.PtrTo(120.0),
-	DiastolicBP1:             models.PtrTo(80.0),
-	SystolicBP2:              models.PtrTo(122.0),
-	DiastolicBP2:             models.PtrTo(78.0),
-	AverageSystolicBP:        models.PtrTo(121.0),
-	AverageDiastolicBP:       models.PtrTo(79.0),
-	HR1:                      models.PtrTo(72.0),
-	HR2:                      models.PtrTo(71.0),
-	AverageHR:                models.PtrTo(71.5),
-	RandomBloodGlucoseMmolL:  models.PtrTo(5.4),
-	RandomBloodGlucoseMmolLp: models.PtrTo(5.3),
+var vitalstatistics = entities.VitalStatistics{
+	Temperature:              entities.PtrTo(36.5),
+	SpO2:                     entities.PtrTo(98.0),
+	SystolicBP1:              entities.PtrTo(120.0),
+	DiastolicBP1:             entities.PtrTo(80.0),
+	SystolicBP2:              entities.PtrTo(122.0),
+	DiastolicBP2:             entities.PtrTo(78.0),
+	AverageSystolicBP:        entities.PtrTo(121.0),
+	AverageDiastolicBP:       entities.PtrTo(79.0),
+	HR1:                      entities.PtrTo(72.0),
+	HR2:                      entities.PtrTo(71.0),
+	AverageHR:                entities.PtrTo(71.5),
+	RandomBloodGlucoseMmolL:  entities.PtrTo(5.4),
+	RandomBloodGlucoseMmolLp: entities.PtrTo(5.3),
 }
-var heightandweight = models.HeightAndWeight{
-	Height:      models.PtrTo(170.0),
-	Weight:      models.PtrTo(70.0),
-	BMI:         models.PtrTo(24.2),
-	BMIAnalysis: models.PtrTo("normal weight"),
-	PaedsHeight: models.PtrTo(90.0),
-	PaedsWeight: models.PtrTo(80.0),
+var heightandweight = entities.HeightAndWeight{
+	Height:      entities.PtrTo(170.0),
+	Weight:      entities.PtrTo(70.0),
+	BMI:         entities.PtrTo(24.2),
+	BMIAnalysis: entities.PtrTo("normal weight"),
+	PaedsHeight: entities.PtrTo(90.0),
+	PaedsWeight: entities.PtrTo(80.0),
 }
-var visualacuity = models.VisualAcuity{
-	LEyeVision:             models.PtrTo(int32(20)),
-	REyeVision:             models.PtrTo(int32(20)),
-	AdditionalIntervention: models.PtrTo("VISUAL FIELD TEST REQUIRED"),
+var visualacuity = entities.VisualAcuity{
+	LEyeVision:             entities.PtrTo(int32(20)),
+	REyeVision:             entities.PtrTo(int32(20)),
+	AdditionalIntervention: entities.PtrTo("VISUAL FIELD TEST REQUIRED"),
 }
-var doctorsconsultation = models.DoctorsConsultation{
-	Healthy:           models.PtrTo(true),
-	Msk:               models.PtrTo(false),
-	Cvs:               models.PtrTo(false),
-	Respi:             models.PtrTo(true),
-	Gu:                models.PtrTo(true),
-	Git:               models.PtrTo(false),
-	Eye:               models.PtrTo(true),
-	Derm:              models.PtrTo(false),
-	Others:            models.PtrTo(false),
-	ConsultationNotes: models.PtrTo("CHEST PAIN, SHORTNESS OF BREATH, COUGH"),
-	Diagnosis:         models.PtrTo("ACUTE BRONCHITIS"),
-	Treatment:         models.PtrTo("REST, HYDRATION, COUGH SYRUP"),
-	ReferralNeeded:    models.PtrTo(false),
+var doctorsconsultation = entities.DoctorsConsultation{
+	Healthy:           entities.PtrTo(true),
+	Msk:               entities.PtrTo(false),
+	Cvs:               entities.PtrTo(false),
+	Respi:             entities.PtrTo(true),
+	Gu:                entities.PtrTo(true),
+	Git:               entities.PtrTo(false),
+	Eye:               entities.PtrTo(true),
+	Derm:              entities.PtrTo(false),
+	Others:            entities.PtrTo(false),
+	ConsultationNotes: entities.PtrTo("CHEST PAIN, SHORTNESS OF BREATH, COUGH"),
+	Diagnosis:         entities.PtrTo("ACUTE BRONCHITIS"),
+	Treatment:         entities.PtrTo("REST, HYDRATION, COUGH SYRUP"),
+	ReferralNeeded:    entities.PtrTo(false),
 	ReferralLoc:       nil,
-	Remarks:           models.PtrTo("MONITOR FOR RESOLUTION"),
+	Remarks:           entities.PtrTo("MONITOR FOR RESOLUTION"),
 }
 
 func initDb() {
 	// Initialize global variables
-	viper.SetConfigFile(`../../../config.json`)
+	viper.SetConfigFile(`../../config.json`)
 	err := viper.ReadInConfig()
 	if err != nil {
 		panic(err)
@@ -137,10 +136,10 @@ func TestDB(t *testing.T) {
 	initDb()
 	id := 1
 	rows, err := db.Query("SELECT * FROM admin WHERE id = $1", id)
-	result := make([]models.Admin, 0)
+	result := make([]entities.Admin, 0)
 
 	for rows.Next() {
-		admin := models.Admin{}
+		admin := entities.Admin{}
 		err = rows.Scan(
 			&admin.ID,
 			&admin.FamilyGroup,
@@ -226,7 +225,7 @@ func TestInsertPatient(t *testing.T) {
 		log.Fatal("Failed to assert repo")
 	}
 
-	patient := domain.Patient{
+	patient := entities.Patient{
 		Admin:               &admin,
 		PastMedicalHistory:  &pastmedicalhistory,
 		SocialHistory:       &socialhistory,
@@ -251,7 +250,7 @@ func TestUpdatePatientByID(t *testing.T) {
 		log.Fatal("Failed to assert repo")
 	}
 
-	patient := domain.Patient{
+	patient := entities.Patient{
 		Admin:               &admin,
 		PastMedicalHistory:  nil,
 		SocialHistory:       nil,
@@ -272,7 +271,7 @@ func TestUpdatePatientByID(t *testing.T) {
 	visualacuity.ID = id
 	doctorsconsultation.ID = id
 
-	updatePatient := domain.Patient{
+	updatePatient := entities.Patient{
 		Admin:               &admin,
 		PastMedicalHistory:  &pastmedicalhistory,
 		SocialHistory:       &socialhistory,
@@ -289,7 +288,7 @@ func TestUpdatePatientByID(t *testing.T) {
 	p, err := patient_repo.GetPatientByID(context.Background(), id)
 	assert.Nil(t, err)
 
-	expectedPatient := domain.Patient{
+	expectedPatient := entities.Patient{
 		Admin:               &admin,
 		PastMedicalHistory:  &pastmedicalhistory,
 		SocialHistory:       &socialhistory,
@@ -325,7 +324,7 @@ func TestFull(t *testing.T) {
 	}
 
 	// InsertPatient with only admin and docconsult field - should successfully insert
-	patient1 := domain.Patient{
+	patient1 := entities.Patient{
 		Admin:               &admin,
 		PastMedicalHistory:  nil,
 		SocialHistory:       nil,
@@ -339,7 +338,7 @@ func TestFull(t *testing.T) {
 	assert.Nil(t, err)
 
 	// InsertPatient with no admin field - should return -1 and error
-	patient2 := domain.Patient{
+	patient2 := entities.Patient{
 		Admin:               nil,
 		PastMedicalHistory:  nil,
 		SocialHistory:       nil,
@@ -358,7 +357,7 @@ func TestFull(t *testing.T) {
 	assert.NotNil(t, err)
 
 	// GetPatient with only admin and socialhistory field filled in
-	patient4 := domain.Patient{
+	patient4 := entities.Patient{
 		Admin:         &admin,
 		SocialHistory: &socialhistory,
 	}
@@ -379,21 +378,21 @@ func TestFull(t *testing.T) {
 	assert.NotNil(t, patient5.SocialHistory)
 
 	// Update Patient4 and update all admin fields except id, add vitalstatistics and visualacuity
-	updatedAdmin := models.Admin{
-		FamilyGroup:         models.PtrTo("S001"),
-		RegDate:             models.PtrTo(time.Now()),
-		Name:                models.PtrTo("Updated Name Here"),
-		Dob:                 models.PtrTo(time.Date(1994, time.January, 10, 0, 0, 0, 0, time.UTC)),
-		Age:                 models.PtrTo(5),
-		Gender:              models.PtrTo("F"),
-		Village:             models.PtrTo("SO"),
-		ContactNo:           models.PtrTo("12345678"),
-		Pregnant:            models.PtrTo(false),
-		LastMenstrualPeriod: models.PtrTo(time.Date(2024, time.January, 10, 0, 0, 0, 0, time.UTC)),
-		DrugAllergies:       models.PtrTo("panadol"),
-		SentToID:            models.PtrTo(false),
+	updatedAdmin := entities.Admin{
+		FamilyGroup:         entities.PtrTo("S001"),
+		RegDate:             entities.PtrTo(time.Now()),
+		Name:                entities.PtrTo("Updated Name Here"),
+		Dob:                 entities.PtrTo(time.Date(1994, time.January, 10, 0, 0, 0, 0, time.UTC)),
+		Age:                 entities.PtrTo(5),
+		Gender:              entities.PtrTo("F"),
+		Village:             entities.PtrTo("SO"),
+		ContactNo:           entities.PtrTo("12345678"),
+		Pregnant:            entities.PtrTo(false),
+		LastMenstrualPeriod: entities.PtrTo(time.Date(2024, time.January, 10, 0, 0, 0, 0, time.UTC)),
+		DrugAllergies:       entities.PtrTo("panadol"),
+		SentToID:            entities.PtrTo(false),
 	}
-	patient6 := domain.Patient{
+	patient6 := entities.Patient{
 		Admin:           &updatedAdmin,
 		VitalStatistics: &vitalstatistics,
 		VisualAcuity:    &visualacuity,
