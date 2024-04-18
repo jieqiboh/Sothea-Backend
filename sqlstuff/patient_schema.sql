@@ -96,6 +96,6 @@ CREATE TABLE IF NOT EXISTS doctorsconsultation (
     treatment          TEXT,
     referral_needed    BOOLEAN NOT NULL,
     referral_loc       TEXT,
-    remarks            TEXT
+    remarks            TEXT,
     CONSTRAINT fk_id FOREIGN KEY (id) REFERENCES admin (id)
 );
