@@ -1,0 +1,15 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres
+    restart: always
+    # set shared memory limit when using docker-compose
+    shm_size: 128mb
+    environment:
+      - POSTGRES_USER=jieqiboh
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      # Mount and run the init.sql file to load data
+      - ./sqlstuff/init.sql:/docker-entrypoint-initdb.d/init.sql
