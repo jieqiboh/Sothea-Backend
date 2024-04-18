@@ -1,4 +1,10 @@
 .DS_Store
 .vscode
+logfile.txt
 **/.env
 **/.idea
+
+# Executables
+*.exe
+*.out
+*.app

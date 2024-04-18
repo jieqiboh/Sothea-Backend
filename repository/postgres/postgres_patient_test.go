@@ -105,9 +105,10 @@ func initDb() {
 	dbPort := viper.GetString(`database.port`)
 	dbUser := viper.GetString(`database.user`)
 	dbName := viper.GetString(`database.name`)
+	dbPassword := viper.GetString(`database.password`)
 	dbSslMode := viper.GetString(`database.sslmode`)
 
-	connStr := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=%s", dbHost, dbPort, dbUser, dbName, dbSslMode)
+	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", dbHost, dbPort, dbUser, dbPassword, dbName, dbSslMode)
 
 	// Open a database connection
 	db, err = sql.Open("postgres", connStr)
@@ -115,7 +116,6 @@ func initDb() {
 		log.Fatal(err)
 	}
 
-	// You might want to check the connection here to handle errors
 	err = db.Ping()
 	if err != nil {
 		log.Fatal("Database connection failed:", err)
@@ -314,8 +314,8 @@ func TestUpdatePatientByID(t *testing.T) {
 }
 
 func TestFull(t *testing.T) {
-	// Tests some edge cases and ensures desired behaviour is maintained
 	initDb()
+	// Tests some edge cases and ensures desired behaviour is maintained
 	repo := NewPostgresPatientRepository(db)
 
 	patient_repo, ok := repo.(*postgresPatientRepository)
@@ -431,17 +431,3 @@ func TestFull(t *testing.T) {
 	// Delete Patient4
 
 }
-
-//func TestGetAllAdmin(t *testing.T) {
-//	initDb()
-//	repo := NewPostgresPatientRepository(db)
-//
-//	patient_repo, ok := repo.(*postgresPatientRepository)
-//	if !ok {
-//		log.Fatal("Failed to assert repo")
-//	}
-//
-//	adminArray, err := patient_repo.GetAllFromAdmin(context.Background())
-//	assert.Nil(t, err)
-//	assert.NotNil(t, adminArray)
-//}
