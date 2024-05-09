@@ -3,17 +3,22 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/jieqiboh/sothea_backend/entities"
 	_ "github.com/lib/pq"
-	"github.com/spf13/viper"
+	"github.com/ory/dockertest/v3"
+	"github.com/ory/dockertest/v3/docker"
 	"github.com/stretchr/testify/assert"
 	"log"
+	"os"
 	"testing"
 	"time"
-)
 
-var db *sql.DB
+	"github.com/golang-migrate/migrate/v4"
+	pg "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+)
 
 var admin = entities.Admin{
 	FamilyGroup:   entities.PtrTo("S001"),
@@ -93,47 +98,101 @@ var doctorsconsultation = entities.DoctorsConsultation{
 	Remarks:           entities.PtrTo("MONITOR FOR RESOLUTION"),
 }
 
-func initDb() {
-	// Initialize global variables
-	viper.SetConfigFile(`../../config.json`)
-	err := viper.ReadInConfig()
+var db *sql.DB
+
+const (
+	PostgresPassword = "postgres"
+	PostgresUser     = "jieqiboh"
+	PostgresDB       = "patients"
+)
+
+func TestMain(m *testing.M) {
+	// uses a sensible default on windows (tcp/http) and linux/osx (socket)
+	pool, err := dockertest.NewPool("")
 	if err != nil {
-		panic(err)
+		log.Fatalf("Could not construct pool: %s", err)
 	}
 
-	dbHost := viper.GetString(`database.host`)
-	dbPort := viper.GetString(`database.port`)
-	dbUser := viper.GetString(`database.user`)
-	dbName := viper.GetString(`database.name`)
-	dbPassword := viper.GetString(`database.password`)
-	dbSslMode := viper.GetString(`database.sslmode`)
-
-	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", dbHost, dbPort, dbUser, dbPassword, dbName, dbSslMode)
-
-	// Open a database connection
-	db, err = sql.Open("postgres", connStr)
+	err = pool.Client.Ping()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Could not connect to Docker: %s", err)
 	}
 
-	err = db.Ping()
+	// pulls an image, creates a container based on it and runs it
+	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
+		Repository: "postgres",
+		Tag:        "11",
+		Env: []string{
+			"POSTGRES_PASSWORD=" + PostgresPassword,
+			"POSTGRES_USER=" + PostgresUser,
+			"POSTGRES_DB=" + PostgresDB,
+			"listen_addresses = '*'",
+		},
+	}, func(config *docker.HostConfig) {
+		// set AutoRemove to true so that stopped container goes away by itself
+		config.AutoRemove = true
+		config.RestartPolicy = docker.RestartPolicy{Name: "no"}
+	})
 	if err != nil {
-		log.Fatal("Database connection failed:", err)
+		log.Fatalf("Could not start resource: %s", err)
 	}
+
+	hostAndPort := resource.GetHostPort("5432/tcp")
+	databaseUrl := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", PostgresUser, PostgresPassword,
+		hostAndPort, PostgresDB)
+
+	log.Println("Connecting to database on url: ", databaseUrl)
+
+	resource.Expire(120) // Tell docker to hard kill the container in 120 seconds
+
+	// exponential backoff-retry, because the application in the container might not be ready to accept connections yet
+	pool.MaxWait = 120 * time.Second
+	if err = pool.Retry(func() error {
+		db, err = sql.Open("postgres", databaseUrl)
+		if err != nil {
+			return err
+		}
+		return db.Ping()
+	}); err != nil {
+		log.Fatalf("Could not connect to docker: %s", err)
+	}
+
+	// Migrating DB
+	if err := runMigrations("../../migrations", db); err != nil {
+		log.Fatalf("Could not migrate db: %s", err)
+	}
+
+	//Run tests
+	code := m.Run()
+
+	// You can't defer this because os.Exit doesn't care for defer
+	if err := pool.Purge(resource); err != nil {
+		log.Fatalf("Could not purge resource: %s", err)
+	}
+
+	os.Exit(code)
 }
 
-// Gets Patient with highest ID from db, deletes it, then inserts another Patient
-func TestRun(t *testing.T) {
-	t.Run("TestDB", TestDB)
-	t.Run("TestGetPatientByID", TestGetPatientByID)
-	t.Run("TestDeletePatientByID", TestDeletePatientByID)
-	t.Run("TestInsertPatient", TestInsertPatient)
-	t.Run("TestUpdatePatientByID", TestUpdatePatientByID)
-	//t.Run("TestInsertAdmin", TestInsertAdmin)
+func runMigrations(migrationsPath string, db *sql.DB) error {
+	if migrationsPath == "" {
+		return errors.New("missing migrations path")
+	}
+	driver, err := pg.WithInstance(db, &pg.Config{})
+	if err != nil {
+		return err
+	}
+	m, err := migrate.NewWithDatabaseInstance("file://"+migrationsPath, "postgres", driver)
+	if err != nil {
+		return err
+	}
+	err = m.Up()
+	if err != nil && err != migrate.ErrNoChange {
+		return err
+	}
+	return nil
 }
 
 func TestDB(t *testing.T) {
-	initDb()
 	id := 1
 	rows, err := db.Query("SELECT * FROM admin WHERE id = $1", id)
 	result := make([]entities.Admin, 0)
@@ -174,7 +233,6 @@ func TestDB(t *testing.T) {
 }
 
 func TestGetPatientByID(t *testing.T) {
-	initDb()
 	repo := NewPostgresPatientRepository(db)
 
 	patient_repo, ok := repo.(*postgresPatientRepository)
@@ -196,7 +254,6 @@ func TestGetPatientByID(t *testing.T) {
 }
 
 func TestDeletePatientByID(t *testing.T) {
-	initDb()
 	repo := NewPostgresPatientRepository(db)
 
 	patient_repo, ok := repo.(*postgresPatientRepository)
@@ -217,7 +274,6 @@ func TestDeletePatientByID(t *testing.T) {
 }
 
 func TestInsertPatient(t *testing.T) {
-	initDb()
 	repo := NewPostgresPatientRepository(db)
 
 	patient_repo, ok := repo.(*postgresPatientRepository)
@@ -242,7 +298,6 @@ func TestInsertPatient(t *testing.T) {
 }
 
 func TestUpdatePatientByID(t *testing.T) {
-	initDb()
 	repo := NewPostgresPatientRepository(db)
 
 	patient_repo, ok := repo.(*postgresPatientRepository)
@@ -314,7 +369,6 @@ func TestUpdatePatientByID(t *testing.T) {
 }
 
 func TestFull(t *testing.T) {
-	initDb()
 	// Tests some edge cases and ensures desired behaviour is maintained
 	repo := NewPostgresPatientRepository(db)
 
@@ -414,20 +468,4 @@ func TestFull(t *testing.T) {
 	assert.Equal(t, updatedAdmin.Name, updatedPatient6.Admin.Name)
 	assert.Equal(t, updatedAdmin.Age, updatedPatient6.Admin.Age)
 	assert.Equal(t, updatedAdmin.Gender, updatedPatient6.Admin.Gender)
-
-	// Update Patient6 admin id, should fail
-	//updatedAdmin = models.Admin{
-	//	ID: int64(10000),
-	//}
-	//patient7 := domain.Patient{
-	//	Admin: &updatedAdmin,
-	//}
-	//id7, err := patient_repo.UpdatePatientByID(context.Background(), id6, &patient7)
-	//assert.Equal(t, int64(-1), id7)
-	//assert.NotNil(t, err)
-
-	// Update a non-existing patient, should fail
-
-	// Delete Patient4
-
 }
