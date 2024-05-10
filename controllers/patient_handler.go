@@ -30,11 +30,13 @@ func NewPatientHandler(e *gin.Engine, us entities.PatientUseCase) {
 	e.POST("/patient", handler.InsertPatient)
 	e.DELETE("/patient/:id", handler.DeletePatientByID)
 	e.PATCH("/patient/:id", handler.UpdatePatientByID)
-	e.GET("/patient/admin", handler.GetAllAdmin)
+	//e.GET("/patient/admin", handler.GetAllAdmin)
 }
 
 func (p *PatientHandler) GetPatientByID(c *gin.Context) {
 	idP, err := strconv.Atoi(c.Param("id"))
+
+	// Check if the id is not a number
 	if err != nil {
 		c.JSON(http.StatusNotFound, ResponseError{Message: err.Error()})
 		return
@@ -43,6 +45,7 @@ func (p *PatientHandler) GetPatientByID(c *gin.Context) {
 	id := int32(idP)
 	ctx := c.Request.Context()
 
+	// Get the patient by id
 	patient, err := p.AUsecase.GetPatientByID(ctx, id)
 	if err != nil {
 		c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
@@ -55,7 +58,7 @@ func (p *PatientHandler) GetPatientByID(c *gin.Context) {
 func (p *PatientHandler) InsertPatient(c *gin.Context) {
 	var patient entities.Patient
 	if err := c.ShouldBindJSON(&patient); err != nil {
-		c.JSON(http.StatusBadRequest, ResponseError{Message: err.Error()})
+		c.JSON(http.StatusBadRequest, ResponseError{Message: domain.ErrInvalidInput.Error()})
 		return
 	}
 
@@ -99,7 +102,7 @@ func (p *PatientHandler) UpdatePatientByID(c *gin.Context) {
 
 	var patient entities.Patient
 	if err := c.ShouldBindJSON(&patient); err != nil {
-		c.JSON(http.StatusBadRequest, ResponseError{Message: err.Error()})
+		c.JSON(http.StatusBadRequest, ResponseError{Message: domain.ErrInvalidInput.Error()})
 		return
 	}
 
@@ -112,16 +115,16 @@ func (p *PatientHandler) UpdatePatientByID(c *gin.Context) {
 	c.JSON(http.StatusOK, id)
 }
 
-func (p *PatientHandler) GetAllAdmin(c *gin.Context) {
-	ctx := c.Request.Context()
-	arrAdmin, err := p.AUsecase.GetAllFromAdmin(ctx)
-	if err != nil {
-		c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, arrAdmin)
-}
+//func (p *PatientHandler) GetAllAdmin(c *gin.Context) {
+//	ctx := c.Request.Context()
+//	arrAdmin, err := p.AUsecase.GetAllFromAdmin(ctx)
+//	if err != nil {
+//		c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+//		return
+//	}
+//
+//	c.JSON(http.StatusOK, arrAdmin)
+//}
 
 func getStatusCode(err error) int {
 	if err == nil {
@@ -132,8 +135,8 @@ func getStatusCode(err error) int {
 		return http.StatusInternalServerError
 	case domain.ErrNotFound:
 		return http.StatusNotFound
-	case domain.ErrConflict:
-		return http.StatusConflict
+	case domain.ErrMissingAdminInput:
+		return http.StatusBadRequest
 	default:
 		return http.StatusInternalServerError
 	}
