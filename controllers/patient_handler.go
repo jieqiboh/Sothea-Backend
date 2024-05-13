@@ -115,17 +115,6 @@ func (p *PatientHandler) UpdatePatientByID(c *gin.Context) {
 	c.JSON(http.StatusOK, id)
 }
 
-//func (p *PatientHandler) GetAllAdmin(c *gin.Context) {
-//	ctx := c.Request.Context()
-//	arrAdmin, err := p.AUsecase.GetAllFromAdmin(ctx)
-//	if err != nil {
-//		c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
-//		return
-//	}
-//
-//	c.JSON(http.StatusOK, arrAdmin)
-//}
-
 func getStatusCode(err error) int {
 	if err == nil {
 		return http.StatusOK
