@@ -1,4 +1,4 @@
-package domain
+package entities
 
 import "errors"
 
@@ -7,7 +7,8 @@ var (
 	// Should know which categories are missing
 	ErrInternalServerError  = errors.New("Internal Server Error")
 	ErrAuthenticationFailed = errors.New("Not Authenticated")
-	ErrNotFound             = errors.New("Patient Not Found")
-	ErrMissingAdminInput    = errors.New("Missing Admin field")
+	ErrPatientNotFound      = errors.New("Patient Not Found")
+	ErrMissingAdminCategory = errors.New("Missing Admin field")
 	ErrInvalidInput         = errors.New("Invalid Parameters Given")
+	ErrInvalidAdminFields   = errors.New("Invalid Admin Fields")
 )
