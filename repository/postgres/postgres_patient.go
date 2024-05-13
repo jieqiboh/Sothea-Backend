@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"github.com/jieqiboh/sothea_backend/domain"
 	"github.com/jieqiboh/sothea_backend/entities"
 	_ "github.com/lib/pq"
 )
@@ -48,7 +47,7 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int32
 		&admin.SentToID,
 	)
 	if err != nil { // no admin found
-		return nil, domain.ErrNotFound
+		return nil, entities.ErrPatientNotFound
 	}
 
 	rows = tx.QueryRowContext(ctx, "SELECT * FROM pastmedicalhistory WHERE pastmedicalhistory.id = $1;", id)
@@ -207,7 +206,7 @@ func (p *postgresPatientRepository) InsertPatient(ctx context.Context, patient *
 
 	var patientid int32
 	if admin == nil { // no admin field
-		return -1, domain.ErrMissingAdminInput
+		return -1, entities.ErrMissingAdminCategory
 	}
 	rows := tx.QueryRowContext(ctx, `INSERT INTO admin (family_group, reg_date, name, khmer_name, dob, age, gender, village, 
 	contact_no, pregnant, last_menstrual_period, drug_allergies, sent_to_id) 
@@ -376,7 +375,7 @@ func (p *postgresPatientRepository) UpdatePatientByID(ctx context.Context, id in
 	)
 
 	if err != nil { // no patient found
-		return -1, domain.ErrNotFound
+		return -1, entities.ErrPatientNotFound
 	}
 	if a != nil { // Update admin
 		_, err = tx.ExecContext(ctx, `UPDATE admin SET family_group = $1, reg_date = $2, name = $3, khmer_name = $4, dob = $5, age = $6, 

@@ -159,7 +159,7 @@ func TestMain(m *testing.M) {
 	}
 
 	// Migrating DB
-	if err := runMigrations("../../migrations", db); err != nil {
+	if err := runMigrations("../../sql", db); err != nil {
 		log.Fatalf("Could not migrate db: %s", err)
 	}
 
@@ -176,7 +176,7 @@ func TestMain(m *testing.M) {
 
 func runMigrations(migrationsPath string, db *sql.DB) error {
 	if migrationsPath == "" {
-		return errors.New("missing migrations path")
+		return errors.New("missing sql path")
 	}
 	driver, err := pg.WithInstance(db, &pg.Config{})
 	if err != nil {

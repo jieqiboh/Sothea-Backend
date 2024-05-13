@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/jieqiboh/sothea_backend/domain"
 	"github.com/jieqiboh/sothea_backend/entities"
 	"net/http"
 	"strconv"
@@ -58,7 +57,7 @@ func (p *PatientHandler) GetPatientByID(c *gin.Context) {
 func (p *PatientHandler) InsertPatient(c *gin.Context) {
 	var patient entities.Patient
 	if err := c.ShouldBindJSON(&patient); err != nil {
-		c.JSON(http.StatusBadRequest, ResponseError{Message: domain.ErrInvalidInput.Error()})
+		c.JSON(http.StatusBadRequest, ResponseError{Message: entities.ErrInvalidInput.Error()})
 		return
 	}
 
@@ -94,7 +93,7 @@ func (p *PatientHandler) DeletePatientByID(c *gin.Context) {
 func (p *PatientHandler) UpdatePatientByID(c *gin.Context) {
 	idP, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusNotFound, domain.ErrNotFound.Error())
+		c.JSON(http.StatusNotFound, entities.ErrPatientNotFound.Error())
 	}
 
 	id := int32(idP)
@@ -102,7 +101,7 @@ func (p *PatientHandler) UpdatePatientByID(c *gin.Context) {
 
 	var patient entities.Patient
 	if err := c.ShouldBindJSON(&patient); err != nil {
-		c.JSON(http.StatusBadRequest, ResponseError{Message: domain.ErrInvalidInput.Error()})
+		c.JSON(http.StatusBadRequest, ResponseError{Message: entities.ErrInvalidInput.Error()})
 		return
 	}
 
@@ -120,11 +119,11 @@ func getStatusCode(err error) int {
 		return http.StatusOK
 	}
 	switch err {
-	case domain.ErrInternalServerError:
+	case entities.ErrInternalServerError:
 		return http.StatusInternalServerError
-	case domain.ErrNotFound:
+	case entities.ErrPatientNotFound:
 		return http.StatusNotFound
-	case domain.ErrMissingAdminInput:
+	case entities.ErrMissingAdminCategory:
 		return http.StatusBadRequest
 	default:
 		return http.StatusInternalServerError
