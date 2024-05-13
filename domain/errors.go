@@ -11,8 +11,3 @@ var (
 	ErrMissingAdminInput    = errors.New("Missing Admin field")
 	ErrInvalidInput         = errors.New("Invalid Parameters Given")
 )
-
-/**
- * List of possible errors
- * Errors that happen commonly include:
- */

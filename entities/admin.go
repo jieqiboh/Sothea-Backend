@@ -10,6 +10,7 @@ type Admin struct {
 	FamilyGroup         *string    `json:"familyGroup" binding:"required"`
 	RegDate             *time.Time `json:"regDate" binding:"required"`
 	Name                *string    `json:"name" binding:"required"`
+	KhmerName           *string    `json:"khmerName" binding:"required"`
 	Dob                 *time.Time `json:"dob" binding:"required"`
 	Age                 *int       `json:"age" binding:"required"`
 	Gender              *string    `json:"gender" binding:"required"`
@@ -33,6 +34,7 @@ func (a Admin) String() string {
 	result += fmt.Sprintf("FamilyGroup: %s\n", *a.FamilyGroup)
 	result += fmt.Sprintf("RegDate: %s\n", a.RegDate.Format("2006-01-02"))
 	result += fmt.Sprintf("Name: %s\n", *a.Name)
+	result += fmt.Sprintf("KhmerName: %s\n", *a.KhmerName)
 	result += fmt.Sprintf("Dob: %s\n", a.Dob.Format("2006-01-02"))
 	result += fmt.Sprintf("Age: %d\n", *a.Age)
 	result += fmt.Sprintf("Gender: %s\n", *a.Gender)
