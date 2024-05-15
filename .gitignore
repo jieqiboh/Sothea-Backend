@@ -8,3 +8,4 @@ logfile.txt
 *.exe
 *.out
 *.app
+bin/*
