@@ -1,10 +1,13 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/jieqiboh/sothea_backend/entities"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 // ResponseError represent the response error struct
@@ -29,7 +32,6 @@ func NewPatientHandler(e *gin.Engine, us entities.PatientUseCase) {
 	e.POST("/patient", handler.InsertPatient)
 	e.DELETE("/patient/:id", handler.DeletePatientByID)
 	e.PATCH("/patient/:id", handler.UpdatePatientByID)
-	//e.GET("/patient/admin", handler.GetAllAdmin)
 }
 
 func (p *PatientHandler) GetPatientByID(c *gin.Context) {
@@ -56,9 +58,12 @@ func (p *PatientHandler) GetPatientByID(c *gin.Context) {
 
 func (p *PatientHandler) InsertPatient(c *gin.Context) {
 	var patient entities.Patient
+
 	if err := c.ShouldBindJSON(&patient); err != nil {
-		c.JSON(http.StatusBadRequest, ResponseError{Message: entities.ErrInvalidInput.Error()})
-		return
+		for _, fieldErr := range err.(validator.ValidationErrors) {
+			c.JSON(http.StatusBadRequest, ResponseError{Message: fieldError{fieldErr}.String()})
+			return // exit on first error
+		}
 	}
 
 	ctx := c.Request.Context()
@@ -101,8 +106,10 @@ func (p *PatientHandler) UpdatePatientByID(c *gin.Context) {
 
 	var patient entities.Patient
 	if err := c.ShouldBindJSON(&patient); err != nil {
-		c.JSON(http.StatusBadRequest, ResponseError{Message: entities.ErrInvalidInput.Error()})
-		return
+		for _, fieldErr := range err.(validator.ValidationErrors) {
+			c.JSON(http.StatusBadRequest, ResponseError{Message: fieldError{fieldErr}.String()})
+			return // exit on first error
+		}
 	}
 
 	id, err = p.AUsecase.UpdatePatientByID(ctx, id, &patient)
@@ -128,4 +135,26 @@ func getStatusCode(err error) int {
 	default:
 		return http.StatusInternalServerError
 	}
+}
+
+type fieldError struct {
+	err validator.FieldError
+}
+
+func (q fieldError) String() string {
+	var sb strings.Builder
+
+	sb.WriteString("validation failed on field '" + q.err.Field() + "'")
+	sb.WriteString(", condition: " + q.err.ActualTag())
+
+	// Print condition parameters, e.g. oneof=red blue -> { red blue }
+	if q.err.Param() != "" {
+		sb.WriteString(" { " + q.err.Param() + " }")
+	}
+
+	if q.err.Value() != nil && q.err.Value() != "" {
+		sb.WriteString(fmt.Sprintf(", actual: %v", q.err.Value()))
+	}
+
+	return sb.String()
 }
