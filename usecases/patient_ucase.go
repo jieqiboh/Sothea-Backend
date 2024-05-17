@@ -47,9 +47,9 @@ func (p patientUsecase) UpdatePatientByID(ctx context.Context, id int32, patient
 	return p.patientRepo.UpdatePatientByID(ctx, id, patient)
 }
 
-//func (p patientUsecase) GetAllFromAdmin(ctx context.Context) ([]entities.Admin, error) {
-//	ctx, cancel := context.WithTimeout(ctx, p.contextTimeout)
-//	defer cancel()
-//
-//	return p.patientRepo.GetAllFromAdmin(ctx)
-//}
+func (p patientUsecase) GetAllAdmin(ctx context.Context) ([]entities.PartAdmin, error) {
+	ctx, cancel := context.WithTimeout(ctx, p.contextTimeout)
+	defer cancel()
+
+	return p.patientRepo.GetAllAdmin(ctx)
+}

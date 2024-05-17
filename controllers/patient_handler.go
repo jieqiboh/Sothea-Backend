@@ -32,6 +32,7 @@ func NewPatientHandler(e *gin.Engine, us entities.PatientUseCase) {
 	e.POST("/patient", handler.InsertPatient)
 	e.DELETE("/patient/:id", handler.DeletePatientByID)
 	e.PATCH("/patient/:id", handler.UpdatePatientByID)
+	e.GET("/get-all-admin", handler.GetAllAdmin)
 }
 
 func (p *PatientHandler) GetPatientByID(c *gin.Context) {
@@ -119,6 +120,18 @@ func (p *PatientHandler) UpdatePatientByID(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, id)
+}
+
+func (p *PatientHandler) GetAllAdmin(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	adminlist, err := p.AUsecase.GetAllAdmin(ctx)
+	if err != nil {
+		c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, adminlist)
 }
 
 func getStatusCode(err error) int {
