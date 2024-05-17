@@ -20,6 +20,7 @@ type PatientUseCase interface {
 	DeletePatientByID(ctx context.Context, id int32) (int32, error) // Deletes a Patient by ID
 	UpdatePatientByID(ctx context.Context, id int32, patient *Patient) (int32, error)
 	InsertPatient(ctx context.Context, patient *Patient) (int32, error) // Creates a new patient and inserts in database
+	GetAllAdmin(ctx context.Context) ([]PartAdmin, error)
 }
 
 type PatientRepository interface {
@@ -27,4 +28,5 @@ type PatientRepository interface {
 	DeletePatientByID(ctx context.Context, id int32) (int32, error) // Deletes a Patient by ID
 	UpdatePatientByID(ctx context.Context, id int32, patient *Patient) (int32, error)
 	InsertPatient(ctx context.Context, patient *Patient) (int32, error) // Creates a new patient and inserts in database
+	GetAllAdmin(ctx context.Context) ([]PartAdmin, error)
 }

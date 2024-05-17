@@ -472,3 +472,16 @@ func TestFull(t *testing.T) {
 	assert.Equal(t, updatedAdmin.Age, updatedPatient6.Admin.Age)
 	assert.Equal(t, updatedAdmin.Gender, updatedPatient6.Admin.Gender)
 }
+
+func TestGetAllAdmin(t *testing.T) {
+	repo := NewPostgresPatientRepository(db)
+
+	patient_repo, ok := repo.(*postgresPatientRepository)
+	if !ok {
+		log.Fatal("Failed to assert repo")
+	}
+
+	admins, err := patient_repo.GetAllAdmin(context.Background())
+	assert.Nil(t, err)
+	assert.NotNil(t, admins)
+}
