@@ -485,3 +485,16 @@ func TestGetAllAdmin(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, admins)
 }
+
+func TestPostgresPatientRepository_SearchPatients(t *testing.T) {
+	repo := NewPostgresPatientRepository(db)
+
+	patient_repo, ok := repo.(*postgresPatientRepository)
+	if !ok {
+		log.Fatal("Failed to assert repo")
+	}
+
+	admins, err := patient_repo.SearchPatients(context.Background(), "១២៣៤ ៥៦៧៨៩០ឥឲ")
+	assert.Nil(t, err)
+	assert.NotNil(t, admins)
+}

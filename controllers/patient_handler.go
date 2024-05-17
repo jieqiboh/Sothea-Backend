@@ -33,6 +33,7 @@ func NewPatientHandler(e *gin.Engine, us entities.PatientUseCase) {
 	e.DELETE("/patient/:id", handler.DeletePatientByID)
 	e.PATCH("/patient/:id", handler.UpdatePatientByID)
 	e.GET("/get-all-admin", handler.GetAllAdmin)
+	e.GET("/search-patients/:search-name", handler.SearchPatients)
 }
 
 func (p *PatientHandler) GetPatientByID(c *gin.Context) {
@@ -132,6 +133,20 @@ func (p *PatientHandler) GetAllAdmin(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, adminlist)
+}
+
+func (p *PatientHandler) SearchPatients(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	patientName := c.Param("search-name")
+
+	foundPatients, err := p.AUsecase.SearchPatients(ctx, patientName)
+	if err != nil {
+		c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, foundPatients)
 }
 
 func getStatusCode(err error) int {

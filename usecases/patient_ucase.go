@@ -53,3 +53,10 @@ func (p patientUsecase) GetAllAdmin(ctx context.Context) ([]entities.PartAdmin, 
 
 	return p.patientRepo.GetAllAdmin(ctx)
 }
+
+func (p patientUsecase) SearchPatients(ctx context.Context, search string) ([]entities.PartAdmin, error) {
+	ctx, cancel := context.WithTimeout(ctx, p.contextTimeout)
+	defer cancel()
+
+	return p.patientRepo.SearchPatients(ctx, search)
+}
