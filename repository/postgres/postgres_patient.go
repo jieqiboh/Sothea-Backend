@@ -545,3 +545,30 @@ func (p *postgresPatientRepository) GetAllAdmin(ctx context.Context) ([]entities
 
 	return result, nil
 }
+
+func (p *postgresPatientRepository) SearchPatients(ctx context.Context, search string) ([]entities.PartAdmin, error) {
+	var rows *sql.Rows
+	result := make([]entities.PartAdmin, 0)
+
+	rows, err := p.Conn.QueryContext(ctx, `
+				SELECT id, name, khmer_name, dob, gender, contact_no 
+				FROM ADMIN 
+				WHERE LOWER(name) = LOWER($1) OR LOWER(khmer_name) = LOWER($2)`, search, search)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		partadmin := entities.PartAdmin{}
+		err = rows.Scan(&partadmin.ID, &partadmin.Name, &partadmin.KhmerName, &partadmin.Dob, &partadmin.Gender, &partadmin.ContactNo)
+
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, partadmin)
+	}
+
+	return result, nil
+}
