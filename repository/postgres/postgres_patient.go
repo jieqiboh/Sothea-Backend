@@ -45,6 +45,7 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int32
 		&admin.LastMenstrualPeriod,
 		&admin.DrugAllergies,
 		&admin.SentToID,
+		&admin.Photo,
 	)
 	if err != nil { // no admin found
 		return nil, entities.ErrPatientNotFound
@@ -209,10 +210,10 @@ func (p *postgresPatientRepository) InsertPatient(ctx context.Context, patient *
 		return -1, entities.ErrMissingAdminCategory
 	}
 	rows := tx.QueryRowContext(ctx, `INSERT INTO admin (family_group, reg_date, name, khmer_name, dob, age, gender, village, 
-	contact_no, pregnant, last_menstrual_period, drug_allergies, sent_to_id) 
-	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id`,
+	contact_no, pregnant, last_menstrual_period, drug_allergies, sent_to_id, photo) 
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id`,
 		admin.FamilyGroup, admin.RegDate, admin.Name, admin.KhmerName, admin.Dob, admin.Age, admin.Gender, admin.Village, admin.ContactNo,
-		admin.Pregnant, admin.LastMenstrualPeriod, admin.DrugAllergies, admin.SentToID)
+		admin.Pregnant, admin.LastMenstrualPeriod, admin.DrugAllergies, admin.SentToID, admin.Photo)
 	err = rows.Scan(&patientid)
 	if err != nil { // error inserting admin
 		return -1, err
@@ -372,6 +373,7 @@ func (p *postgresPatientRepository) UpdatePatientByID(ctx context.Context, id in
 		&prevAdmin.LastMenstrualPeriod,
 		&prevAdmin.DrugAllergies,
 		&prevAdmin.SentToID,
+		&prevAdmin.Photo,
 	)
 
 	if err != nil { // no patient found
@@ -380,8 +382,8 @@ func (p *postgresPatientRepository) UpdatePatientByID(ctx context.Context, id in
 	if a != nil { // Update admin
 		_, err = tx.ExecContext(ctx, `UPDATE admin SET family_group = $1, reg_date = $2, name = $3, khmer_name = $4, dob = $5, age = $6, 
 		gender = $7, village = $8, contact_no = $9, pregnant = $10, last_menstrual_period = $11, drug_allergies = $12,
-		sent_to_id = $13 WHERE id = $14`, a.FamilyGroup, a.RegDate, a.Name, a.KhmerName, a.Dob, a.Age, a.Gender, a.Village, a.ContactNo,
-			a.Pregnant, a.LastMenstrualPeriod, a.DrugAllergies, a.SentToID, id)
+		sent_to_id = $13, photo = $14 WHERE id = $15`, a.FamilyGroup, a.RegDate, a.Name, a.KhmerName, a.Dob, a.Age, a.Gender, a.Village, a.ContactNo,
+			a.Pregnant, a.LastMenstrualPeriod, a.DrugAllergies, a.SentToID, a.Photo, id)
 		if err != nil {
 			return -1, err
 		}

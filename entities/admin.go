@@ -20,6 +20,7 @@ type Admin struct {
 	LastMenstrualPeriod *time.Time `json:"lastMenstrualPeriod"`
 	DrugAllergies       *string    `json:"drugAllergies"`
 	SentToID            *bool      `json:"sentToId" binding:"required"`
+	Photo               *string    `json:"photo"`
 }
 
 // TableName specifies the table name for the Admin model.
