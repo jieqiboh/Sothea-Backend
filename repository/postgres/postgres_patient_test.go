@@ -114,26 +114,18 @@ func TestMain(m *testing.M) {
 		log.Fatalf("Could not construct pool: %s", err)
 	}
 
-	err = pool.Client.Ping()
-	if err != nil {
-		log.Fatalf("Could not connect to Docker: %s", err)
+	// Define the run options
+	runOptions := &dockertest.RunOptions{
+		Name:       "sothea-db", // Container name
+		Repository: "sothea-db", // Image name
+		Tag:        "latest",    // Image tag
+		PortBindings: map[docker.Port][]docker.PortBinding{
+			"5432/tcp": {{HostIP: "", HostPort: "5432"}},
+		},
 	}
 
-	// pulls an image, creates a container based on it and runs it
-	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
-		Repository: "postgres",
-		Tag:        "11",
-		Env: []string{
-			"POSTGRES_PASSWORD=" + PostgresPassword,
-			"POSTGRES_USER=" + PostgresUser,
-			"POSTGRES_DB=" + PostgresDB,
-			"listen_addresses = '*'",
-		},
-	}, func(config *docker.HostConfig) {
-		// set AutoRemove to true so that stopped container goes away by itself
-		config.AutoRemove = true
-		config.RestartPolicy = docker.RestartPolicy{Name: "no"}
-	})
+	// Build and run the Docker container
+	resource, err := pool.BuildAndRunWithOptions("../../Dockerfile", runOptions)
 	if err != nil {
 		log.Fatalf("Could not start resource: %s", err)
 	}
@@ -158,12 +150,6 @@ func TestMain(m *testing.M) {
 		log.Fatalf("Could not connect to docker: %s", err)
 	}
 
-	// Migrating DB
-	if err := runMigrations("../../sql", db); err != nil {
-		log.Fatalf("Could not migrate db: %s", err)
-	}
-
-	//Run tests
 	code := m.Run()
 
 	// You can't defer this because os.Exit doesn't care for defer
@@ -215,6 +201,7 @@ func TestDB(t *testing.T) {
 			&admin.LastMenstrualPeriod,
 			&admin.DrugAllergies,
 			&admin.SentToID,
+			&admin.Photo,
 		)
 		if err != nil {
 			panic(err)
@@ -230,6 +217,7 @@ func TestDB(t *testing.T) {
 	assert.Nil(t, result[0].LastMenstrualPeriod)
 	assert.NotNil(t, result[0].DrugAllergies)
 	assert.NotNil(t, result[0].SentToID)
+	assert.NotNil(t, result[0].Photo)
 
 	log.Println(result[0])
 }
