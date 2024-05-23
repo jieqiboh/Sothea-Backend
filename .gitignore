@@ -3,6 +3,7 @@
 logfile.txt
 **/.env
 **/.idea
+/data
 
 # Executables
 *.exe
