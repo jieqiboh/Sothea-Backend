@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"encoding/base64"
 	"errors"
 	"github.com/jieqiboh/sothea_backend/entities"
 	_ "github.com/lib/pq"
@@ -30,6 +31,7 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int32
 
 	rows := tx.QueryRowContext(ctx, "SELECT * FROM admin WHERE id = $1;", id)
 	admin := entities.Admin{}
+	var photoBytes []byte
 	err = rows.Scan(
 		&admin.ID,
 		&admin.FamilyGroup,
@@ -45,8 +47,10 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int32
 		&admin.LastMenstrualPeriod,
 		&admin.DrugAllergies,
 		&admin.SentToID,
-		&admin.Photo,
+		&photoBytes,
 	)
+	photoBase64 := base64.StdEncoding.EncodeToString(photoBytes)
+	admin.Photo = &photoBase64
 	if err != nil { // no admin found
 		return nil, entities.ErrPatientNotFound
 	}
