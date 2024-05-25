@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	_patientHttpDelivery "github.com/jieqiboh/sothea_backend/controllers"
 	_patientPostgresRepository "github.com/jieqiboh/sothea_backend/repository/postgres"
@@ -53,6 +54,7 @@ func main() {
 	}()
 
 	router := gin.Default()
+	router.Use(cors.Default())
 	patientRepo := _patientPostgresRepository.NewPostgresPatientRepository(db)
 	patientUseCase := _patientUseCase.NewPatientUsecase(patientRepo, 2*time.Second)
 	_patientHttpDelivery.NewPatientHandler(router, patientUseCase)
