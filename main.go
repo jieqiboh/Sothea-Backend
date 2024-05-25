@@ -54,7 +54,16 @@ func main() {
 	}()
 
 	router := gin.Default()
-	router.Use(cors.Default())
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowHeaders:     []string{"Origin"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		AllowOriginFunc: func(origin string) bool {
+			return origin == "https://github.com"
+		},
+		MaxAge: 12 * time.Hour,
+	}))
 	patientRepo := _patientPostgresRepository.NewPostgresPatientRepository(db)
 	patientUseCase := _patientUseCase.NewPatientUsecase(patientRepo, 2*time.Second)
 	_patientHttpDelivery.NewPatientHandler(router, patientUseCase)
