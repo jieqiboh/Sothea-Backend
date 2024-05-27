@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	_patientHttpDelivery "github.com/jieqiboh/sothea_backend/controllers"
+	_httpDelivery "github.com/jieqiboh/sothea_backend/controllers"
 	_patientPostgresRepository "github.com/jieqiboh/sothea_backend/repository/postgres"
-	_patientUseCase "github.com/jieqiboh/sothea_backend/usecases"
+	_useCase "github.com/jieqiboh/sothea_backend/usecases"
 	"github.com/spf13/viper"
 	"log"
 	"time"
@@ -60,8 +60,14 @@ func main() {
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
+	// Set up login routes
+	loginUseCase := _useCase.NewLoginUseCase(5 * time.Second)
+	_httpDelivery.NewLoginHandler(router, loginUseCase)
+
+	// Set up patient routes
 	patientRepo := _patientPostgresRepository.NewPostgresPatientRepository(db)
-	patientUseCase := _patientUseCase.NewPatientUsecase(patientRepo, 2*time.Second)
-	_patientHttpDelivery.NewPatientHandler(router, patientUseCase)
+	patientUseCase := _useCase.NewPatientUsecase(patientRepo, 2*time.Second)
+	_httpDelivery.NewPatientHandler(router, patientUseCase)
+
 	router.Run("localhost:9090")
 }

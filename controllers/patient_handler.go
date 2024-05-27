@@ -4,16 +4,12 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/jieqiboh/sothea_backend/controllers/middleware"
 	"github.com/jieqiboh/sothea_backend/entities"
 	"net/http"
 	"strconv"
 	"strings"
 )
-
-// ResponseError represent the response error struct
-type ResponseError struct {
-	Message string `json:"message"`
-}
 
 // PatientHandler represent the httphandler for patient
 type PatientHandler struct {
@@ -25,15 +21,18 @@ func NewPatientHandler(e *gin.Engine, us entities.PatientUseCase) {
 	handler := &PatientHandler{
 		AUsecase: us,
 	}
-	e.GET("/ping", func(c *gin.Context) {
-		c.String(200, "pong")
-	})
-	e.GET("/patient/:id", handler.GetPatientByID)
-	e.POST("/patient", handler.InsertPatient)
-	e.DELETE("/patient/:id", handler.DeletePatientByID)
-	e.PATCH("/patient/:id", handler.UpdatePatientByID)
-	e.GET("/get-all-admin", handler.GetAllAdmin)
-	e.GET("/search-patients/:search-name", handler.SearchPatients)
+
+	// Protected routes
+	authorized := e.Group("/")
+	authorized.Use(middleware.AuthRequired())
+	{
+		authorized.GET("/patient/:id", handler.GetPatientByID)
+		authorized.POST("/patient", handler.InsertPatient)
+		authorized.DELETE("/patient/:id", handler.DeletePatientByID)
+		authorized.PATCH("/patient/:id", handler.UpdatePatientByID)
+		authorized.GET("/get-all-admin", handler.GetAllAdmin)
+		authorized.GET("/search-patients/:search-name", handler.SearchPatients)
+	}
 }
 
 func (p *PatientHandler) GetPatientByID(c *gin.Context) {
@@ -41,7 +40,7 @@ func (p *PatientHandler) GetPatientByID(c *gin.Context) {
 
 	// Check if the id is not a number
 	if err != nil {
-		c.JSON(http.StatusNotFound, ResponseError{Message: err.Error()})
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -51,7 +50,7 @@ func (p *PatientHandler) GetPatientByID(c *gin.Context) {
 	// Get the patient by id
 	patient, err := p.AUsecase.GetPatientByID(ctx, id)
 	if err != nil {
-		c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+		c.JSON(getStatusCode(err), gin.H{"error": err.Error()})
 		return
 	}
 
@@ -63,7 +62,7 @@ func (p *PatientHandler) InsertPatient(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&patient); err != nil {
 		for _, fieldErr := range err.(validator.ValidationErrors) {
-			c.JSON(http.StatusBadRequest, ResponseError{Message: fieldError{fieldErr}.String()})
+			c.JSON(http.StatusBadRequest, gin.H{"error": fieldError{fieldErr}.String()})
 			return // exit on first error
 		}
 	}
@@ -71,7 +70,7 @@ func (p *PatientHandler) InsertPatient(c *gin.Context) {
 	ctx := c.Request.Context()
 	id, err := p.AUsecase.InsertPatient(ctx, &patient)
 	if err != nil {
-		c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+		c.JSON(getStatusCode(err), gin.H{"error": err.Error()})
 		return
 	}
 
@@ -81,7 +80,7 @@ func (p *PatientHandler) InsertPatient(c *gin.Context) {
 func (p *PatientHandler) DeletePatientByID(c *gin.Context) {
 	idP, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusNotFound, ResponseError{Message: err.Error()})
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -90,7 +89,7 @@ func (p *PatientHandler) DeletePatientByID(c *gin.Context) {
 
 	id, err = p.AUsecase.DeletePatientByID(ctx, id)
 	if err != nil {
-		c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+		c.JSON(getStatusCode(err), gin.H{"error": err.Error()})
 		return
 	}
 
@@ -109,14 +108,14 @@ func (p *PatientHandler) UpdatePatientByID(c *gin.Context) {
 	var patient entities.Patient
 	if err := c.ShouldBindJSON(&patient); err != nil {
 		for _, fieldErr := range err.(validator.ValidationErrors) {
-			c.JSON(http.StatusBadRequest, ResponseError{Message: fieldError{fieldErr}.String()})
+			c.JSON(http.StatusBadRequest, gin.H{"error": fieldError{fieldErr}.String()})
 			return // exit on first error
 		}
 	}
 
 	id, err = p.AUsecase.UpdatePatientByID(ctx, id, &patient)
 	if err != nil {
-		c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+		c.JSON(getStatusCode(err), gin.H{"error": err.Error()})
 		return
 	}
 
@@ -128,7 +127,7 @@ func (p *PatientHandler) GetAllAdmin(c *gin.Context) {
 
 	adminlist, err := p.AUsecase.GetAllAdmin(ctx)
 	if err != nil {
-		c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+		c.JSON(getStatusCode(err), gin.H{"error": err.Error()})
 		return
 	}
 
@@ -142,7 +141,7 @@ func (p *PatientHandler) SearchPatients(c *gin.Context) {
 
 	foundPatients, err := p.AUsecase.SearchPatients(ctx, patientName)
 	if err != nil {
-		c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+		c.JSON(getStatusCode(err), gin.H{"error": err.Error()})
 		return
 	}
 
