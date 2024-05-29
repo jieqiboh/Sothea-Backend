@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS doctorsconsultation (
     git                BOOLEAN NOT NULL,
     eye                BOOLEAN NOT NULL,
     derm               BOOLEAN NOT NULL,
-    others             BOOLEAN NOT NULL,
+    others             TEXT NOT NULL,
     consultation_notes TEXT,
     diagnosis          TEXT,
     treatment          TEXT,
@@ -171,6 +171,6 @@ INSERT INTO doctorsconsultation (
     consultation_notes, diagnosis, treatment, referral_needed,
     referral_loc, remarks
 ) VALUES
-(TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, FALSE,
+(TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, 'LEUKAEMIA',
 'CHEST PAIN, SHORTNESS OF BREATH, COUGH', 'ACUTE BRONCHITIS',
 'REST, HYDRATION, COUGH SYRUP', FALSE, NULL, 'MONITOR FOR RESOLUTION');
