@@ -61,9 +61,17 @@ func (p *PatientHandler) InsertPatient(c *gin.Context) {
 	var patient entities.Patient
 
 	if err := c.ShouldBindJSON(&patient); err != nil {
-		for _, fieldErr := range err.(validator.ValidationErrors) {
-			c.JSON(http.StatusBadRequest, gin.H{"error": fieldError{fieldErr}.String()})
-			return // exit on first error
+		// Use type assertion to check if err is of type validator.ValidationErrors
+		if validationErrs, ok := err.(validator.ValidationErrors); ok {
+			// Iterate over the validation errors
+			for _, fieldErr := range validationErrs {
+				c.JSON(http.StatusBadRequest, gin.H{"error": fieldErr.Error()})
+				return // exit on first error
+			}
+		} else {
+			// Handle other types of errors (e.g., JSON binding errors)
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
 		}
 	}
 
@@ -107,9 +115,17 @@ func (p *PatientHandler) UpdatePatientByID(c *gin.Context) {
 
 	var patient entities.Patient
 	if err := c.ShouldBindJSON(&patient); err != nil {
-		for _, fieldErr := range err.(validator.ValidationErrors) {
-			c.JSON(http.StatusBadRequest, gin.H{"error": fieldError{fieldErr}.String()})
-			return // exit on first error
+		// Use type assertion to check if err is of type validator.ValidationErrors
+		if validationErrs, ok := err.(validator.ValidationErrors); ok {
+			// Iterate over the validation errors
+			for _, fieldErr := range validationErrs {
+				c.JSON(http.StatusBadRequest, gin.H{"error": fieldErr.Error()})
+				return // exit on first error
+			}
+		} else {
+			// Handle other types of errors (e.g., JSON binding errors)
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
 		}
 	}
 
