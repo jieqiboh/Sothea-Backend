@@ -90,7 +90,7 @@ var doctorsconsultation = entities.DoctorsConsultation{
 	Git:               entities.PtrTo(false),
 	Eye:               entities.PtrTo(true),
 	Derm:              entities.PtrTo(false),
-	Others:            entities.PtrTo(false),
+	Others:            entities.PtrTo("TRICHOMONAS VAGINALIS"),
 	ConsultationNotes: entities.PtrTo("CHEST PAIN, SHORTNESS OF BREATH, COUGH"),
 	Diagnosis:         entities.PtrTo("ACUTE BRONCHITIS"),
 	Treatment:         entities.PtrTo("REST, HYDRATION, COUGH SYRUP"),

@@ -14,7 +14,7 @@ type DoctorsConsultation struct {
 	Git               *bool   `json:"git" binding:"required"`
 	Eye               *bool   `json:"eye" binding:"required"`
 	Derm              *bool   `json:"derm" binding:"required"`
-	Others            *bool   `json:"others" binding:"required"`
+	Others            *string `json:"others" binding:"required"`
 	ConsultationNotes *string `json:"consultationNotes"`
 	Diagnosis         *string `json:"diagnosis"`
 	Treatment         *string `json:"treatment"`
@@ -42,7 +42,7 @@ func (dc DoctorsConsultation) String() string {
 	result += fmt.Sprintf("Git: %t\n", *dc.Git)
 	result += fmt.Sprintf("Eye: %t\n", *dc.Eye)
 	result += fmt.Sprintf("Derm: %t\n", *dc.Derm)
-	result += fmt.Sprintf("Others: %t\n", *dc.Others)
+	result += fmt.Sprintf("Others: %s\n", *dc.Others)
 	result += fmt.Sprintf("ConsultationNotes: %s\n", SafeDeref(dc.ConsultationNotes))
 	result += fmt.Sprintf("Diagnosis: %s\n", SafeDeref(dc.Diagnosis))
 	result += fmt.Sprintf("Treatment: %s\n", SafeDeref(dc.Treatment))
