@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/jieqiboh/sothea_backend/entities"
 	"net/http"
 )
@@ -22,10 +23,18 @@ func NewLoginHandler(e *gin.Engine, us entities.LoginUseCase) {
 func (l *LoginHandler) Login(c *gin.Context) {
 	// username and password are in the json body
 	var u entities.User
-	err := c.BindJSON(&u)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+	if err := c.ShouldBindJSON(&u); err != nil {
+		// Use type assertion to check if err is of type validator.ValidationErrors
+		if validationErrs, ok := err.(validator.ValidationErrors); ok {
+			// Get the first Validation Error
+			fieldErr := validationErrs[0]
+			c.JSON(http.StatusBadRequest, gin.H{"error": fieldErr.Error()})
+			return // exit on first error
+		} else {
+			// Handle other types of errors (e.g., JSON binding errors)
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 	}
 
 	ctx := c.Request.Context()

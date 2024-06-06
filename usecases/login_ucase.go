@@ -19,7 +19,7 @@ func NewLoginUseCase(timeout time.Duration) entities.LoginUseCase {
 	}
 }
 
-func (l loginUsecase) Login(ctx context.Context, user entities.User) (string, error) {
+func (l *loginUsecase) Login(ctx context.Context, user entities.User) (string, error) {
 	ctx, cancel := context.WithTimeout(ctx, l.contextTimeout)
 	defer cancel()
 

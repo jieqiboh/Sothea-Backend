@@ -13,13 +13,13 @@ import (
 
 // PatientHandler represent the httphandler for patient
 type PatientHandler struct {
-	AUsecase entities.PatientUseCase
+	Usecase entities.PatientUseCase
 }
 
 // NewPatientHandler will initialize the patients/ resources endpoint
 func NewPatientHandler(e *gin.Engine, us entities.PatientUseCase) {
 	handler := &PatientHandler{
-		AUsecase: us,
+		Usecase: us,
 	}
 
 	// Protected routes
@@ -48,7 +48,7 @@ func (p *PatientHandler) GetPatientByID(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	// Get the patient by id
-	patient, err := p.AUsecase.GetPatientByID(ctx, id)
+	patient, err := p.Usecase.GetPatientByID(ctx, id)
 	if err != nil {
 		c.JSON(getStatusCode(err), gin.H{"error": err.Error()})
 		return
@@ -63,11 +63,14 @@ func (p *PatientHandler) InsertPatient(c *gin.Context) {
 	if err := c.ShouldBindJSON(&patient); err != nil {
 		// Use type assertion to check if err is of type validator.ValidationErrors
 		if validationErrs, ok := err.(validator.ValidationErrors); ok {
-			// Iterate over the validation errors
-			for _, fieldErr := range validationErrs {
-				c.JSON(http.StatusBadRequest, gin.H{"error": fieldErr.Error()})
-				return // exit on first error
-			}
+			// Get the first Validation Error
+			fieldErr := validationErrs[0]
+			c.JSON(http.StatusBadRequest, gin.H{"error": fieldErr.Error()})
+			return // exit on first error
+		} else if err.Error() == "EOF" {
+			// Handle Empty Request Body Errors
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Request Body is empty!"})
+			return
 		} else {
 			// Handle other types of errors (e.g., JSON binding errors)
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -76,7 +79,7 @@ func (p *PatientHandler) InsertPatient(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
-	id, err := p.AUsecase.InsertPatient(ctx, &patient)
+	id, err := p.Usecase.InsertPatient(ctx, &patient)
 	if err != nil {
 		c.JSON(getStatusCode(err), gin.H{"error": err.Error()})
 		return
@@ -95,7 +98,7 @@ func (p *PatientHandler) DeletePatientByID(c *gin.Context) {
 	id := int32(idP)
 	ctx := c.Request.Context()
 
-	id, err = p.AUsecase.DeletePatientByID(ctx, id)
+	id, err = p.Usecase.DeletePatientByID(ctx, id)
 	if err != nil {
 		c.JSON(getStatusCode(err), gin.H{"error": err.Error()})
 		return
@@ -117,11 +120,14 @@ func (p *PatientHandler) UpdatePatientByID(c *gin.Context) {
 	if err := c.ShouldBindJSON(&patient); err != nil {
 		// Use type assertion to check if err is of type validator.ValidationErrors
 		if validationErrs, ok := err.(validator.ValidationErrors); ok {
-			// Iterate over the validation errors
-			for _, fieldErr := range validationErrs {
-				c.JSON(http.StatusBadRequest, gin.H{"error": fieldErr.Error()})
-				return // exit on first error
-			}
+			// Get the first Validation Error
+			fieldErr := validationErrs[0]
+			c.JSON(http.StatusBadRequest, gin.H{"error": fieldErr.Error()})
+			return // exit on first error
+		} else if err.Error() == "EOF" {
+			// Handle Empty Request Body Errors
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Request Body is empty!"})
+			return
 		} else {
 			// Handle other types of errors (e.g., JSON binding errors)
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -129,7 +135,7 @@ func (p *PatientHandler) UpdatePatientByID(c *gin.Context) {
 		}
 	}
 
-	id, err = p.AUsecase.UpdatePatientByID(ctx, id, &patient)
+	id, err = p.Usecase.UpdatePatientByID(ctx, id, &patient)
 	if err != nil {
 		c.JSON(getStatusCode(err), gin.H{"error": err.Error()})
 		return
@@ -141,7 +147,7 @@ func (p *PatientHandler) UpdatePatientByID(c *gin.Context) {
 func (p *PatientHandler) GetAllAdmin(c *gin.Context) {
 	ctx := c.Request.Context()
 
-	adminlist, err := p.AUsecase.GetAllAdmin(ctx)
+	adminlist, err := p.Usecase.GetAllAdmin(ctx)
 	if err != nil {
 		c.JSON(getStatusCode(err), gin.H{"error": err.Error()})
 		return
@@ -154,8 +160,13 @@ func (p *PatientHandler) SearchPatients(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	patientName := c.Param("search-name")
+	// Check if the search-name parameter is empty
+	if patientName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "search-name parameter cannot be empty"})
+		return
+	}
 
-	foundPatients, err := p.AUsecase.SearchPatients(ctx, patientName)
+	foundPatients, err := p.Usecase.SearchPatients(ctx, patientName)
 	if err != nil {
 		c.JSON(getStatusCode(err), gin.H{"error": err.Error()})
 		return
@@ -175,6 +186,8 @@ func getStatusCode(err error) int {
 		return http.StatusNotFound
 	case entities.ErrMissingAdminCategory:
 		return http.StatusBadRequest
+	case entities.ErrAuthenticationFailed:
+		return http.StatusUnauthorized
 	default:
 		return http.StatusInternalServerError
 	}

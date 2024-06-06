@@ -19,42 +19,42 @@ func NewPatientUsecase(p entities.PatientRepository, timeout time.Duration) enti
 	}
 }
 
-func (p patientUsecase) GetPatientByID(ctx context.Context, id int32) (*entities.Patient, error) {
+func (p *patientUsecase) GetPatientByID(ctx context.Context, id int32) (*entities.Patient, error) {
 	ctx, cancel := context.WithTimeout(ctx, p.contextTimeout)
 	defer cancel()
 
 	return p.patientRepo.GetPatientByID(ctx, id)
 }
 
-func (p patientUsecase) InsertPatient(ctx context.Context, patient *entities.Patient) (int32, error) {
+func (p *patientUsecase) InsertPatient(ctx context.Context, patient *entities.Patient) (int32, error) {
 	ctx, cancel := context.WithTimeout(ctx, p.contextTimeout)
 	defer cancel()
 
 	return p.patientRepo.InsertPatient(ctx, patient)
 }
 
-func (p patientUsecase) DeletePatientByID(ctx context.Context, id int32) (int32, error) {
+func (p *patientUsecase) DeletePatientByID(ctx context.Context, id int32) (int32, error) {
 	ctx, cancel := context.WithTimeout(ctx, p.contextTimeout)
 	defer cancel()
 
 	return p.patientRepo.DeletePatientByID(ctx, id)
 }
 
-func (p patientUsecase) UpdatePatientByID(ctx context.Context, id int32, patient *entities.Patient) (int32, error) {
+func (p *patientUsecase) UpdatePatientByID(ctx context.Context, id int32, patient *entities.Patient) (int32, error) {
 	ctx, cancel := context.WithTimeout(ctx, p.contextTimeout)
 	defer cancel()
 
 	return p.patientRepo.UpdatePatientByID(ctx, id, patient)
 }
 
-func (p patientUsecase) GetAllAdmin(ctx context.Context) ([]entities.PartAdmin, error) {
+func (p *patientUsecase) GetAllAdmin(ctx context.Context) ([]entities.PartAdmin, error) {
 	ctx, cancel := context.WithTimeout(ctx, p.contextTimeout)
 	defer cancel()
 
 	return p.patientRepo.GetAllAdmin(ctx)
 }
 
-func (p patientUsecase) SearchPatients(ctx context.Context, search string) ([]entities.PartAdmin, error) {
+func (p *patientUsecase) SearchPatients(ctx context.Context, search string) ([]entities.PartAdmin, error) {
 	ctx, cancel := context.WithTimeout(ctx, p.contextTimeout)
 	defer cancel()
 
