@@ -19,7 +19,7 @@ func NewLoginHandler(e *gin.Engine, us entities.LoginUseCase) {
 		Usecase: us,
 	}
 	e.POST("/login", handler.Login)
-	e.GET("/login/isValidToken", middleware.AuthRequired(), handler.IsValidToken)
+	e.GET("/login/is-valid-token", middleware.AuthRequired(), handler.IsValidToken)
 }
 
 func (l *LoginHandler) Login(c *gin.Context) {
