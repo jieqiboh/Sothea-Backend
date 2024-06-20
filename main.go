@@ -27,6 +27,7 @@ func main() {
 	dbName := viper.GetString(`database.name`)
 	dbPassword := viper.GetString(`database.password`)
 	dbSslMode := viper.GetString(`database.sslmode`)
+	secretKey := []byte("secret-key")
 
 	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", dbHost, dbPort, dbUser, dbPassword, dbName, dbSslMode)
 
@@ -57,17 +58,18 @@ func main() {
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:5173"},
 		AllowHeaders:     []string{"Origin", "Authorization", "Content-Type"},
+		AllowMethods:     []string{"GET", "POST", "DELETE", "PATCH"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
 	// Set up login routes
-	loginUseCase := _useCase.NewLoginUseCase(5 * time.Second)
-	_httpDelivery.NewLoginHandler(router, loginUseCase)
+	loginUseCase := _useCase.NewLoginUseCase(5*time.Second, secretKey)
+	_httpDelivery.NewLoginHandler(router, loginUseCase, secretKey)
 
 	// Set up patient routes
 	patientRepo := _patientPostgresRepository.NewPostgresPatientRepository(db)
 	patientUseCase := _useCase.NewPatientUsecase(patientRepo, 2*time.Second)
-	_httpDelivery.NewPatientHandler(router, patientUseCase)
+	_httpDelivery.NewPatientHandler(router, patientUseCase, secretKey)
 
 	router.Run("localhost:9090")
 }

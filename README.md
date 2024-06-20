@@ -8,10 +8,11 @@ TO ADD
 
 Before you begin, ensure you have the following installed:
 
+- [Git](https://git-scm.com/) - A distributed version control system.
 - [Golang](https://golang.org/) - The Go programming language.
 - [PostgreSQL](https://www.postgresql.org/) - An open-source relational database system.
 - [Docker](https://www.docker.com/) - A platform for building, shipping, and running applications in containers.
-- [pgAdmin](https://www.pgadmin.org/) - A comprehensive database management tool for PostgreSQL. Good to have for database management.
+- [pgAdmin](https://www.pgadmin.org/) - (OPTIONAL) A comprehensive database management tool for PostgreSQL. Good to have for database management.
 
 ### Installation and Setup
 1. Clone the repository to your local machine: `git clone https://github.com/Project-Sothea/Sothea-Backend.git`

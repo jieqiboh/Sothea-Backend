@@ -13,6 +13,10 @@ import (
 	"testing"
 )
 
+var (
+	secretKey = []byte("secret-key")
+)
+
 // Success - 200 OK
 // Bad Request - 400 Bad Request
 // Unauthorized - 401 Unauthorized
@@ -31,7 +35,7 @@ func TestLogin_Success(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/login", strings.NewReader(`{"username":"admin","password":"admin"}`))
 
-	NewLoginHandler(router, &mockUsecase)
+	NewLoginHandler(router, &mockUsecase, secretKey)
 
 	router.ServeHTTP(w, req)
 
@@ -63,7 +67,7 @@ func TestLogin_Failure_ValidationError(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/login", strings.NewReader(`{"username":"admin"}`)) // missing password field
 
-	NewLoginHandler(router, &mockUsecase)
+	NewLoginHandler(router, &mockUsecase, secretKey)
 
 	router.ServeHTTP(w, req)
 
@@ -85,7 +89,7 @@ func TestLogin_Failure_JSONError(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/login", strings.NewReader(`{"username": 5, "password": "test"}`)) // Wrong data type results in JSON marshalling error
 
-	NewLoginHandler(router, &mockUsecase)
+	NewLoginHandler(router, &mockUsecase, secretKey)
 
 	router.ServeHTTP(w, req)
 
@@ -106,7 +110,7 @@ func TestLogin_Failure_Unauthorized(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/login", strings.NewReader(`{"username": "admin", "password": "wrongpassword"}`)) // Wrong password
 
-	NewLoginHandler(router, &mockUsecase)
+	NewLoginHandler(router, &mockUsecase, secretKey)
 
 	router.ServeHTTP(w, req)
 
