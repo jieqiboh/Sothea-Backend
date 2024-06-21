@@ -9,11 +9,7 @@ import (
 	"time"
 )
 
-var (
-	secretKey = []byte("secret-key") // Todo: Store and retrieve from config file
-)
-
-func CreateToken(username string) (string, error) {
+func CreateToken(username string, secretKey []byte) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
 			"username": username,
@@ -26,7 +22,7 @@ func CreateToken(username string) (string, error) {
 	return tokenString, nil
 }
 
-func VerifyToken(tokenString string) error {
+func VerifyToken(tokenString string, secretKey []byte) error {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return secretKey, nil
 	})
@@ -40,7 +36,7 @@ func VerifyToken(tokenString string) error {
 }
 
 // AuthRequired is a middleware function that checks for the JWT token in the Authorization header
-func AuthRequired() gin.HandlerFunc {
+func AuthRequired(secretKey []byte) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Get the Authorization header
 		authHeader := c.GetHeader("Authorization")
@@ -62,7 +58,7 @@ func AuthRequired() gin.HandlerFunc {
 		tokenString := bearerToken[1]
 
 		// Validate the token
-		err := VerifyToken(tokenString)
+		err := VerifyToken(tokenString, secretKey)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
 			c.Abort()

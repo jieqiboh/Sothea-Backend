@@ -13,9 +13,10 @@ type loginUsecase struct {
 }
 
 // NewLoginUseCase
-func NewLoginUseCase(timeout time.Duration) entities.LoginUseCase {
+func NewLoginUseCase(timeout time.Duration, secretKey []byte) entities.LoginUseCase {
 	return &loginUsecase{
 		contextTimeout: timeout,
+		secretKey:      secretKey,
 	}
 }
 
@@ -24,7 +25,7 @@ func (l *loginUsecase) Login(ctx context.Context, user entities.User) (string, e
 	defer cancel()
 
 	if user.Username == "admin" && user.Password == "admin" { // Todo: replace this with a database query
-		token, err := middleware.CreateToken(user.Username)
+		token, err := middleware.CreateToken(user.Username, l.secretKey)
 		return token, err
 	} else {
 		return "", entities.ErrLoginFailed
