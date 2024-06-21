@@ -10,16 +10,17 @@ import (
 
 // LoginHandler represent the httphandler for patient
 type LoginHandler struct {
-	Usecase entities.LoginUseCase
+	Usecase   entities.LoginUseCase
+	secretKey []byte
 }
 
 // NewLoginHandler will initialize the resources endpoint
-func NewLoginHandler(e *gin.Engine, us entities.LoginUseCase) {
+func NewLoginHandler(e *gin.Engine, us entities.LoginUseCase, secretKey []byte) {
 	handler := &LoginHandler{
 		Usecase: us,
 	}
 	e.POST("/login", handler.Login)
-	e.GET("/login/is-valid-token", middleware.AuthRequired(), handler.IsValidToken)
+	e.GET("/login/is-valid-token", middleware.AuthRequired(secretKey), handler.IsValidToken)
 }
 
 func (l *LoginHandler) Login(c *gin.Context) {

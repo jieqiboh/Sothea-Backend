@@ -17,14 +17,14 @@ type PatientHandler struct {
 }
 
 // NewPatientHandler will initialize the patients/ resources endpoint
-func NewPatientHandler(e *gin.Engine, us entities.PatientUseCase) {
+func NewPatientHandler(e *gin.Engine, us entities.PatientUseCase, secretKey []byte) {
 	handler := &PatientHandler{
 		Usecase: us,
 	}
 
 	// Protected routes
 	authorized := e.Group("/")
-	authorized.Use(middleware.AuthRequired())
+	authorized.Use(middleware.AuthRequired(secretKey))
 	{
 		authorized.GET("/patient/:id", handler.GetPatientByID)
 		authorized.POST("/patient", handler.InsertPatient)

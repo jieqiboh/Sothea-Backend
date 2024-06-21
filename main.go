@@ -13,20 +13,31 @@ import (
 	"time"
 )
 
+const (
+	isProduction = false // Global variable, change to true when in production mode!
+)
+
 func main() {
 	// Initialize global variables
-	viper.SetConfigFile(`config.json`)
+	if isProduction {
+		viper.SetConfigFile(`prod.json`)
+	} else {
+		viper.SetConfigFile(`config.json`)
+	}
+
 	err := viper.ReadInConfig()
 	if err != nil {
 		panic(err)
 	}
 
+	address := viper.GetString(`server.address`)
 	dbHost := viper.GetString(`database.host`)
 	dbPort := viper.GetString(`database.port`)
 	dbUser := viper.GetString(`database.user`)
 	dbName := viper.GetString(`database.name`)
 	dbPassword := viper.GetString(`database.password`)
 	dbSslMode := viper.GetString(`database.sslmode`)
+	secretKey := []byte(viper.GetString(`jwt.secretkey`))
 
 	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", dbHost, dbPort, dbUser, dbPassword, dbName, dbSslMode)
 
@@ -55,19 +66,20 @@ func main() {
 
 	router := gin.Default()
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowOrigins:     []string{"http://localhost:5173", "*"},
 		AllowHeaders:     []string{"Origin", "Authorization", "Content-Type"},
+		AllowMethods:     []string{"GET", "POST", "DELETE", "PATCH"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
 	// Set up login routes
-	loginUseCase := _useCase.NewLoginUseCase(5 * time.Second)
-	_httpDelivery.NewLoginHandler(router, loginUseCase)
+	loginUseCase := _useCase.NewLoginUseCase(5*time.Second, secretKey)
+	_httpDelivery.NewLoginHandler(router, loginUseCase, secretKey)
 
 	// Set up patient routes
 	patientRepo := _patientPostgresRepository.NewPostgresPatientRepository(db)
 	patientUseCase := _useCase.NewPatientUsecase(patientRepo, 2*time.Second)
-	_httpDelivery.NewPatientHandler(router, patientUseCase)
+	_httpDelivery.NewPatientHandler(router, patientUseCase, secretKey)
 
-	router.Run("localhost:9090")
+	router.Run(address)
 }
