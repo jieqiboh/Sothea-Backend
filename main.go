@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"flag"
 	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -13,16 +14,23 @@ import (
 	"time"
 )
 
-const (
-	isProduction = false // Global variable, change to true when in production mode!
-)
-
 func main() {
-	// Initialize global variables
-	if isProduction {
-		viper.SetConfigFile(`prod.json`)
-	} else {
+	// Define a flag to determine the mode
+	mode := flag.String("mode", "dev", "Mode of the application: dev or prod")
+
+	// Parse the flags
+	flag.Parse()
+
+	// Determine the mode and print a message
+	switch *mode {
+	case "dev":
+		fmt.Println("Running in development mode")
 		viper.SetConfigFile(`config.json`)
+	case "prod":
+		fmt.Println("Running in production mode")
+		viper.SetConfigFile(`prod.json`)
+	default:
+		fmt.Println("Unknown mode. Please use 'dev' or 'prod'.")
 	}
 
 	err := viper.ReadInConfig()
