@@ -2,7 +2,8 @@
 
 ## Overview
 
-TO ADD
+This is the backend for the patient management system for Project Sothea, and is to be set up in conjunction with the frontend.  
+The backend is written in Go, and uses a PostgreSQL database to store patient data. The backend provides a RESTful API for the frontend to interact with, and is responsible for handling requests to create, read, update, and delete patient data.
 
 ## Prerequisites
 
@@ -21,9 +22,9 @@ Before you begin, ensure you have the following installed:
 
 3. Set up the required docker containers for the database (see below).
 
-4. Run the Go binary with `./bin/sothea-backend`
+4. Run the Go binary with `./bin/sothea-backend --mode=dev`, starting it up in development mode.
  
-5. The server should now be running on `localhost:9090`
+5. The server should now be accessible on `http://localhost:9090`
 
 6. You can now make requests to the server using a tool like Postman or curl.
  
@@ -39,6 +40,12 @@ To facilitate easy setup of the patients database with preloaded data, we've opt
 
 4. To stop the container, run `docker stop sothea-db`
 
-#### Common Issues
+### Modes of Operation
+When running the Go binary, you can specify the mode of operation using the `--mode` flag. The available modes are:  
+- `dev` - Development mode, using config.json for configuration. This mode will run the server on port 9090.
+- `prod` - Production mode, using prod.json for configuration. This mode will run the server on "192.168.0.100:9090", a static IP address that we use on our production server on the deployed network.   
+Do ensure that the frontend is appropriately configured to make requests to the correct server address.
+
+### Common Issues
 - Database role not found / Authentication Failed
 This usually happens if there are already pre-existing Postgres instances running on port 5432. To resolve this, stop check the processes running on port 5432, and stop the existing Postgres processes.
