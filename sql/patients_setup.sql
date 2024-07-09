@@ -119,13 +119,13 @@ CREATE TABLE IF NOT EXISTS doctorsconsultation (
  */
 
 INSERT INTO admin (family_group, reg_date, name, khmer_name, dob, age, gender, village, contact_no, pregnant,
-                   last_menstrual_period, drug_allergies, sent_to_id, photo) VALUES
-('S001', '2024-01-10', 'John Doe', '១២៣៤ ៥៦៧៨៩០ឥឲ', '1994-01-10', 30, 'M', 'SO', '12345678', FALSE, NULL, 'panadol', FALSE, pg_read_binary_file('/docker-entrypoint-initdb.d/patient_photo.png')),
-('S002A', '2024-01-10', 'Jane Smith', '១២៣៤ ៥៦៧៨៩០ឥឲ', '1999-01-10', 25, 'F', 'SO', '12345679', FALSE, NULL, NULL, FALSE, pg_read_binary_file('/docker-entrypoint-initdb.d/patient_photo.png')),
-('S002B', '2024-01-10', 'Bob Smith', '១២៣៤ ៥៦៧៨៩០ឥឲ', '1999-01-10', 25, 'M', 'R1', '99999999', FALSE, NULL, 'aspirin', FALSE, pg_read_binary_file('/docker-entrypoint-initdb.d/patient_photo.png')),
-('S003', '2024-01-10', 'Bob Johnson', '១២៣៤ ៥៦៧៨៩០ឥឲ', '1989-01-10', 35, 'M', 'R1', '11111111', FALSE, NULL, NULL, FALSE, pg_read_binary_file('/docker-entrypoint-initdb.d/patient_photo.png')),
-('S004', '2024-01-10', 'Alice Brown', '១២៣៤ ៥៦៧៨៩០ឥឲ', '1996-01-10', 28, 'F', 'R1', '17283948', FALSE, NULL, NULL, FALSE, pg_read_binary_file('/docker-entrypoint-initdb.d/patient_photo.png')),
-('S005A', '2024-01-10', 'Charlie Davis', '១២៣៤ ៥៦៧៨៩០ឥឲ', '1982-01-10', 40, 'M', 'R1', '09876543', FALSE, NULL, NULL, FALSE, pg_read_binary_file('/docker-entrypoint-initdb.d/patient_photo.png'));
+                   last_menstrual_period, drug_allergies, sent_to_id) VALUES
+('S001', '2024-01-10', 'John Doe', '១២៣៤ ៥៦៧៨៩០ឥឲ', '1994-01-10', 30, 'M', 'SO', '12345678', FALSE, NULL, 'panadol', FALSE),
+('S002A', '2024-01-10', 'Jane Smith', '១២៣៤ ៥៦៧៨៩០ឥឲ', '1999-01-10', 25, 'F', 'SO', '12345679', FALSE, NULL, NULL, FALSE),
+('S002B', '2024-01-10', 'Bob Smith', '១២៣៤ ៥៦៧៨៩០ឥឲ', '1999-01-10', 25, 'M', 'R1', '99999999', FALSE, NULL, 'aspirin', FALSE),
+('S003', '2024-01-10', 'Bob Johnson', '១២៣៤ ៥៦៧៨៩០ឥឲ', '1989-01-10', 35, 'M', 'R1', '11111111', FALSE, NULL, NULL, FALSE),
+('S004', '2024-01-10', 'Alice Brown', '១២៣៤ ៥៦៧៨៩០ឥឲ', '1996-01-10', 28, 'F', 'R1', '17283948', FALSE, NULL, NULL, FALSE),
+('S005A', '2024-01-10', 'Charlie Davis', '១២៣៤ ៥៦៧៨៩០ឥឲ', '1982-01-10', 40, 'M', 'R1', '09876543', FALSE, NULL, NULL, FALSE);
 
 INSERT INTO pastmedicalhistory(tuberculosis, diabetes, hypertension, hyperlipidemia, chronic_joint_pains,
                                 chronic_muscle_aches, sexually_transmitted_disease, specified_stds, others) VALUES
