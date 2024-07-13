@@ -61,10 +61,6 @@ func main() {
 		log.Fatal("Database connection failed:", err)
 	}
 
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	defer func() {
 		err := db.Close()
 		if err != nil {

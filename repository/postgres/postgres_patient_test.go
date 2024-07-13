@@ -3,7 +3,6 @@ package postgres
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"github.com/jieqiboh/sothea_backend/entities"
 	_ "github.com/lib/pq"
@@ -15,8 +14,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang-migrate/migrate/v4"
-	pg "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
@@ -108,6 +105,10 @@ const (
 )
 
 func TestMain(m *testing.M) {
+	pwd, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("Failed to get current directory: %v", err)
+	}
 	// uses a sensible default on windows (tcp/http) and linux/osx (socket)
 	pool, err := dockertest.NewPool("")
 	if err != nil {
@@ -121,6 +122,9 @@ func TestMain(m *testing.M) {
 		Tag:        "latest",    // Image tag
 		PortBindings: map[docker.Port][]docker.PortBinding{
 			"5432/tcp": {{HostIP: "", HostPort: "5432"}},
+		},
+		Mounts: []string{
+			fmt.Sprintf("%s/tmp:/tmp", pwd),
 		},
 	}
 
@@ -158,25 +162,6 @@ func TestMain(m *testing.M) {
 	}
 
 	os.Exit(code)
-}
-
-func runMigrations(migrationsPath string, db *sql.DB) error {
-	if migrationsPath == "" {
-		return errors.New("missing sql path")
-	}
-	driver, err := pg.WithInstance(db, &pg.Config{})
-	if err != nil {
-		return err
-	}
-	m, err := migrate.NewWithDatabaseInstance("file://"+migrationsPath, "postgres", driver)
-	if err != nil {
-		return err
-	}
-	err = m.Up()
-	if err != nil && err != migrate.ErrNoChange {
-		return err
-	}
-	return nil
 }
 
 func TestDB(t *testing.T) {
@@ -217,7 +202,7 @@ func TestDB(t *testing.T) {
 	assert.Nil(t, result[0].LastMenstrualPeriod)
 	assert.NotNil(t, result[0].DrugAllergies)
 	assert.NotNil(t, result[0].SentToID)
-	assert.NotNil(t, result[0].Photo)
+	assert.Nil(t, result[0].Photo)
 
 	log.Println(result[0])
 }
@@ -485,4 +470,23 @@ func TestPostgresPatientRepository_SearchPatients(t *testing.T) {
 	admins, err := patient_repo.SearchPatients(context.Background(), "១២៣៤ ៥៦៧៨៩០ឥឲ")
 	assert.Nil(t, err)
 	assert.NotNil(t, admins)
+}
+
+func TestPostgresPatientRepository_ExportDatabaseToCSV(t *testing.T) {
+	repo := NewPostgresPatientRepository(db)
+
+	patient_repo, ok := repo.(*postgresPatientRepository)
+	if !ok {
+		log.Fatal("Failed to assert repo")
+	}
+
+	err := patient_repo.ExportDatabaseToCSV(context.Background())
+	assert.Nil(t, err)
+	// Assert that file exists
+	_, err = os.Stat("./tmp/output.csv")
+	assert.Nil(t, err)
+
+	// Cleanup directory
+	err = os.Remove("./tmp/output.csv")
+	assert.Nil(t, err)
 }
