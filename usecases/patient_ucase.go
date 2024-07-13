@@ -60,3 +60,10 @@ func (p *patientUsecase) SearchPatients(ctx context.Context, search string) ([]e
 
 	return p.patientRepo.SearchPatients(ctx, search)
 }
+
+func (p *patientUsecase) ExportDatabaseToCSV(ctx context.Context) error {
+	ctx, cancel := context.WithTimeout(ctx, p.contextTimeout)
+	defer cancel()
+
+	return p.patientRepo.ExportDatabaseToCSV(ctx)
+}

@@ -578,3 +578,103 @@ func (p *postgresPatientRepository) SearchPatients(ctx context.Context, search s
 
 	return result, nil
 }
+
+func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context) error {
+	query := `COPY (
+    SELECT
+        a.id,
+        a.family_group,
+        a.reg_date,
+        a.name,
+        a.khmer_name,
+        a.dob,
+        a.age,
+        a.gender,
+        a.village,
+        a.contact_no,
+        a.pregnant,
+        a.last_menstrual_period,
+        a.drug_allergies,
+        a.sent_to_id,
+        -- Past Medical History
+        p.tuberculosis,
+        p.diabetes,
+        p.hypertension,
+        p.hyperlipidemia,
+        p.chronic_joint_pains,
+        p.chronic_muscle_aches,
+        p.sexually_transmitted_disease,
+        p.specified_stds,
+        p.others AS pmh_others,
+        -- Social History
+        s.past_smoking_history,
+        s.no_of_years,
+        s.current_smoking_history,
+        s.cigarettes_per_day,
+        s.alcohol_history,
+        s.how_regular,
+        -- Vital Statistics
+        v.temperature,
+        v.spo2,
+        v.systolic_bp1,
+        v.diastolic_bp1,
+        v.systolic_bp2,
+        v.diastolic_bp2,
+        v.avg_systolic_bp,
+        v.avg_diastolic_bp,
+        v.hr1,
+        v.hr2,
+        v.avg_hr,
+        v.rand_blood_glucose_mmolL,
+        v.rand_blood_glucose_mmolLp,
+        -- Height and Weight
+        h.height,
+        h.weight,
+        h.bmi,
+        h.bmi_analysis,
+        h.paeds_height,
+        h.paeds_weight,
+        -- Visual Acuity
+        va.l_eye_vision,
+        va.r_eye_vision,
+        va.additional_intervention,
+        -- Doctors Consultation
+        d.healthy,
+        d.msk,
+        d.cvs,
+        d.respi,
+        d.gu,
+        d.git,
+        d.eye,
+        d.derm,
+        d.others AS dc_others,
+        d.consultation_notes,
+        d.diagnosis,
+        d.treatment,
+        d.referral_needed,
+        d.referral_loc,
+        d.remarks
+    FROM
+        admin a
+    LEFT JOIN
+        pastmedicalhistory p ON a.id = p.id
+    LEFT JOIN
+        socialhistory s ON a.id = s.id
+    LEFT JOIN
+        vitalstatistics v ON a.id = v.id
+    LEFT JOIN
+        heightandweight h ON a.id = h.id
+    LEFT JOIN
+        visualacuity va ON a.id = va.id
+    LEFT JOIN
+        doctorsconsultation d ON a.id = d.id
+	) TO '/tmp/output.csv' WITH CSV HEADER;
+	`
+	// Execute the query
+	_, err := p.Conn.ExecContext(ctx, query)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

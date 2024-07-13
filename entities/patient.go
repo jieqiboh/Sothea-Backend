@@ -22,6 +22,7 @@ type PatientUseCase interface {
 	InsertPatient(ctx context.Context, patient *Patient) (int32, error) // Creates a new patient and inserts in database
 	GetAllAdmin(ctx context.Context) ([]PartAdmin, error)
 	SearchPatients(ctx context.Context, search string) ([]PartAdmin, error)
+	ExportDatabaseToCSV(ctx context.Context) error
 }
 
 type PatientRepository interface {
@@ -31,4 +32,5 @@ type PatientRepository interface {
 	InsertPatient(ctx context.Context, patient *Patient) (int32, error) // Creates a new patient and inserts in database
 	GetAllAdmin(ctx context.Context) ([]PartAdmin, error)
 	SearchPatients(ctx context.Context, search string) ([]PartAdmin, error)
+	ExportDatabaseToCSV(ctx context.Context) error
 }

@@ -36,7 +36,7 @@ To facilitate easy setup of the patients database with preloaded data, we've opt
 
 2. Build the Docker image for the Postgres database: `docker build -t sothea-db .`
 
-3. Run the Postgres database container with `docker run --rm --name sothea-db -d -p 5432:5432 sothea-db`
+3. Run the Postgres database container with `docker run --rm --name sothea-db -d -p 5432:5432 -v $(pwd)/tmp:/tmp sothea-db`
 
 4. To stop the container, run `docker stop sothea-db`
 

@@ -6,6 +6,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/jieqiboh/sothea_backend/controllers/middleware"
 	"github.com/jieqiboh/sothea_backend/entities"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -32,6 +33,7 @@ func NewPatientHandler(e *gin.Engine, us entities.PatientUseCase, secretKey []by
 		authorized.PATCH("/patient/:id", handler.UpdatePatientByID)
 		authorized.GET("/get-all-admin", handler.GetAllAdmin)
 		authorized.GET("/search-patients/:search-name", handler.SearchPatients)
+		authorized.GET("/export-db", handler.ExportDatabaseToCSV)
 	}
 }
 
@@ -173,6 +175,24 @@ func (p *PatientHandler) SearchPatients(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, foundPatients)
+}
+
+func (p *PatientHandler) ExportDatabaseToCSV(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	filePath := "./tmp/output.csv"
+	err := p.Usecase.ExportDatabaseToCSV(ctx)
+	if err != nil {
+		log.Printf("Failed to export data to CSV: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to export data"})
+		return
+	}
+
+	// Set the content disposition header to force download
+	c.Writer.Header().Set("Content-Disposition", "attachment")
+
+	// Write the contents of the CSV file to the response
+	c.FileAttachment(filePath, "output.csv")
 }
 
 func getStatusCode(err error) int {
