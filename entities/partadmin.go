@@ -7,6 +7,7 @@ import (
 
 type PartAdmin struct {
 	ID        int32      `json:"id" binding:"-"`
+	QueueNo   *string    `json:"queueNo" binding:"required"`
 	Name      *string    `json:"name" binding:"required"`
 	KhmerName *string    `json:"khmerName" binding:"required"`
 	Dob       *time.Time `json:"dob" binding:"required"`
@@ -23,6 +24,7 @@ func (PartAdmin) TableName() string {
 func (pa PartAdmin) String() string {
 	result := fmt.Sprintf("\nADMIN\n")
 	result += fmt.Sprintf("ID: %d\n", pa.ID)
+	result += fmt.Sprintf("QueueNo: %s\n", *pa.QueueNo)
 	result += fmt.Sprintf("Name: %s\n", *pa.Name)
 	result += fmt.Sprintf("KhmerName: %s\n", *pa.KhmerName)
 	result += fmt.Sprintf("Dob: %s\n", pa.Dob.Format("2006-01-02"))

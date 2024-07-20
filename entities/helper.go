@@ -1,5 +1,7 @@
 package entities
 
+import "time"
+
 // PtrTo is a generic method for creating a pointer to a primitive type, used when manually creating a models object
 func PtrTo[T any](v T) *T {
 	return &v
@@ -11,6 +13,14 @@ func SafeDeref[T any](p *T) T {
 	if p == nil {
 		var v T
 		return v
+	}
+	return *p
+}
+
+// SafeDerefTime safely dereferences a *time.Time, returning a zero time if nil
+func SafeDerefTime(p *time.Time) time.Time {
+	if p == nil {
+		return time.Time{}
 	}
 	return *p
 }

@@ -21,6 +21,7 @@ import (
 var admin = entities.Admin{
 	FamilyGroup:   entities.PtrTo("S001"),
 	RegDate:       entities.PtrTo(time.Date(2024, time.January, 10, 0, 0, 0, 0, time.UTC)),
+	QueueNo:       entities.PtrTo("1A"),
 	Name:          entities.PtrTo("John Doe"),
 	KhmerName:     entities.PtrTo("១២៣៤ ៥៦៧៨៩០ឥឲ"),
 	Dob:           entities.PtrTo(time.Date(1994, time.January, 10, 0, 0, 0, 0, time.UTC)),
@@ -169,6 +170,7 @@ func TestDB(t *testing.T) {
 			&admin.ID,
 			&admin.FamilyGroup,
 			&admin.RegDate,
+			&admin.QueueNo,
 			&admin.Name,
 			&admin.KhmerName,
 			&admin.Dob,
@@ -189,6 +191,7 @@ func TestDB(t *testing.T) {
 	}
 
 	assert.NotNil(t, *result[0].Dob)
+	assert.NotNil(t, *result[0].QueueNo)
 	assert.NotNil(t, result[0].Gender)
 	assert.NotNil(t, result[0].Village)
 	assert.NotNil(t, result[0].ContactNo)
@@ -404,6 +407,7 @@ func TestFull(t *testing.T) {
 	updatedAdmin := entities.Admin{
 		FamilyGroup:         entities.PtrTo("S001"),
 		RegDate:             entities.PtrTo(time.Now()),
+		QueueNo:             entities.PtrTo("3C"),
 		Name:                entities.PtrTo("Updated Name Here"),
 		KhmerName:           entities.PtrTo("ចវបនមឦ។៊"),
 		Dob:                 entities.PtrTo(time.Date(1994, time.January, 10, 0, 0, 0, 0, time.UTC)),

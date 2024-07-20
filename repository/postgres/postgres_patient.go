@@ -40,6 +40,7 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int32
 		&admin.ID,
 		&admin.FamilyGroup,
 		&admin.RegDate,
+		&admin.QueueNo,
 		&admin.Name,
 		&admin.KhmerName,
 		&admin.Dob,
@@ -217,10 +218,10 @@ func (p *postgresPatientRepository) InsertPatient(ctx context.Context, patient *
 	if admin == nil { // no admin field
 		return -1, entities.ErrMissingAdminCategory
 	}
-	rows := tx.QueryRowContext(ctx, `INSERT INTO admin (family_group, reg_date, name, khmer_name, dob, age, gender, village, 
+	rows := tx.QueryRowContext(ctx, `INSERT INTO admin (family_group, reg_date, queue_no, name, khmer_name, dob, age, gender, village, 
 	contact_no, pregnant, last_menstrual_period, drug_allergies, sent_to_id, photo) 
-	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id`,
-		admin.FamilyGroup, admin.RegDate, admin.Name, admin.KhmerName, admin.Dob, admin.Age, admin.Gender, admin.Village, admin.ContactNo,
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING id`,
+		admin.FamilyGroup, admin.RegDate, admin.QueueNo, admin.Name, admin.KhmerName, admin.Dob, admin.Age, admin.Gender, admin.Village, admin.ContactNo,
 		admin.Pregnant, admin.LastMenstrualPeriod, admin.DrugAllergies, admin.SentToID, admin.Photo)
 	err = rows.Scan(&patientid)
 	if err != nil { // error inserting admin
@@ -370,6 +371,7 @@ func (p *postgresPatientRepository) UpdatePatientByID(ctx context.Context, id in
 		&prevAdmin.ID,
 		&prevAdmin.FamilyGroup,
 		&prevAdmin.RegDate,
+		&prevAdmin.QueueNo,
 		&prevAdmin.Name,
 		&prevAdmin.KhmerName,
 		&prevAdmin.Dob,
@@ -388,9 +390,9 @@ func (p *postgresPatientRepository) UpdatePatientByID(ctx context.Context, id in
 		return -1, entities.ErrPatientNotFound
 	}
 	if a != nil { // Update admin
-		_, err = tx.ExecContext(ctx, `UPDATE admin SET family_group = $1, reg_date = $2, name = $3, khmer_name = $4, dob = $5, age = $6, 
-		gender = $7, village = $8, contact_no = $9, pregnant = $10, last_menstrual_period = $11, drug_allergies = $12,
-		sent_to_id = $13, photo = $14 WHERE id = $15`, a.FamilyGroup, a.RegDate, a.Name, a.KhmerName, a.Dob, a.Age, a.Gender, a.Village, a.ContactNo,
+		_, err = tx.ExecContext(ctx, `UPDATE admin SET family_group = $1, reg_date = $2, queue_no = $3, name = $4, khmer_name = $5, dob = $6, age = $7, 
+		gender = $8, village = $9, contact_no = $10, pregnant = $11, last_menstrual_period = $12, drug_allergies = $13,
+		sent_to_id = $14, photo = $15 WHERE id = $16`, a.FamilyGroup, a.RegDate, a.QueueNo, a.Name, a.KhmerName, a.Dob, a.Age, a.Gender, a.Village, a.ContactNo,
 			a.Pregnant, a.LastMenstrualPeriod, a.DrugAllergies, a.SentToID, a.Photo, id)
 		if err != nil {
 			return -1, err
@@ -535,7 +537,7 @@ func (p *postgresPatientRepository) UpdatePatientByID(ctx context.Context, id in
 func (p *postgresPatientRepository) GetAllAdmin(ctx context.Context) ([]entities.PartAdmin, error) {
 	var rows *sql.Rows
 	result := make([]entities.PartAdmin, 0)
-	query := "SELECT id, name, khmer_name, dob, gender, contact_no FROM ADMIN"
+	query := "SELECT id, queue_no, name, khmer_name, dob, gender, contact_no FROM ADMIN"
 	rows, err := p.Conn.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
@@ -545,7 +547,7 @@ func (p *postgresPatientRepository) GetAllAdmin(ctx context.Context) ([]entities
 
 	for rows.Next() {
 		partadmin := entities.PartAdmin{}
-		err = rows.Scan(&partadmin.ID, &partadmin.Name, &partadmin.KhmerName, &partadmin.Dob, &partadmin.Gender, &partadmin.ContactNo)
+		err = rows.Scan(&partadmin.ID, &partadmin.QueueNo, &partadmin.Name, &partadmin.KhmerName, &partadmin.Dob, &partadmin.Gender, &partadmin.ContactNo)
 
 		if err != nil {
 			return nil, err
@@ -588,6 +590,7 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context) err
         a.id,
         a.family_group,
         a.reg_date,
+        a.queue_no,
         a.name,
         a.khmer_name,
         a.dob,

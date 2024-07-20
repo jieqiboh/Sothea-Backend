@@ -9,10 +9,11 @@ type Admin struct {
 	ID                  int32      `json:"id" binding:"-"`
 	FamilyGroup         *string    `json:"familyGroup" binding:"required"`
 	RegDate             *time.Time `json:"regDate" binding:"required"`
+	QueueNo             *string    `json:"queueNo" binding:"required"`
 	Name                *string    `json:"name" binding:"required"`
 	KhmerName           *string    `json:"khmerName" binding:"required"`
-	Dob                 *time.Time `json:"dob" binding:"required"`
-	Age                 *int       `json:"age" binding:"required"`
+	Dob                 *time.Time `json:"dob"`
+	Age                 *int       `json:"age"`
 	Gender              *string    `json:"gender" binding:"required"`
 	Village             *string    `json:"village" binding:"required"`
 	ContactNo           *string    `json:"contactNo" binding:"required"`
@@ -34,10 +35,11 @@ func (a Admin) String() string {
 	result += fmt.Sprintf("ID: %d\n", a.ID)
 	result += fmt.Sprintf("FamilyGroup: %s\n", *a.FamilyGroup)
 	result += fmt.Sprintf("RegDate: %s\n", a.RegDate.Format("2006-01-02"))
+	result += fmt.Sprintf("QueueNo: %s\n", *a.QueueNo)
 	result += fmt.Sprintf("Name: %s\n", *a.Name)
 	result += fmt.Sprintf("KhmerName: %s\n", *a.KhmerName)
-	result += fmt.Sprintf("Dob: %s\n", a.Dob.Format("2006-01-02"))
-	result += fmt.Sprintf("Age: %d\n", *a.Age)
+	result += fmt.Sprintf("Dob: %s\n", SafeDerefTime(a.Dob).Format("2006-01-02"))
+	result += fmt.Sprintf("Age: %d\n", SafeDeref(a.Age))
 	result += fmt.Sprintf("Gender: %s\n", *a.Gender)
 	result += fmt.Sprintf("Village: %s\n", *a.Village)
 	result += fmt.Sprintf("ContactNo: %s\n", *a.ContactNo)
