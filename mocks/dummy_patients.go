@@ -10,6 +10,7 @@ var ValidPatientJson = `{
   "admin": {
     "familyGroup": "S001",
     "regDate": "2024-01-10T00:00:00Z",
+	"queueNo": "8A",
     "name": "Patient's Name Here",
     "khmerName": "តតតតតតត",
     "dob": "1994-01-10T00:00:00Z",
@@ -92,6 +93,7 @@ var ValidPatientJson = `{
 var admin = entities.Admin{
 	FamilyGroup:         entities.PtrTo("S001"),
 	RegDate:             entities.PtrTo(time.Date(2024, time.January, 10, 0, 0, 0, 0, time.UTC)),
+	QueueNo:             entities.PtrTo("8A"),
 	Name:                entities.PtrTo("Patient's Name Here"),
 	KhmerName:           entities.PtrTo("តតតតតតត"),
 	Dob:                 entities.PtrTo(time.Date(1994, time.January, 10, 0, 0, 0, 0, time.UTC)),
