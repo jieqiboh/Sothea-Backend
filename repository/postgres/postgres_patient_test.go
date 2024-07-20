@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/jieqiboh/sothea_backend/entities"
+	"github.com/jieqiboh/sothea_backend/util"
 	_ "github.com/lib/pq"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
@@ -105,10 +106,6 @@ const (
 )
 
 func TestMain(m *testing.M) {
-	pwd, err := os.Getwd()
-	if err != nil {
-		log.Fatalf("Failed to get current directory: %v", err)
-	}
 	// uses a sensible default on windows (tcp/http) and linux/osx (socket)
 	pool, err := dockertest.NewPool("")
 	if err != nil {
@@ -122,9 +119,6 @@ func TestMain(m *testing.M) {
 		Tag:        "latest",    // Image tag
 		PortBindings: map[docker.Port][]docker.PortBinding{
 			"5432/tcp": {{HostIP: "", HostPort: "5432"}},
-		},
-		Mounts: []string{
-			fmt.Sprintf("%s/tmp:/tmp", pwd),
 		},
 	}
 
@@ -483,10 +477,10 @@ func TestPostgresPatientRepository_ExportDatabaseToCSV(t *testing.T) {
 	err := patient_repo.ExportDatabaseToCSV(context.Background())
 	assert.Nil(t, err)
 	// Assert that file exists
-	_, err = os.Stat("./tmp/output.csv")
+	_, err = os.Stat(util.MustGitPath("repository/tmp/output.csv"))
 	assert.Nil(t, err)
 
 	// Cleanup directory
-	err = os.Remove("./tmp/output.csv")
-	assert.Nil(t, err)
+	//err = os.Remove("output.csv")
+	//assert.Nil(t, err)
 }

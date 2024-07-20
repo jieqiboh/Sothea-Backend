@@ -6,7 +6,11 @@ import (
 	"encoding/base64"
 	"errors"
 	"github.com/jieqiboh/sothea_backend/entities"
+	"github.com/jieqiboh/sothea_backend/util"
+	"github.com/joho/sqltocsv"
 	_ "github.com/lib/pq"
+	"log"
+	"os"
 )
 
 type postgresPatientRepository struct {
@@ -580,8 +584,7 @@ func (p *postgresPatientRepository) SearchPatients(ctx context.Context, search s
 }
 
 func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context) error {
-	query := `COPY (
-    SELECT
+	query := `SELECT
         a.id,
         a.family_group,
         a.reg_date,
@@ -667,13 +670,23 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context) err
     LEFT JOIN
         visualacuity va ON a.id = va.id
     LEFT JOIN
-        doctorsconsultation d ON a.id = d.id
-	) TO '/tmp/output.csv' WITH CSV HEADER;
-	`
+        doctorsconsultation d ON a.id = d.id`
 	// Execute the query
-	_, err := p.Conn.ExecContext(ctx, query)
+	rows, err := p.Conn.QueryContext(ctx, query)
 	if err != nil {
 		return err
+	}
+
+	filePath := util.MustGitPath("repository/tmp/output.csv")
+	file, err := os.Create(filePath)
+	if err != nil {
+		log.Fatalf("Error creating file: %v", err)
+	}
+	defer file.Close()
+
+	err = sqltocsv.WriteFile(filePath, rows)
+	if err != nil {
+		panic(err)
 	}
 
 	return nil

@@ -365,20 +365,20 @@ func TestSearchPatients_Success(t *testing.T) {
 }
 
 // Success - 200 OK
-//func TestExportDatabaseToCSV_Success(t *testing.T) {
-//	var mockUsecase mocks.PatientUseCase
-//	mockUsecase.On("ExportDatabaseToCSV", context.Background()).Return(nil)
-//	router := gin.Default()
-//	newTestPatientHandler(router, &mockUsecase)
-//
-//	w := httptest.NewRecorder()
-//	req, _ := http.NewRequest("GET", "/export-db", nil)
-//
-//	router.ServeHTTP(w, req)
-//
-//	if w.Code != http.StatusOK {
-//		t.Fatalf("Expected status code 200, but got %d. Response body: %s", w.Code, w.Body.String())
-//	}
-//
-//	assert.Equal(t, 200, w.Code)
-//}
+func TestExportDatabaseToCSV_Success(t *testing.T) {
+	var mockUsecase mocks.PatientUseCase
+	mockUsecase.On("ExportDatabaseToCSV", context.Background()).Return(nil)
+	router := gin.Default()
+	newTestPatientHandler(router, &mockUsecase)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/export-db", nil)
+
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("Expected status code 200, but got %d. Response body: %s", w.Code, w.Body.String())
+	}
+
+	assert.Equal(t, 200, w.Code)
+}

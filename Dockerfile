@@ -12,9 +12,6 @@ COPY ./sql /docker-entrypoint-initdb.d
 # Expose the PostgreSQL port
 EXPOSE 5432
 
-# Create a volume mount point
-VOLUME ["/tmp"]
-
 # Set the entrypoint to the default PostgreSQL entrypoint
 ENTRYPOINT ["docker-entrypoint.sh"]
 
