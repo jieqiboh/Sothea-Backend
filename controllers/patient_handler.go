@@ -6,6 +6,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/jieqiboh/sothea_backend/controllers/middleware"
 	"github.com/jieqiboh/sothea_backend/entities"
+	"github.com/jieqiboh/sothea_backend/util"
 	"log"
 	"net/http"
 	"strconv"
@@ -180,7 +181,7 @@ func (p *PatientHandler) SearchPatients(c *gin.Context) {
 func (p *PatientHandler) ExportDatabaseToCSV(c *gin.Context) {
 	ctx := c.Request.Context()
 
-	filePath := "./tmp/output.csv"
+	filePath := util.MustGitPath("repository/tmp/output.csv")
 	err := p.Usecase.ExportDatabaseToCSV(ctx)
 	if err != nil {
 		log.Printf("Failed to export data to CSV: %v", err)
@@ -188,6 +189,7 @@ func (p *PatientHandler) ExportDatabaseToCSV(c *gin.Context) {
 		return
 	}
 
+	c.Writer.Header().Set("Content-Type", "text/csv")
 	// Set the content disposition header to force download
 	c.Writer.Header().Set("Content-Disposition", "attachment")
 
