@@ -537,7 +537,7 @@ func (p *postgresPatientRepository) UpdatePatientByID(ctx context.Context, id in
 func (p *postgresPatientRepository) GetAllAdmin(ctx context.Context) ([]entities.PartAdmin, error) {
 	var rows *sql.Rows
 	result := make([]entities.PartAdmin, 0)
-	query := "SELECT id, name, khmer_name, dob, gender, contact_no FROM ADMIN"
+	query := "SELECT id, queue_no, name, khmer_name, dob, gender, contact_no FROM ADMIN"
 	rows, err := p.Conn.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
@@ -547,7 +547,7 @@ func (p *postgresPatientRepository) GetAllAdmin(ctx context.Context) ([]entities
 
 	for rows.Next() {
 		partadmin := entities.PartAdmin{}
-		err = rows.Scan(&partadmin.ID, &partadmin.Name, &partadmin.KhmerName, &partadmin.Dob, &partadmin.Gender, &partadmin.ContactNo)
+		err = rows.Scan(&partadmin.ID, &partadmin.QueueNo, &partadmin.Name, &partadmin.KhmerName, &partadmin.Dob, &partadmin.Gender, &partadmin.ContactNo)
 
 		if err != nil {
 			return nil, err
