@@ -49,3 +49,465 @@ Do ensure that the frontend is appropriately configured to make requests to the 
 ### Common Issues
 - Database role not found / Authentication Failed
 This usually happens if there are already pre-existing Postgres instances running on port 5432. To resolve this, stop check the processes running on port 5432, and stop the existing Postgres processes.
+
+### API Endpoints
+API endpoints are detailed below:
+
+#### Get Patient By ID
+Get a patient by their ID and Entry ID.
+
+```plaintext
+GET /patient/:id/:eid
+```
+
+If successful, returns `200` and the following
+response attributes:
+
+| Attribute            | Type   | Description          |
+|----------------------|--------|----------------------|
+| `admin`              | object | Guaranteed to exist. |
+| `pastmedicalhistory` | object | May not exist.       |
+| `socialhistory`      | object | May not exist.       |
+| `vitalstatistics`    | object | May not exist.       |
+| `heightandweight`    | object | May not exist.       |
+| `visualacuity`       | object | May not exist.       |
+
+Unsuccessful responses include:
+`404` - Patient not found.  
+`401` - Unauthorized.  
+`500` - Internal server error.
+
+Example request:
+
+```shell
+curl --url 'http://localhost:9090/patient/1/1' \
+--header 'Authorization: Bearer <your_access_token>'
+```
+
+Example response:
+
+```json
+{
+ "admin": {
+  "id": 1,
+  "eid": 1,
+  "familyGroup": "S001",
+  "regDate": "2024-01-10T00:00:00Z",
+  "queueNo": "1A",
+  "name": "John Doe",
+  "khmerName": "១២៣៤ ៥៦៧៨៩០ឥឲ",
+  "dob": "1994-01-10T00:00:00Z",
+  "age": 30,
+  "gender": "M",
+  "village": "SO",
+  "contactNo": "12345678",
+  "pregnant": false,
+  "lastMenstrualPeriod": null,
+  "drugAllergies": "panadol",
+  "sentToId": false,
+  "photo": ""
+ },
+ "pastmedicalhistory": {
+  "id": 1,
+  "eid": 1,
+  "tuberculosis": true,
+  "diabetes": false,
+  "hypertension": true,
+  "hyperlipidemia": false,
+  "chronicJointPains": false,
+  "chronicMuscleAches": true,
+  "sexuallyTransmittedDisease": true,
+  "specifiedSTDs": "TRICHOMONAS",
+  "others": "None"
+ },
+ "socialhistory": {
+  "id": 1,
+  "eid": 1,
+  "pastSmokingHistory": true,
+  "numberOfYears": 15,
+  "currentSmokingHistory": false,
+  "cigarettesPerDay": null,
+  "alcoholHistory": true,
+  "howRegular": "A"
+ },
+ "vitalstatistics": {
+  "id": 1,
+  "eid": 1,
+  "temperature": 36.5,
+  "spO2": 98,
+  "systolicBP1": 120,
+  "diastolicBP1": 80,
+  "systolicBP2": 122,
+  "diastolicBP2": 78,
+  "averageSystolicBP": 121,
+  "averageDiastolicBP": 79,
+  "hr1": 72,
+  "hr2": 71,
+  "averageHR": 71.5,
+  "randomBloodGlucoseMmolL": 5.4,
+  "randomBloodGlucoseMmolLp": 5.3
+ },
+ "heightandweight": {
+  "id": 1,
+  "eid": 1,
+  "height": 170,
+  "weight": 70,
+  "bmi": 24.2,
+  "bmiAnalysis": "normal weight",
+  "paedsHeight": 90,
+  "paedsWeight": 80
+ },
+ "visualacuity": {
+  "id": 1,
+  "eid": 1,
+  "lEyeVision": 20,
+  "rEyeVision": 20,
+  "additionalIntervention": "VISUAL FIELD TEST REQUIRED"
+ },
+ "doctorsconsultation": {
+  "id": 1,
+  "eid": 1,
+  "healthy": true,
+  "msk": false,
+  "cvs": false,
+  "respi": true,
+  "gu": true,
+  "git": false,
+  "eye": true,
+  "derm": false,
+  "others": "LEUKAEMIA",
+  "consultationNotes": "CHEST PAIN, SHORTNESS OF BREATH, COUGH",
+  "diagnosis": "ACUTE BRONCHITIS",
+  "treatment": "REST, HYDRATION, COUGH SYRUP",
+  "referralNeeded": false,
+  "referralLoc": null,
+  "remarks": "MONITOR FOR RESOLUTION"
+ }
+}
+```
+
+#### Insert Patient
+Create an entirely new patient.
+
+```plaintext
+POST /patient
+```
+
+If successful, returns `200` and the following
+response attributes:
+
+| Attribute         | Type    | Description                      |
+|-------------------|---------|----------------------------------|
+| `Inserted userid` | integer | Integer id of new patient created |
+| `status`           | string  | String indicating success        |
+
+Unsuccessful responses include:
+`400` - Missing Admin Category
+`400` - Json Marshalling Error (Attempts to marshal the JSON request body into a struct failed)
+`400` - Invalid Parameters (e.g. A required field is not present)
+`401` - Unauthorized.  
+`500` - Internal server error.
+
+Example request:
+
+```shell
+curl --url 'http://localhost:9090/patient/' \
+--header 'Authorization: Bearer <your_access_token>'\
+--header 'Content-Type: application/json' \
+--data '{
+    "admin": {
+        "familyGroup": "S001",
+        "regDate": "2024-01-10T00:00:00Z",
+        "queueNo": "2D",
+        "name": "Patient'\''s Name Here",
+        "khmerName": "តតតតតតត",
+        "dob": "1994-01-10T00:00:00Z",
+        "age": 30,
+        "gender": "M",
+        "village": "SO",
+        "contactNo": "12345678",
+        "pregnant": false,
+        "lastMenstrualPeriod": null,
+        "drugAllergies": "panadol",
+        "sentToID": false,
+        "photo": "<photo_encoded_as_base64_string>"
+    },
+    "pastMedicalHistory": {
+        "tuberculosis": true,
+        "diabetes": false,
+        "hypertension": true,
+        "hyperlipidemia": false,
+        "chronicJointPains": false,
+        "chronicMuscleAches": true,
+        "sexuallyTransmittedDisease": true,
+        "specifiedSTDs": "TRICHOMONAS",
+        "others": "None"
+    },
+    "socialHistory": {
+        "pastSmokingHistory": true,
+        "numberOfYears": 15,
+        "currentSmokingHistory": false,
+        "cigarettesPerDay": null,
+        "alcoholHistory": true,
+        "howRegular": "A"
+    },
+    "vitalStatistics": {
+        "temperature": 36.5,
+        "spO2": 98,
+        "systolicBP1": 120,
+        "diastolicBP1": 80,
+        "systolicBP2": 122,
+        "diastolicBP2": 78,
+        "averageSystolicBP": 121,
+        "averageDiastolicBP": 79,
+        "hr1": 72,
+        "hr2": 71,
+        "averageHR": 71.5,
+        "randomBloodGlucoseMmolL": 5.4,
+        "randomBloodGlucoseMmolLp": 5.3
+    },
+    "heightAndWeight": {
+        "height": 170,
+        "weight": 70,
+        "bmi": 24.2,
+        "bmiAnalysis": "normal weight",
+        "paedsHeight": 90,
+        "paedsWeight": 80
+    },
+    "visualAcuity": {
+        "lEyeVision": 20,
+        "rEyeVision": 20,
+        "additionalIntervention": "VISUAL FIELD TEST REQUIRED"
+    },
+    "doctorsConsultation": {
+        "healthy": true,
+        "msk": false,
+        "cvs": false,
+        "respi": true,
+        "gu": true,
+        "git": false,
+        "eye": true,
+        "derm": false,
+        "others": "TRICHOMONAS VAGINALIS",
+        "consultationNotes": "CHEST PAIN, SHORTNESS OF BREATH, COUGH",
+        "diagnosis": "ACUTE BRONCHITIS",
+        "treatment": "REST, HYDRATION, COUGH SYRUP",
+        "referralNeeded": false,
+        "referralLoc": null,
+        "remarks": "MONITOR FOR RESOLUTION"
+    }
+}'
+```
+
+Example response:
+```json
+{
+ "Inserted userid": 7,
+ "status": "success"
+}
+```
+
+#### Insert New Patient Entry
+Create a new entry for an existing patient.
+
+```plaintext
+POST /patient/:id
+```
+
+If successful, returns `200` and the following
+response attributes:
+
+| Attribute                   | Type    | Description                                  |
+|-----------------------------|---------|----------------------------------------------|
+| `Inserted entry for userid` | integer | Integer id of patient with new entry created |
+| `status`                    | string  | String indicating success                    |
+
+Unsuccessful responses include:
+`404` - Patient not found.
+`400` - Missing Admin Category
+`400` - Json Marshalling Error (Attempts to marshal the JSON request body into a struct failed)
+`400` - Invalid Parameters (e.g. A required field is not present)
+`401` - Unauthorized.  
+`500` - Internal server error.
+
+Example request:
+
+```shell
+curl --url 'http://localhost:9090/patient/1' \
+--header 'Authorization: Bearer <your_access_token>'\
+--header 'Content-Type: application/json' \
+--data '{
+    "admin": {
+        "familyGroup": "S001",
+        "regDate": "2024-01-10T00:00:00Z",
+        "queueNo": "2D",
+        "name": "Patient'\''s Name Here",
+        "khmerName": "តតតតតតត",
+        "dob": "1994-01-10T00:00:00Z",
+        "age": 30,
+        "gender": "M",
+        "village": "SO",
+        "contactNo": "12345678",
+        "pregnant": false,
+        "lastMenstrualPeriod": null,
+        "drugAllergies": "panadol",
+        "sentToID": false,
+        "photo": "<photo_encoded_as_base64_string>"
+    },
+    "pastMedicalHistory": {
+        "tuberculosis": true,
+        "diabetes": false,
+        "hypertension": true,
+        "hyperlipidemia": false,
+        "chronicJointPains": false,
+        "chronicMuscleAches": true,
+        "sexuallyTransmittedDisease": true,
+        "specifiedSTDs": "TRICHOMONAS",
+        "others": "None"
+    },
+    "socialHistory": {
+        "pastSmokingHistory": true,
+        "numberOfYears": 15,
+        "currentSmokingHistory": false,
+        "cigarettesPerDay": null,
+        "alcoholHistory": true,
+        "howRegular": "A"
+    },
+    "vitalStatistics": {
+        "temperature": 36.5,
+        "spO2": 98,
+        "systolicBP1": 120,
+        "diastolicBP1": 80,
+        "systolicBP2": 122,
+        "diastolicBP2": 78,
+        "averageSystolicBP": 121,
+        "averageDiastolicBP": 79,
+        "hr1": 72,
+        "hr2": 71,
+        "averageHR": 71.5,
+        "randomBloodGlucoseMmolL": 5.4,
+        "randomBloodGlucoseMmolLp": 5.3
+    },
+    "heightAndWeight": {
+        "height": 170,
+        "weight": 70,
+        "bmi": 24.2,
+        "bmiAnalysis": "normal weight",
+        "paedsHeight": 90,
+        "paedsWeight": 80
+    },
+    "visualAcuity": {
+        "lEyeVision": 20,
+        "rEyeVision": 20,
+        "additionalIntervention": "VISUAL FIELD TEST REQUIRED"
+    },
+    "doctorsConsultation": {
+        "healthy": true,
+        "msk": false,
+        "cvs": false,
+        "respi": true,
+        "gu": true,
+        "git": false,
+        "eye": true,
+        "derm": false,
+        "others": "TRICHOMONAS VAGINALIS",
+        "consultationNotes": "CHEST PAIN, SHORTNESS OF BREATH, COUGH",
+        "diagnosis": "ACUTE BRONCHITIS",
+        "treatment": "REST, HYDRATION, COUGH SYRUP",
+        "referralNeeded": false,
+        "referralLoc": null,
+        "remarks": "MONITOR FOR RESOLUTION"
+    }
+}'
+```
+
+Example response:
+```json
+{
+ "Inserted entry for userid": 7,
+ "status": "success"
+}
+```
+
+#### Delete Patient Entry
+Deletes a specified entry of an existing patient.  
+To avoid accidentally deleting entire patients, only deleting entries one at a time is allowed.
+
+```plaintext
+DELETE /patient/:id/:eid
+```
+
+If successful, returns `200` and the following
+response attributes:
+
+| Attribute | Type    | Description               |
+|-----------|---------|---------------------------|
+| `id`      | integer | Id of patient selected    |
+| `eid`     | integer | Entry id of deleted entry |
+| `status`  | string  | String indicating success |
+
+Unsuccessful responses include:
+`404` - Patient not found.  
+`404` - Patient Entry not found.  
+`401` - Unauthorized.  
+`500` - Internal server error.
+
+Example request:
+
+```shell
+curl --url --request DELETE 'http://localhost:9090/patient/1/1' \
+--header 'Authorization: Bearer <your_access_token>'
+```
+
+Example response:
+```plaintext
+{
+    "id": 1,
+    "eid": 1,
+    "status": "success"
+}
+```
+
+#### Update Patient Entry
+Update an entry of an existing patient.
+
+```plaintext
+PATCH /patient/:id/:eid
+```
+
+If successful, returns `200` and the following
+response attributes:
+
+| Attribute | Type    | Description               |
+|-----------|---------|---------------------------|
+| `id`      | integer | Id of patient selected    |
+| `eid`     | integer | Entry id of deleted entry |
+| `status`  | string  | String indicating success |
+
+Unsuccessful responses include:
+`404` - Patient not found.  
+`404` - Patient Entry not found.  
+`401` - Unauthorized.  
+`500` - Internal server error.
+
+Example request:
+
+```shell
+curl --url --request PATCH 'http://localhost:9090/patient/1/1' \
+--header 'Authorization: Bearer <your_access_token>'
+```
+
+Example response:
+```plaintext
+{
+    "id": 1,
+    "eid": 1,
+    "status": "success"
+}
+```
+
+#### Get All Admin
+
+#### Search Patients
+
+#### Export Patients
