@@ -7,6 +7,7 @@ import (
 
 type Admin struct {
 	ID                  int32      `json:"id" binding:"-"`
+	VID                 int32      `json:"vid" binding:"-"`
 	FamilyGroup         *string    `json:"familyGroup" binding:"required"`
 	RegDate             *time.Time `json:"regDate" binding:"required"`
 	QueueNo             *string    `json:"queueNo" binding:"required"`
@@ -33,6 +34,7 @@ func (Admin) TableName() string {
 func (a Admin) String() string {
 	result := fmt.Sprintf("\nADMIN\n")
 	result += fmt.Sprintf("ID: %d\n", a.ID)
+	result += fmt.Sprintf("VID: %d\n", a.VID)
 	result += fmt.Sprintf("FamilyGroup: %s\n", *a.FamilyGroup)
 	result += fmt.Sprintf("RegDate: %s\n", a.RegDate.Format("2006-01-02"))
 	result += fmt.Sprintf("QueueNo: %s\n", *a.QueueNo)

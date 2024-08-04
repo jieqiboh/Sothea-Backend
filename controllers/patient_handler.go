@@ -28,30 +28,35 @@ func NewPatientHandler(e *gin.Engine, us entities.PatientUseCase, secretKey []by
 	authorized := e.Group("/")
 	authorized.Use(middleware.AuthRequired(secretKey))
 	{
-		authorized.GET("/patient/:id", handler.GetPatientByID)
-		authorized.POST("/patient", handler.InsertPatient)
-		authorized.DELETE("/patient/:id", handler.DeletePatientByID)
-		authorized.PATCH("/patient/:id", handler.UpdatePatientByID)
+		authorized.GET("/patient/:id/:vid", handler.GetPatientVisit)
+		authorized.POST("/patient", handler.CreatePatient)
+		authorized.POST("/patient/:id", handler.CreatePatientVisit)
+		authorized.DELETE("/patient/:id/:vid", handler.DeletePatientVisit)
+		authorized.PATCH("/patient/:id/:vid", handler.UpdatePatientVisit)
 		authorized.GET("/get-all-admin", handler.GetAllAdmin)
 		authorized.GET("/search-patients/:search-name", handler.SearchPatients)
 		authorized.GET("/export-db", handler.ExportDatabaseToCSV)
 	}
 }
 
-func (p *PatientHandler) GetPatientByID(c *gin.Context) {
+func (p *PatientHandler) GetPatientVisit(c *gin.Context) {
 	idP, err := strconv.Atoi(c.Param("id"))
-
-	// Check if the id is not a number
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	vidP, err := strconv.Atoi(c.Param("vid"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	id := int32(idP)
+	vid := int32(vidP)
 	ctx := c.Request.Context()
 
 	// Get the patient by id
-	patient, err := p.Usecase.GetPatientByID(ctx, id)
+	patient, err := p.Usecase.GetPatientVisit(ctx, id, vid)
 	if err != nil {
 		c.JSON(getStatusCode(err), gin.H{"error": err.Error()})
 		return
@@ -60,10 +65,10 @@ func (p *PatientHandler) GetPatientByID(c *gin.Context) {
 	c.JSON(http.StatusOK, patient)
 }
 
-func (p *PatientHandler) InsertPatient(c *gin.Context) {
-	var patient entities.Patient
+func (p *PatientHandler) CreatePatient(c *gin.Context) {
+	var patientAdmin entities.Admin
 
-	if err := c.ShouldBindJSON(&patient); err != nil {
+	if err := c.ShouldBindJSON(&patientAdmin); err != nil {
 		// Use type assertion to check if err is of type validator.ValidationErrors
 		if validationErrs, ok := err.(validator.ValidationErrors); ok {
 			// Get the first Validation Error
@@ -82,41 +87,93 @@ func (p *PatientHandler) InsertPatient(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
-	id, err := p.Usecase.InsertPatient(ctx, &patient)
+	id, err := p.Usecase.CreatePatient(ctx, &patientAdmin)
 	if err != nil {
 		c.JSON(getStatusCode(err), gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"status": "success", "Inserted userid": id})
+	c.JSON(http.StatusOK, gin.H{"id": id})
 }
 
-func (p *PatientHandler) DeletePatientByID(c *gin.Context) {
+func (p *PatientHandler) CreatePatientVisit(c *gin.Context) {
 	idP, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	id := int32(idP)
+	id32 := int32(idP)
 	ctx := c.Request.Context()
 
-	id, err = p.Usecase.DeletePatientByID(ctx, id)
+	var patientAdmin entities.Admin
+	if err := c.ShouldBindJSON(&patientAdmin); err != nil {
+		// Use type assertion to check if err is of type validator.ValidationErrors
+		if validationErrs, ok := err.(validator.ValidationErrors); ok {
+			// Get the first Validation Error
+			fieldErr := validationErrs[0]
+			c.JSON(http.StatusBadRequest, gin.H{"error": fieldErr.Error()})
+			return // exit on first error
+		} else if err.Error() == "EOF" {
+			// Handle Empty Request Body Errors
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Request Body is empty!"})
+			return
+		} else {
+			// Handle other types of errors (e.g., JSON binding errors)
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	vid, err := p.Usecase.CreatePatientVisit(ctx, id32, &patientAdmin)
 	if err != nil {
 		c.JSON(getStatusCode(err), gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, id)
+	c.JSON(http.StatusOK, gin.H{"vid": vid})
 }
 
-func (p *PatientHandler) UpdatePatientByID(c *gin.Context) {
+func (p *PatientHandler) DeletePatientVisit(c *gin.Context) {
 	idP, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusNotFound, entities.ErrPatientNotFound.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	vidP, err := strconv.Atoi(c.Param("vid"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
-	id := int32(idP)
+	id32 := int32(idP)
+	vid32 := int32(vidP)
+	ctx := c.Request.Context()
+
+	err = p.Usecase.DeletePatientVisit(ctx, id32, vid32)
+	if err != nil {
+		c.JSON(getStatusCode(err), gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Status(http.StatusOK)
+}
+
+func (p *PatientHandler) UpdatePatientVisit(c *gin.Context) {
+	idP, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	vidP, err := strconv.Atoi(c.Param("vid"))
+	// Check if the id or vid is not a number
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	id32 := int32(idP)
+	vid32 := int32(vidP)
 	ctx := c.Request.Context()
 
 	var patient entities.Patient
@@ -138,13 +195,13 @@ func (p *PatientHandler) UpdatePatientByID(c *gin.Context) {
 		}
 	}
 
-	id, err = p.Usecase.UpdatePatientByID(ctx, id, &patient)
+	err = p.Usecase.UpdatePatientVisit(ctx, id32, vid32, &patient)
 	if err != nil {
 		c.JSON(getStatusCode(err), gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, id)
+	c.Status(http.StatusOK)
 }
 
 func (p *PatientHandler) GetAllAdmin(c *gin.Context) {
@@ -205,6 +262,8 @@ func getStatusCode(err error) int {
 	case entities.ErrInternalServerError:
 		return http.StatusInternalServerError
 	case entities.ErrPatientNotFound:
+		return http.StatusNotFound
+	case entities.ErrPatientVisitNotFound:
 		return http.StatusNotFound
 	case entities.ErrMissingAdminCategory:
 		return http.StatusBadRequest

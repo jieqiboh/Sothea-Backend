@@ -4,6 +4,7 @@ import "fmt"
 
 type VitalStatistics struct {
 	ID                       int32    `json:"id"`
+	VID                      int32    `json:"vid" binding:"-"`
 	Temperature              *float64 `json:"temperature" binding:"required"`
 	SpO2                     *float64 `json:"spO2" binding:"required"`
 	SystolicBP1              *float64 `json:"systolicBP1" binding:"required"`
@@ -30,6 +31,7 @@ func (VitalStatistics) TableName() string {
 func (vs VitalStatistics) String() string {
 	result := fmt.Sprintf("\nVITAL STATISTICS\n")
 	result += fmt.Sprintf("ID: %d\n", vs.ID)
+	result += fmt.Sprintf("VID: %d\n", vs.VID)
 	result += fmt.Sprintf("Temperature: %.1f\n", *vs.Temperature)
 	result += fmt.Sprintf("SpO2: %.1f\n", *vs.SpO2)
 	result += fmt.Sprintf("SystolicBP1: %.1f\n", *vs.SystolicBP1)

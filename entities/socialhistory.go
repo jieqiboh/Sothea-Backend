@@ -6,6 +6,7 @@ import (
 
 type SocialHistory struct {
 	ID                    int32   `json:"id"`
+	VID                   int32   `json:"vid" binding:"-"`
 	PastSmokingHistory    *bool   `json:"pastSmokingHistory" binding:"required"`
 	NumberOfYears         *int32  `json:"numberOfYears"`
 	CurrentSmokingHistory *bool   `json:"currentSmokingHistory" binding:"required"`
@@ -25,6 +26,7 @@ func (SocialHistory) TableName() string {
 func (sh SocialHistory) String() string {
 	result := fmt.Sprintf("\nSOCIAL HISTORY\n")
 	result += fmt.Sprintf("ID: %d\n", sh.ID)
+	result += fmt.Sprintf("VID: %d\n", sh.VID)
 	result += fmt.Sprintf("Past Smoking History: %t\n", *sh.PastSmokingHistory)
 	result += fmt.Sprintf("Number of Years: %d\n", SafeDeref(sh.NumberOfYears))
 	result += fmt.Sprintf("Current Smoking History: %v\n", *sh.CurrentSmokingHistory)

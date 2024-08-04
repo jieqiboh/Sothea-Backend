@@ -19,32 +19,39 @@ func NewPatientUsecase(p entities.PatientRepository, timeout time.Duration) enti
 	}
 }
 
-func (p *patientUsecase) GetPatientByID(ctx context.Context, id int32) (*entities.Patient, error) {
+func (p *patientUsecase) GetPatientVisit(ctx context.Context, id int32, vid int32) (*entities.Patient, error) {
 	ctx, cancel := context.WithTimeout(ctx, p.contextTimeout)
 	defer cancel()
 
-	return p.patientRepo.GetPatientByID(ctx, id)
+	return p.patientRepo.GetPatientVisit(ctx, id, vid)
 }
 
-func (p *patientUsecase) InsertPatient(ctx context.Context, patient *entities.Patient) (int32, error) {
+func (p *patientUsecase) CreatePatient(ctx context.Context, admin *entities.Admin) (int32, error) {
 	ctx, cancel := context.WithTimeout(ctx, p.contextTimeout)
 	defer cancel()
 
-	return p.patientRepo.InsertPatient(ctx, patient)
+	return p.patientRepo.CreatePatient(ctx, admin)
 }
 
-func (p *patientUsecase) DeletePatientByID(ctx context.Context, id int32) (int32, error) {
+func (p *patientUsecase) CreatePatientVisit(ctx context.Context, id int32, admin *entities.Admin) (int32, error) {
 	ctx, cancel := context.WithTimeout(ctx, p.contextTimeout)
 	defer cancel()
 
-	return p.patientRepo.DeletePatientByID(ctx, id)
+	return p.patientRepo.CreatePatientVisit(ctx, id, admin)
 }
 
-func (p *patientUsecase) UpdatePatientByID(ctx context.Context, id int32, patient *entities.Patient) (int32, error) {
+func (p *patientUsecase) DeletePatientVisit(ctx context.Context, id int32, vid int32) error {
 	ctx, cancel := context.WithTimeout(ctx, p.contextTimeout)
 	defer cancel()
 
-	return p.patientRepo.UpdatePatientByID(ctx, id, patient)
+	return p.patientRepo.DeletePatientVisit(ctx, id, vid)
+}
+
+func (p *patientUsecase) UpdatePatientVisit(ctx context.Context, id int32, vid int32, patient *entities.Patient) error {
+	ctx, cancel := context.WithTimeout(ctx, p.contextTimeout)
+	defer cancel()
+
+	return p.patientRepo.UpdatePatientVisit(ctx, id, vid, patient)
 }
 
 func (p *patientUsecase) GetAllAdmin(ctx context.Context) ([]entities.PartAdmin, error) {

@@ -23,7 +23,7 @@ Patient Golang struct schema: `/entities`
 
 Patients go through the physical health screening stations with the admin station first, and the rest having no guaranteed order.
 Hence, if a patient exists, they will have an admin entry, but may not have the other entries.  
-Additionally, patients may have multiple entries for each category, representing the previous years of visits.  
+Additionally, patients may have multiple visits, with multiple rows for each category, representing the previous years of visits.  
 Every row in the patient database will have the following structure:  
 ```
 +------------+----------+-----------------------+  
@@ -38,7 +38,7 @@ The choice to use an entry id to identify the visit an entry is associated with,
 | Attribute               | Type    | Description                                                                                                         |
 |-------------------------|---------|---------------------------------------------------------------------------------------------------------------------|
 | `id`                    | integer | Auto-incrementing with each new patient created                                                                     |
-| `eid`                   | integer | Auto-incrementing with each new entry created, for each respective patient                                          |
+| `vid`                   | integer | Auto-incrementing with each new entry created, for each respective patient                                          |
 | `family_group`          | string  | Generally a string of the form "S001", "S002A" identifying the village and family number, not enforced in the db.   |
 | `reg_date`              | date    | Date of registration. Set by the doctors.                                                                           |
 | `queue_no`              | string  | String that can be of the form "1A", "2A", etc, not enforced                                                        |
@@ -61,7 +61,7 @@ Optional Fields: `dob`, `age`, `contact_no`, `photo`
 | Attribute                      | Type    | Description                                                                |
 |--------------------------------|---------|----------------------------------------------------------------------------|
 | `id`                           | integer | Auto-incrementing with each new patient created                            |
-| `eid`                          | integer | Auto-incrementing with each new entry created, for each respective patient |
+| `vid`                          | integer | Auto-incrementing with each new entry created, for each respective patient |
 | `diabetes`                     | boolean | Boolean indicating if patient has diabetes                                 |
 | `hypertension`                 | boolean | Boolean indicating if patient has hypertension                             |
 | `hyperlipidemia`               | boolean | Boolean indicating if patient has hyperlipidemia                           |
@@ -77,7 +77,7 @@ Optional Fields: `specified_stds`, `others`
 | Attribute                 | Type    | Description                                                                  |
 |---------------------------|---------|------------------------------------------------------------------------------|
 | `id`                      | integer | Auto-incrementing primary key                                                |
-| `eid`                     | integer | Auto-incrementing with each new entry created, for each respective patient   |
+| `vid`                     | integer | Auto-incrementing with each new entry created, for each respective patient   |
 | `past_smoking_history`    | boolean | Boolean indicating if the patient has a history of smoking                   |
 | `no_of_years`             | integer | Number of years the patient has smoked                                       |
 | `current_smoking_history` | boolean | Boolean indicating if the patient currently smokes                           |
@@ -91,7 +91,7 @@ Optional Fields: `no_of_years`, `cigarettes_per_day`, `how_regular`'
 | Attribute                   | Type    | Description                                                                |
 |-----------------------------|---------|----------------------------------------------------------------------------|
 | `id`                        | integer | Auto-incrementing primary key                                              |
-| `eid`                       | integer | Auto-incrementing with each new entry created, for each respective patient |
+| `vid`                       | integer | Auto-incrementing with each new entry created, for each respective patient |
 | `temperature`               | float   | Patient's body temperature in degrees Celsius, 5 digits with 1 dp          |
 | `spo2`                      | float   | Oxygen saturation level in percentage                                      |
 | `systolic_bp1`              | float   | Systolic blood pressure measurement 1                                      |
@@ -112,7 +112,7 @@ Optional Fields: -
 | Attribute      | Type    | Description                                                                |
 |----------------|---------|----------------------------------------------------------------------------|
 | `id`           | integer | Auto-incrementing primary key                                              |
-| `eid`          | integer | Auto-incrementing with each new entry created, for each respective patient |
+| `vid`          | integer | Auto-incrementing with each new entry created, for each respective patient |
 | `height`       | float   | Patient's height in meters (with 1 decimal place)                          |
 | `weight`       | float   | Patient's weight in kilograms (with 1 decimal place)                       |
 | `bmi`          | float   | Body Mass Index (BMI) value (with 1 decimal place)                         |
@@ -126,7 +126,7 @@ Optional Fields: `paeds_height`, `paeds_weight`
 | Attribute                 | Type    | Description                                                                |
 |---------------------------|---------|----------------------------------------------------------------------------|
 | `id`                      | integer | Auto-incrementing primary key                                              |
-| `eid`                     | integer | Auto-incrementing with each new entry created, for each respective patient |
+| `vid`                     | integer | Auto-incrementing with each new entry created, for each respective patient |
 | `l_eye_vision`            | integer | Vision measurement for the left eye                                        |
 | `r_eye_vision`            | integer | Vision measurement for the right eye                                       |
 | `additional_intervention` | string  | Details of any additional intervention or notes                            |
@@ -137,7 +137,7 @@ Optional Fields: `additional_intervention`
 | Attribute            | Type    | Description                                                                |
 |----------------------|---------|----------------------------------------------------------------------------|
 | `id`                 | integer | Auto-incrementing primary key                                              |
-| `eid`                | integer | Auto-incrementing with each new entry created, for each respective patient |
+| `vid`                | integer | Auto-incrementing with each new entry created, for each respective patient |
 | `healthy`            | boolean | Boolean indicating if the patient is healthy                               |
 | `msk`                | boolean | Boolean indicating if musculoskeletal system is healthy                    |
 | `cvs`                | boolean | Boolean indicating if cardiovascular system is healthy                     |

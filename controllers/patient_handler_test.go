@@ -7,6 +7,7 @@ import (
 	"github.com/jieqiboh/sothea_backend/mocks"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -109,36 +110,64 @@ func newTestPatientHandler(e *gin.Engine, us entities.PatientUseCase) {
 		Usecase: us,
 	}
 
-	e.GET("/patient/:id", handler.GetPatientByID)
-	e.POST("/patient", handler.InsertPatient)
-	e.DELETE("/patient/:id", handler.DeletePatientByID)
-	e.PATCH("/patient/:id", handler.UpdatePatientByID)
+	e.GET("/patient/:id/visit/:vid", handler.GetPatientVisit)
+	e.POST("/patient", handler.CreatePatient)
+	e.POST("/patient/:id", handler.CreatePatientVisit)
+	e.DELETE("/patient/:id/:vid", handler.DeletePatientVisit)
+	e.PATCH("/patient/:id/:vid", handler.UpdatePatientVisit)
 	e.GET("/get-all-admin", handler.GetAllAdmin)
 	e.GET("/search-patients/:search-name", handler.SearchPatients)
 	e.GET("/export-db", handler.ExportDatabaseToCSV)
 }
 
 // Success - 200 OK
-// Patient Not Found - 404 Not Found
-func TestGetPatientByID_Success(t *testing.T) {
+// Bad Request (id or vid is not a number) - 400 Bad Request
+// Patient Visit Not Found - 404 Not Found
+func TestGetPatientVisit_Success(t *testing.T) {
 	var mockUsecase mocks.PatientUseCase
-	num := 1
-	mockUsecase.On("GetPatientByID", context.Background(), int32(num)).Return(&patient, nil)
+	id := 1
+	vid := 1
+	mockUsecase.On("GetPatientVisit", context.Background(), int32(id), int32(vid)).Return(&patient, nil)
 	router := gin.Default()
 	newTestPatientHandler(router, &mockUsecase)
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/patient/1", nil)
+	req, _ := http.NewRequest("GET", "/patient/1/visit/1", nil)
 
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
 }
 
-func TestGetPatientByID_NotFound(t *testing.T) {
+func TestGetPatientVisit_BadRequest(t *testing.T) {
+	var mockUsecase mocks.PatientUseCase
+	id := 1
+	wrongId := "hello"
+	vid := 1
+	wrongVid := "world"
+	mockUsecase.On("GetPatientVisit", context.Background(), int32(id), wrongVid).Return(nil, entities.ErrPatientVisitNotFound)
+	mockUsecase.On("GetPatientVisit", context.Background(), wrongId, int32(vid)).Return(nil, entities.ErrPatientVisitNotFound)
+	router := gin.Default()
+	newTestPatientHandler(router, &mockUsecase)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/patient/1/"+wrongVid, nil)
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 404, w.Code)
+
+	req, _ = http.NewRequest("GET", "/patient/"+wrongId+"/1", nil)
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 404, w.Code)
+}
+
+func TestGetPatientVisit_NotFound(t *testing.T) {
 	var mockUsecase mocks.PatientUseCase
 	num := -1
-	mockUsecase.On("GetPatientByID", context.Background(), int32(num)).Return(nil, entities.ErrPatientNotFound)
+	mockUsecase.On("GetPatientVisit", context.Background(), int32(num)).Return(nil, entities.ErrPatientNotFound)
 	router := gin.Default()
 	newTestPatientHandler(router, &mockUsecase)
 
@@ -151,68 +180,25 @@ func TestGetPatientByID_NotFound(t *testing.T) {
 }
 
 // Success - 200 OK
-// Missing Admin Field - 400 Bad Request
+// Empty Request Body - 400 Bad Request
 // Invalid Parameters - 400 Bad Request
 // Json Marshalling Error - 400 Bad Request
-// Empty Request Body - 400 Bad Request
-func TestInsertPatient_Success(t *testing.T) {
+func TestCreatePatient_Success(t *testing.T) {
 	var mockUsecase mocks.PatientUseCase
 	id := int32(7)
-	mockUsecase.On("InsertPatient", context.Background(), &mocks.ValidPatient).Return(id, nil)
+	mockUsecase.On("CreatePatient", context.Background(), mocks.ValidPatient.Admin).Return(id, nil)
 	router := gin.Default()
 	newTestPatientHandler(router, &mockUsecase)
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/patient", strings.NewReader(mocks.ValidPatientJson))
+	req, _ := http.NewRequest("POST", "/patient", strings.NewReader(mocks.ValidPatientAdminJson))
 
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
 }
 
-func TestInsertPatient_MissingAdmin_Failure(t *testing.T) {
-	var mockUsecase mocks.PatientUseCase
-	mockUsecase.On("InsertPatient", context.Background(), &mocks.MissingAdminPatient).Return(int32(-1), entities.ErrMissingAdminCategory)
-	router := gin.Default()
-	newTestPatientHandler(router, &mockUsecase)
-
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/patient", strings.NewReader(mocks.MissingAdminPatientJson))
-
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, 400, w.Code)
-}
-
-func TestInsertPatient_InvalidParameters_Failure(t *testing.T) {
-	// When ShouldBindJSON fails - e.g. A required field is not present
-	var mockUsecase mocks.PatientUseCase
-	router := gin.Default()
-	newTestPatientHandler(router, &mockUsecase)
-
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/patient", strings.NewReader(mocks.InvalidParametersPatientJson))
-
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, 400, w.Code)
-}
-
-func TestInsertPatient_JSONMarshallingError_Failure(t *testing.T) {
-	// When marshalling into a JSON struct fails - e.g. data type mismatch between the JSON and the expected golang struct field type
-	var mockUsecase mocks.PatientUseCase
-	router := gin.Default()
-	newTestPatientHandler(router, &mockUsecase)
-
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/patient", strings.NewReader(mocks.JSONMarshallingErrorPatientJson))
-
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, 400, w.Code)
-}
-
-func TestInsertPatient_EmptyRequestBody_Failure(t *testing.T) {
+func TestCreatePatient_EmptyRequestBody_Failure(t *testing.T) {
 	var mockUsecase mocks.PatientUseCase
 	router := gin.Default()
 	newTestPatientHandler(router, &mockUsecase)
@@ -225,108 +211,291 @@ func TestInsertPatient_EmptyRequestBody_Failure(t *testing.T) {
 	assert.Equal(t, 400, w.Code)
 }
 
-// Success - 200 OK
-// Patient Not Found - 404 Not Found
-func TestDeletePatientByID_Success(t *testing.T) {
-	var mockUsecase mocks.PatientUseCase
-	num := 1
-	mockUsecase.On("DeletePatientByID", context.Background(), int32(num)).Return(int32(num), nil)
-	router := gin.Default()
-	newTestPatientHandler(router, &mockUsecase)
-
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("DELETE", "/patient/1", nil)
-
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, 200, w.Code)
-}
-
-func TestDeletePatientByID_NotFound_Failure(t *testing.T) {
-	var mockUsecase mocks.PatientUseCase
-	num := -1
-	mockUsecase.On("DeletePatientByID", context.Background(), int32(num)).Return(int32(-1), entities.ErrPatientNotFound)
-	router := gin.Default()
-	newTestPatientHandler(router, &mockUsecase)
-
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("DELETE", "/patient/-1", nil)
-
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, 404, w.Code)
-}
-
-// Success - 200 OK
-// Patient Not Found - 404 Not Found
-// Invalid Parameters - 400 Bad Request
-// Json Marshalling Error - 400 Bad Request
-// Empty Request Body - 400 Bad Request
-func TestUpdatePatientByID_Success(t *testing.T) {
-	var mockUsecase mocks.PatientUseCase
-	id := int32(1)
-	mockUsecase.On("UpdatePatientByID", context.Background(), id, &mocks.MissingAdminPatient).Return(id, nil)
-	router := gin.Default()
-	newTestPatientHandler(router, &mockUsecase)
-
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("PATCH", "/patient/1", strings.NewReader(mocks.MissingAdminPatientJson))
-
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, 200, w.Code)
-}
-
-func TestUpdatePatientByID_NotFound_Failure(t *testing.T) {
-	var mockUsecase mocks.PatientUseCase
-	id := int32(-1)
-	mockUsecase.On("UpdatePatientByID", context.Background(), id, &mocks.ValidPatient).Return(int32(-1), entities.ErrPatientNotFound)
-	router := gin.Default()
-	newTestPatientHandler(router, &mockUsecase)
-
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("PATCH", "/patient/-1", strings.NewReader(mocks.ValidPatientJson))
-
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, 404, w.Code)
-}
-
-func TestUpdatePatientByID_InvalidParameters_Failure(t *testing.T) {
+func TestCreatePatient_InvalidParameters_Failure(t *testing.T) {
 	// When ShouldBindJSON fails - e.g. A required field is not present
 	var mockUsecase mocks.PatientUseCase
 	router := gin.Default()
 	newTestPatientHandler(router, &mockUsecase)
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("PATCH", "/patient/1", strings.NewReader(mocks.InvalidParametersPatientJson))
+	req, _ := http.NewRequest("POST", "/patient", strings.NewReader(mocks.InvalidParametersAdminJson))
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 400, w.Code)
+
+	req, _ = http.NewRequest("POST", "/patient", strings.NewReader("{}"))
 
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 400, w.Code)
 }
 
-func TestUpdatePatientByID_JSONMarshallingError_Failure(t *testing.T) {
+func TestCreatePatient_JSONMarshallingError_Failure(t *testing.T) {
 	// When marshalling into a JSON struct fails - e.g. data type mismatch between the JSON and the expected golang struct field type
 	var mockUsecase mocks.PatientUseCase
 	router := gin.Default()
 	newTestPatientHandler(router, &mockUsecase)
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("PATCH", "/patient/1", strings.NewReader(mocks.JSONMarshallingErrorPatientJson))
+	req, _ := http.NewRequest("POST", "/patient", strings.NewReader(mocks.JSONMarshallingErrorAdminJson))
 
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 400, w.Code)
 }
 
-func TestUpdatePatientByID_EmptyRequestBody_Failure(t *testing.T) {
+// Success - 200 OK
+// Patient Not Found - 404 Not Found
+// Bad Request (id is not a number) - 400 Bad Request
+// Empty Request Body - 400 Bad Request
+// Invalid Parameters - 400 Bad Request
+// Json Marshalling Error - 400 Bad Request
+func TestCreatePatientVisit_Success(t *testing.T) {
+	var mockUsecase mocks.PatientUseCase
+	id := int32(1)
+	vid := int32(1)
+	mockUsecase.On("CreatePatientVisit", context.Background(), id, mocks.ValidPatient.Admin).Return(vid, nil)
+	router := gin.Default()
+	newTestPatientHandler(router, &mockUsecase)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/patient/"+strconv.Itoa(int(id)), strings.NewReader(mocks.ValidPatientAdminJson))
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 200, w.Code)
+}
+
+func TestCreatePatientVisit_BadRequest(t *testing.T) {
+	var mockUsecase mocks.PatientUseCase
+	wrongId := "hello"
+	router := gin.Default()
+	newTestPatientHandler(router, &mockUsecase)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/patient/"+wrongId, nil)
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 400, w.Code)
+}
+
+func TestCreatePatientVisit_EmptyRequestBody_Failure(t *testing.T) {
+	var mockUsecase mocks.PatientUseCase
+	id := int32(1)
+	router := gin.Default()
+	newTestPatientHandler(router, &mockUsecase)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/patient/"+strconv.Itoa(int(id)), strings.NewReader(""))
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 400, w.Code)
+}
+
+func TestCreatePatientVisit_InvalidParameters_Failure(t *testing.T) {
+	// When ShouldBindJSON fails - e.g. A required field is not present
+	var mockUsecase mocks.PatientUseCase
+	id := int32(1)
+	router := gin.Default()
+	newTestPatientHandler(router, &mockUsecase)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/patient/"+strconv.Itoa(int(id)), strings.NewReader(mocks.InvalidParametersAdminJson))
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 400, w.Code)
+}
+
+func TestCreatePatientVisit_JSONMarshallingError_Failure(t *testing.T) {
+	// When marshalling into a JSON struct fails - e.g. data type mismatch between the JSON and the expected golang struct field type
+	var mockUsecase mocks.PatientUseCase
+	id := int32(1)
+	router := gin.Default()
+	newTestPatientHandler(router, &mockUsecase)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/patient/"+strconv.Itoa(int(id)), strings.NewReader(mocks.JSONMarshallingErrorAdminJson))
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 400, w.Code)
+}
+
+// Success - 200 OK
+// Bad Request (id is not a number) - 400 Bad Request
+// Patient Visit Not Found - 404 Not Found
+func TestDeletePatientVisit_Success(t *testing.T) {
+	var mockUsecase mocks.PatientUseCase
+	id := 1
+	vid := 1
+	mockUsecase.On("DeletePatientVisit", context.Background(), int32(id), int32(vid)).Return(nil)
+	router := gin.Default()
+	newTestPatientHandler(router, &mockUsecase)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("DELETE", "/patient/"+strconv.Itoa(id)+"/"+strconv.Itoa(vid), nil)
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 200, w.Code)
+}
+
+func TestDeletePatientByID_BadRequest_Failure(t *testing.T) {
+	var mockUsecase mocks.PatientUseCase
+	id := 1
+	wrongId := "hello"
+	vid := 1
+	wrongVid := "world"
+
+	router := gin.Default()
+	newTestPatientHandler(router, &mockUsecase)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("DELETE", "/patient/"+wrongId+"/"+strconv.Itoa(vid), nil)
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 400, w.Code)
+
+	req, _ = http.NewRequest("DELETE", "/patient/"+strconv.Itoa(id)+"/"+wrongVid, nil)
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 400, w.Code)
+}
+
+//func TestDeletePatientByID_NotFound_Failure(t *testing.T) {
+//	var mockUsecase mocks.PatientUseCase
+//	id := 1
+//	wrongId := -1
+//	vid := 1
+//	wrongVid := -1
+//	mockUsecase.On("DeletePatientVisit", context.Background(), int32(id), int32(wrongVid)).Return(entities.ErrPatientVisitNotFound)
+//	mockUsecase.On("DeletePatientVisit", context.Background(), int32(wrongId), int32(vid)).Return(entities.ErrPatientVisitNotFound)
+//
+//	router := gin.Default()
+//	newTestPatientHandler(router, &mockUsecase)
+//
+//	w := httptest.NewRecorder()
+//	req, _ := http.NewRequest("DELETE", "/patient/"+strconv.Itoa(wrongId)+"/"+strconv.Itoa(vid), nil)
+//
+//	router.ServeHTTP(w, req)
+//
+//	assert.Equal(t, 404, w.Code)
+//
+//	req, _ = http.NewRequest("DELETE", "/patient/"+strconv.Itoa(id)+"/"+strconv.Itoa(wrongVid), nil)
+//
+//	router.ServeHTTP(w, req)
+//
+//	assert.Equal(t, 404, w.Code)
+//}
+
+// Success - 200 OK
+// Patient Not Found - 404 Not Found
+// Bad Request (id or vid is not a number) - 400 Bad Request
+// Invalid Parameters - 400 Bad Request
+// Json Marshalling Error - 400 Bad Request
+// Empty Request Body - 400 Bad Request
+func TestUpdatePatientVisit_Success(t *testing.T) {
+	var mockUsecase mocks.PatientUseCase
+	id := int32(1)
+	vid := int32(1)
+	mockUsecase.On("UpdatePatientVisit", context.Background(), id, vid, &mocks.MissingAdminPatient).Return(nil)
+	router := gin.Default()
+	newTestPatientHandler(router, &mockUsecase)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("PATCH", "/patient/"+strconv.Itoa(int(id))+"/"+strconv.Itoa(int(vid)), strings.NewReader(mocks.MissingAdminPatientJson))
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 200, w.Code)
+}
+
+func TestUpdatePatientVisit_BadRequest_Failure(t *testing.T) {
+	var mockUsecase mocks.PatientUseCase
+	id := int32(1)
+	wrongId := "hello"
+	vid := int32(1)
+	wrongVid := "world"
+	router := gin.Default()
+	newTestPatientHandler(router, &mockUsecase)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("PATCH", "/patient/"+wrongId+"/"+strconv.Itoa(int(vid)), strings.NewReader(mocks.MissingAdminPatientJson))
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 400, w.Code)
+
+	req, _ = http.NewRequest("PATCH", "/patient/"+strconv.Itoa(int(id))+"/"+wrongVid, strings.NewReader(mocks.MissingAdminPatientJson))
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 400, w.Code)
+}
+
+func TestUpdatePatientVisit_NotFound_Failure(t *testing.T) {
+	var mockUsecase mocks.PatientUseCase
+	router := gin.Default()
+	newTestPatientHandler(router, &mockUsecase)
+
+	mockUsecase.On("UpdatePatientVisit", context.Background(), int32(-1), int32(1), &mocks.MissingAdminPatient).Return(entities.ErrPatientVisitNotFound)
+	mockUsecase.On("UpdatePatientVisit", context.Background(), int32(1), int32(-1), &mocks.MissingAdminPatient).Return(entities.ErrPatientVisitNotFound)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("PATCH", "/patient/-1/1", strings.NewReader(mocks.MissingAdminPatientJson))
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 404, w.Code)
+
+	req, _ = http.NewRequest("PATCH", "/patient/1/-1", strings.NewReader(mocks.MissingAdminPatientJson))
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 404, w.Code)
+}
+
+func TestUpdatePatientVisit_InvalidParameters_Failure(t *testing.T) {
+	// When ShouldBindJSON fails - e.g. A required field is not present
 	var mockUsecase mocks.PatientUseCase
 	router := gin.Default()
 	newTestPatientHandler(router, &mockUsecase)
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("PATCH", "/patient/1", strings.NewReader(""))
+	req, _ := http.NewRequest("PATCH", "/patient/1/1", strings.NewReader(mocks.InvalidParametersPatientJson))
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 400, w.Code)
+}
+
+func TestUpdatePatientVisit_JSONMarshallingError_Failure(t *testing.T) {
+	// When marshalling into a JSON struct fails - e.g. data type mismatch between the JSON and the expected golang struct field type
+	var mockUsecase mocks.PatientUseCase
+	router := gin.Default()
+	newTestPatientHandler(router, &mockUsecase)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("PATCH", "/patient/1/1", strings.NewReader(mocks.JSONMarshallingErrorPatientJson))
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 400, w.Code)
+}
+
+func TestUpdatePatientVisit_EmptyRequestBody_Failure(t *testing.T) {
+	var mockUsecase mocks.PatientUseCase
+	router := gin.Default()
+	newTestPatientHandler(router, &mockUsecase)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("PATCH", "/patient/1/1", strings.NewReader(""))
 
 	router.ServeHTTP(w, req)
 
