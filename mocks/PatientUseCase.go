@@ -14,32 +14,78 @@ type PatientUseCase struct {
 	mock.Mock
 }
 
-// DeletePatientByID provides a mock function with given fields: ctx, id
-func (_m *PatientUseCase) DeletePatientByID(ctx context.Context, id int32) (int32, error) {
-	ret := _m.Called(ctx, id)
+// CreatePatient provides a mock function with given fields: ctx, admin
+func (_m *PatientUseCase) CreatePatient(ctx context.Context, admin *entities.Admin) (int32, error) {
+	ret := _m.Called(ctx, admin)
 
 	if len(ret) == 0 {
-		panic("no return value specified for DeletePatientByID")
+		panic("no return value specified for CreatePatient")
 	}
 
 	var r0 int32
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, int32) (int32, error)); ok {
-		return rf(ctx, id)
+	if rf, ok := ret.Get(0).(func(context.Context, *entities.Admin) (int32, error)); ok {
+		return rf(ctx, admin)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, int32) int32); ok {
-		r0 = rf(ctx, id)
+	if rf, ok := ret.Get(0).(func(context.Context, *entities.Admin) int32); ok {
+		r0 = rf(ctx, admin)
 	} else {
 		r0 = ret.Get(0).(int32)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, int32) error); ok {
-		r1 = rf(ctx, id)
+	if rf, ok := ret.Get(1).(func(context.Context, *entities.Admin) error); ok {
+		r1 = rf(ctx, admin)
 	} else {
 		r1 = ret.Error(1)
 	}
 
 	return r0, r1
+}
+
+// CreatePatientVisit provides a mock function with given fields: ctx, id, admin
+func (_m *PatientUseCase) CreatePatientVisit(ctx context.Context, id int32, admin *entities.Admin) (int32, error) {
+	ret := _m.Called(ctx, id, admin)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreatePatientVisit")
+	}
+
+	var r0 int32
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, int32, *entities.Admin) (int32, error)); ok {
+		return rf(ctx, id, admin)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, int32, *entities.Admin) int32); ok {
+		r0 = rf(ctx, id, admin)
+	} else {
+		r0 = ret.Get(0).(int32)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, int32, *entities.Admin) error); ok {
+		r1 = rf(ctx, id, admin)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// DeletePatientVisit provides a mock function with given fields: ctx, id, vid
+func (_m *PatientUseCase) DeletePatientVisit(ctx context.Context, id int32, vid int32) error {
+	ret := _m.Called(ctx, id, vid)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeletePatientVisit")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, int32, int32) error); ok {
+		r0 = rf(ctx, id, vid)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // ExportDatabaseToCSV provides a mock function with given fields: ctx
@@ -90,57 +136,29 @@ func (_m *PatientUseCase) GetAllAdmin(ctx context.Context) ([]entities.PartAdmin
 	return r0, r1
 }
 
-// GetPatientByID provides a mock function with given fields: ctx, id
-func (_m *PatientUseCase) GetPatientByID(ctx context.Context, id int32) (*entities.Patient, error) {
-	ret := _m.Called(ctx, id)
+// GetPatientVisit provides a mock function with given fields: ctx, id, vid
+func (_m *PatientUseCase) GetPatientVisit(ctx context.Context, id int32, vid int32) (*entities.Patient, error) {
+	ret := _m.Called(ctx, id, vid)
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetPatientByID")
+		panic("no return value specified for GetPatientVisit")
 	}
 
 	var r0 *entities.Patient
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, int32) (*entities.Patient, error)); ok {
-		return rf(ctx, id)
+	if rf, ok := ret.Get(0).(func(context.Context, int32, int32) (*entities.Patient, error)); ok {
+		return rf(ctx, id, vid)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, int32) *entities.Patient); ok {
-		r0 = rf(ctx, id)
+	if rf, ok := ret.Get(0).(func(context.Context, int32, int32) *entities.Patient); ok {
+		r0 = rf(ctx, id, vid)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*entities.Patient)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, int32) error); ok {
-		r1 = rf(ctx, id)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// InsertPatient provides a mock function with given fields: ctx, patient
-func (_m *PatientUseCase) InsertPatient(ctx context.Context, patient *entities.Patient) (int32, error) {
-	ret := _m.Called(ctx, patient)
-
-	if len(ret) == 0 {
-		panic("no return value specified for InsertPatient")
-	}
-
-	var r0 int32
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *entities.Patient) (int32, error)); ok {
-		return rf(ctx, patient)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, *entities.Patient) int32); ok {
-		r0 = rf(ctx, patient)
-	} else {
-		r0 = ret.Get(0).(int32)
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, *entities.Patient) error); ok {
-		r1 = rf(ctx, patient)
+	if rf, ok := ret.Get(1).(func(context.Context, int32, int32) error); ok {
+		r1 = rf(ctx, id, vid)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -178,32 +196,22 @@ func (_m *PatientUseCase) SearchPatients(ctx context.Context, search string) ([]
 	return r0, r1
 }
 
-// UpdatePatientByID provides a mock function with given fields: ctx, id, patient
-func (_m *PatientUseCase) UpdatePatientByID(ctx context.Context, id int32, patient *entities.Patient) (int32, error) {
-	ret := _m.Called(ctx, id, patient)
+// UpdatePatientVisit provides a mock function with given fields: ctx, id, vid, patient
+func (_m *PatientUseCase) UpdatePatientVisit(ctx context.Context, id int32, vid int32, patient *entities.Patient) error {
+	ret := _m.Called(ctx, id, vid, patient)
 
 	if len(ret) == 0 {
-		panic("no return value specified for UpdatePatientByID")
+		panic("no return value specified for UpdatePatientVisit")
 	}
 
-	var r0 int32
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, int32, *entities.Patient) (int32, error)); ok {
-		return rf(ctx, id, patient)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, int32, *entities.Patient) int32); ok {
-		r0 = rf(ctx, id, patient)
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, int32, int32, *entities.Patient) error); ok {
+		r0 = rf(ctx, id, vid, patient)
 	} else {
-		r0 = ret.Get(0).(int32)
+		r0 = ret.Error(0)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, int32, *entities.Patient) error); ok {
-		r1 = rf(ctx, id, patient)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
+	return r0
 }
 
 // NewPatientUseCase creates a new instance of PatientUseCase. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.

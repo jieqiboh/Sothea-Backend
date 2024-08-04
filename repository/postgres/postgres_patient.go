@@ -22,8 +22,8 @@ func NewPostgresPatientRepository(conn *sql.DB) entities.PatientRepository {
 	return &postgresPatientRepository{conn}
 }
 
-// GetPatientByID returns a Patient struct based on ID. Only guaranteed field is Admin
-func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int32) (res *entities.Patient, err error) {
+// GetPatientVisit returns a Patient struct representing a single visit based on ID, and Entry ID. Only guaranteed field is Admin
+func (p *postgresPatientRepository) GetPatientVisit(ctx context.Context, id int32, vid int32) (res *entities.Patient, err error) {
 	// Start a new transaction
 	tx, err := p.Conn.BeginTx(ctx, nil)
 	if err != nil {
@@ -33,11 +33,12 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int32
 	// Defer a rollback in case anything fails.
 	defer tx.Rollback()
 
-	rows := tx.QueryRowContext(ctx, "SELECT * FROM admin WHERE id = $1;", id)
+	rows := tx.QueryRowContext(ctx, "SELECT * FROM admin WHERE id = $1 AND vid = $2;", id, vid)
 	admin := entities.Admin{}
 	var photoBytes []byte
 	err = rows.Scan(
 		&admin.ID,
+		&admin.VID,
 		&admin.FamilyGroup,
 		&admin.RegDate,
 		&admin.QueueNo,
@@ -57,13 +58,14 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int32
 	photoBase64 := base64.StdEncoding.EncodeToString(photoBytes)
 	admin.Photo = &photoBase64
 	if err != nil { // no admin found
-		return nil, entities.ErrPatientNotFound
+		return nil, entities.ErrPatientVisitNotFound
 	}
 
-	rows = tx.QueryRowContext(ctx, "SELECT * FROM pastmedicalhistory WHERE pastmedicalhistory.id = $1;", id)
+	rows = tx.QueryRowContext(ctx, "SELECT * FROM pastmedicalhistory WHERE pastmedicalhistory.id = $1 AND pastmedicalhistory.vid = $2;", id, vid)
 	pastmedicalhistory := &entities.PastMedicalHistory{}
 	err = rows.Scan(
 		&pastmedicalhistory.ID,
+		&pastmedicalhistory.VID,
 		&pastmedicalhistory.Tuberculosis,
 		&pastmedicalhistory.Diabetes,
 		&pastmedicalhistory.Hypertension,
@@ -80,10 +82,11 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int32
 		return nil, err
 	}
 
-	rows = tx.QueryRowContext(ctx, "SELECT * FROM socialhistory WHERE socialhistory.id = $1;", id)
+	rows = tx.QueryRowContext(ctx, "SELECT * FROM socialhistory WHERE socialhistory.id = $1 AND socialhistory.vid = $2;", id, vid)
 	socialhistory := &entities.SocialHistory{}
 	err = rows.Scan(
 		&socialhistory.ID,
+		&socialhistory.VID,
 		&socialhistory.PastSmokingHistory,
 		&socialhistory.NumberOfYears,
 		&socialhistory.CurrentSmokingHistory,
@@ -97,10 +100,11 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int32
 		return nil, err
 	}
 
-	rows = tx.QueryRowContext(ctx, "SELECT * FROM vitalstatistics WHERE vitalstatistics.id = $1;", id)
+	rows = tx.QueryRowContext(ctx, "SELECT * FROM vitalstatistics WHERE vitalstatistics.id = $1 AND vitalstatistics.vid = $2;", id, vid)
 	vitalstatistics := &entities.VitalStatistics{}
 	err = rows.Scan(
 		&vitalstatistics.ID,
+		&vitalstatistics.VID,
 		&vitalstatistics.Temperature,
 		&vitalstatistics.SpO2,
 		&vitalstatistics.SystolicBP1,
@@ -121,10 +125,11 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int32
 		return nil, err
 	}
 
-	rows = tx.QueryRowContext(ctx, "SELECT * FROM heightandweight WHERE heightandweight.id = $1;", id)
+	rows = tx.QueryRowContext(ctx, "SELECT * FROM heightandweight WHERE heightandweight.id = $1 AND heightandweight.vid = $2;", id, vid)
 	heightandweight := &entities.HeightAndWeight{}
 	err = rows.Scan(
 		&heightandweight.ID,
+		&heightandweight.VID,
 		&heightandweight.Height,
 		&heightandweight.Weight,
 		&heightandweight.BMI,
@@ -138,10 +143,11 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int32
 		return nil, err
 	}
 
-	rows = tx.QueryRowContext(ctx, "SELECT * FROM visualacuity WHERE visualacuity.id = $1;", id)
+	rows = tx.QueryRowContext(ctx, "SELECT * FROM visualacuity WHERE visualacuity.id = $1 AND visualacuity.vid = $2;", id, vid)
 	visualacuity := &entities.VisualAcuity{}
 	err = rows.Scan(
 		&visualacuity.ID,
+		&visualacuity.VID,
 		&visualacuity.LEyeVision,
 		&visualacuity.REyeVision,
 		&visualacuity.AdditionalIntervention,
@@ -152,10 +158,11 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int32
 		return nil, err
 	}
 
-	rows = tx.QueryRowContext(ctx, "SELECT * FROM doctorsconsultation WHERE doctorsconsultation.id = $1;", id)
+	rows = tx.QueryRowContext(ctx, "SELECT * FROM doctorsconsultation WHERE doctorsconsultation.id = $1 AND doctorsconsultation.vid = $2;", id, vid)
 	doctorsconsultation := &entities.DoctorsConsultation{}
 	err = rows.Scan(
 		&doctorsconsultation.ID,
+		&doctorsconsultation.VID,
 		&doctorsconsultation.Healthy,
 		&doctorsconsultation.Msk,
 		&doctorsconsultation.Cvs,
@@ -195,8 +202,8 @@ func (p *postgresPatientRepository) GetPatientByID(ctx context.Context, id int32
 	return &patient, nil
 }
 
-// InsertPatient inserts a Patient and returns the new id if successful. Only required field is Admin
-func (p *postgresPatientRepository) InsertPatient(ctx context.Context, patient *entities.Patient) (int32, error) {
+// CreatePatient inserts a new Admin category for a new patient and returns the new id if successful.
+func (p *postgresPatientRepository) CreatePatient(ctx context.Context, admin *entities.Admin) (int32, error) {
 	// Start a new transaction
 	tx, err := p.Conn.BeginTx(ctx, nil)
 	if err != nil { // error starting transaction
@@ -205,14 +212,6 @@ func (p *postgresPatientRepository) InsertPatient(ctx context.Context, patient *
 
 	// Defer a rollback in case anything fails.
 	defer tx.Rollback()
-
-	admin := patient.Admin
-	pastmedicalhistory := patient.PastMedicalHistory
-	socialhistory := patient.SocialHistory
-	vitalstatistics := patient.VitalStatistics
-	heightandweight := patient.HeightAndWeight
-	visualacuity := patient.VisualAcuity
-	doctorsconsultation := patient.DoctorsConsultation
 
 	var patientid int32
 	if admin == nil { // no admin field
@@ -227,68 +226,44 @@ func (p *postgresPatientRepository) InsertPatient(ctx context.Context, patient *
 	if err != nil { // error inserting admin
 		return -1, err
 	}
-	if pastmedicalhistory != nil {
-		_, err = tx.ExecContext(ctx, `INSERT INTO pastmedicalhistory (id, tuberculosis, diabetes, hypertension, 
-		hyperlipidemia, chronic_joint_pains, chronic_muscle_aches, sexually_transmitted_disease, specified_stds, others) 
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-			patientid, pastmedicalhistory.Tuberculosis, pastmedicalhistory.Diabetes, pastmedicalhistory.Hypertension,
-			pastmedicalhistory.Hyperlipidemia, pastmedicalhistory.ChronicJointPains, pastmedicalhistory.ChronicMuscleAches,
-			pastmedicalhistory.SexuallyTransmittedDisease, pastmedicalhistory.SpecifiedSTDs, pastmedicalhistory.Others)
-		if err != nil {
-			return -1, err
-		}
+
+	if err = tx.Commit(); err != nil {
+		return -1, err
 	}
-	if socialhistory != nil {
-		_, err = tx.ExecContext(ctx, `INSERT INTO socialhistory (id, past_smoking_history, no_of_years, 
-		current_smoking_history, cigarettes_per_day, alcohol_history, how_regular) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-			patientid, socialhistory.PastSmokingHistory, socialhistory.NumberOfYears, socialhistory.CurrentSmokingHistory,
-			socialhistory.CigarettesPerDay, socialhistory.AlcoholHistory, socialhistory.HowRegular)
-		if err != nil {
-			return -1, err
-		}
+	return patientid, nil
+}
+
+// CreatePatientVisit inserts a new Admin category for an existing patient and returns the new vid if successful. Only required field is Admin
+func (p *postgresPatientRepository) CreatePatientVisit(ctx context.Context, id int32, admin *entities.Admin) (int32, error) {
+	// Start a new transaction
+	tx, err := p.Conn.BeginTx(ctx, nil)
+	if err != nil { // error starting transaction
+		return -1, err
 	}
-	if vitalstatistics != nil {
-		_, err = tx.ExecContext(ctx, `INSERT INTO vitalstatistics (id, temperature, spo2, systolic_bp1, 
-diastolic_bp1, systolic_bp2, diastolic_bp2, avg_systolic_bp, avg_diastolic_bp, hr1, hr2, avg_hr, 
-rand_blood_glucose_mmolL, rand_blood_glucose_mmolLp) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
-			patientid, vitalstatistics.Temperature, vitalstatistics.SpO2, vitalstatistics.SystolicBP1,
-			vitalstatistics.DiastolicBP1, vitalstatistics.SystolicBP2, vitalstatistics.DiastolicBP2,
-			vitalstatistics.AverageSystolicBP, vitalstatistics.AverageDiastolicBP, vitalstatistics.HR1,
-			vitalstatistics.HR2, vitalstatistics.AverageHR, vitalstatistics.RandomBloodGlucoseMmolL,
-			vitalstatistics.RandomBloodGlucoseMmolLp)
-		if err != nil {
-			return -1, err
-		}
+	// Defer a rollback in case anything fails.
+	defer tx.Rollback()
+
+	var patientid int32
+	if admin == nil { // no admin field
+		return -1, entities.ErrMissingAdminCategory
 	}
-	if heightandweight != nil {
-		_, err = tx.ExecContext(ctx, `INSERT INTO heightandweight (id, height, weight, bmi, bmi_analysis, 
-		paeds_height, paeds_weight) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-			patientid, heightandweight.Height, heightandweight.Weight, heightandweight.BMI,
-			heightandweight.BMIAnalysis, heightandweight.PaedsHeight, heightandweight.PaedsWeight)
-		if err != nil {
-			return -1, err
-		}
+
+	// Check that patient exists
+	doesPatientExist, err := p.checkPatientExists(ctx, id)
+	if err != nil { // query error
+		return -1, err
+	} else if doesPatientExist == false { // no query error, and patient doesn't exist
+		return -1, entities.ErrPatientNotFound
 	}
-	if visualacuity != nil {
-		_, err = tx.ExecContext(ctx, `INSERT INTO visualacuity (id, l_eye_vision, r_eye_vision, 
-		additional_intervention) VALUES ($1, $2, $3, $4)`,
-			patientid, visualacuity.LEyeVision, visualacuity.REyeVision, visualacuity.AdditionalIntervention)
-		if err != nil {
-			return -1, err
-		}
-	}
-	if doctorsconsultation != nil {
-		_, err = tx.ExecContext(ctx, `INSERT INTO doctorsconsultation (id, healthy, msk, cvs, respi, gu, git, eye, 
-		derm, others, consultation_notes, diagnosis, treatment, referral_needed, referral_loc, remarks) VALUES ($1, $2, 
-		$3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
-			patientid, doctorsconsultation.Healthy, doctorsconsultation.Msk, doctorsconsultation.Cvs,
-			doctorsconsultation.Respi, doctorsconsultation.Gu, doctorsconsultation.Git,
-			doctorsconsultation.Eye, doctorsconsultation.Derm, doctorsconsultation.Others,
-			doctorsconsultation.ConsultationNotes, doctorsconsultation.Diagnosis, doctorsconsultation.Treatment,
-			doctorsconsultation.ReferralNeeded, doctorsconsultation.ReferralLoc, doctorsconsultation.Remarks)
-		if err != nil {
-			return -1, err
-		}
+
+	rows := tx.QueryRowContext(ctx, `INSERT INTO admin (id, family_group, reg_date, queue_no, name, khmer_name, dob, age, gender, village, 
+	contact_no, pregnant, last_menstrual_period, drug_allergies, sent_to_id, photo) 
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING vid`,
+		id, admin.FamilyGroup, admin.RegDate, admin.QueueNo, admin.Name, admin.KhmerName, admin.Dob, admin.Age, admin.Gender, admin.Village, admin.ContactNo,
+		admin.Pregnant, admin.LastMenstrualPeriod, admin.DrugAllergies, admin.SentToID, admin.Photo)
+	err = rows.Scan(&patientid)
+	if err != nil { // error inserting admin
+		return -1, err
 	}
 
 	if err = tx.Commit(); err != nil {
@@ -297,64 +272,72 @@ rand_blood_glucose_mmolL, rand_blood_glucose_mmolLp) VALUES ($1, $2, $3, $4, $5,
 	return patientid, nil
 }
 
-func (p *postgresPatientRepository) DeletePatientByID(ctx context.Context, id int32) (int32, error) {
+// Deletes all patient entries where id and vid match
+func (p *postgresPatientRepository) DeletePatientVisit(ctx context.Context, id int32, vid int32) error {
 	// Start a new transaction
 	tx, err := p.Conn.BeginTx(ctx, nil)
 	if err != nil {
-		return -1, err
+		return err
 	}
 
 	// Defer a rollback in case anything fails.
 	defer tx.Rollback()
 
-	_, err = tx.Exec("DELETE FROM pastmedicalhistory WHERE id = $1", id)
+	_, err = tx.Exec("DELETE FROM pastmedicalhistory WHERE pastmedicalhistory.id = $1 AND pastmedicalhistory.vid = $2;", id, vid)
 	if err != nil {
-		return -1, err
+		return err
 	}
-	_, err = tx.Exec("DELETE FROM socialhistory WHERE id = $1", id)
+	_, err = tx.Exec("DELETE FROM socialhistory WHERE socialhistory.id = $1 AND socialhistory.vid = $2;", id, vid)
 	if err != nil {
-		return -1, err
+		return err
 	}
-	_, err = tx.Exec("DELETE FROM vitalstatistics WHERE id = $1", id)
+	_, err = tx.Exec("DELETE FROM vitalstatistics WHERE vitalstatistics.id = $1 AND vitalstatistics.vid = $2;", id, vid)
 	if err != nil {
-		return -1, err
+		return err
 	}
-	_, err = tx.Exec("DELETE FROM heightandweight WHERE id = $1", id)
+	_, err = tx.Exec("DELETE FROM heightandweight WHERE heightandweight.id = $1 AND heightandweight.vid = $2;", id, vid)
 	if err != nil {
-		return -1, err
+		return err
 	}
-	_, err = tx.Exec("DELETE FROM visualacuity WHERE id = $1", id)
+	_, err = tx.Exec("DELETE FROM visualacuity WHERE visualacuity.id = $1 AND visualacuity.vid = $2;", id, vid)
 	if err != nil {
-		return -1, err
+		return err
 	}
-	_, err = tx.Exec("DELETE FROM doctorsconsultation WHERE id = $1", id)
+	_, err = tx.Exec("DELETE FROM doctorsconsultation WHERE doctorsconsultation.id = $1 AND doctorsconsultation.vid = $2;", id, vid)
 	if err != nil {
-		return -1, err
+		return err
 	}
-	_, err = tx.Exec("DELETE FROM admin WHERE id = $1", id)
+	_, err = tx.Exec("DELETE FROM admin WHERE id = $1 AND vid = $2", id, vid)
 	if err != nil {
-		return -1, err
+		return err
 	}
 
 	if err = tx.Commit(); err != nil {
-		return -1, err
+		return err
 	}
-	return id, nil
+	return nil
 }
 
-// UpdatePatientByID updates an already existing patient, filling out or overriding any of its fields
-func (p *postgresPatientRepository) UpdatePatientByID(ctx context.Context, id int32, patient *entities.Patient) (int32, error) {
+// UpdatePatientVisit updates a visit for an existing patient, filling out or overriding any of its fields
+func (p *postgresPatientRepository) UpdatePatientVisit(ctx context.Context, id int32, vid int32, patient *entities.Patient) error {
 	// Checks that a patient exists by searching for admin field
 	// Then for each non-nil field in patient, updates it
-
 	// Start a new transaction
 	tx, err := p.Conn.BeginTx(ctx, nil)
 	if err != nil {
-		return -1, err
+		return err
 	}
 
 	// Defer a rollback in case anything fails.
 	defer tx.Rollback()
+
+	// Check that patient visit exists
+	doesPatientVisitExist, err := p.checkPatientVisitExists(ctx, id, vid)
+	if err != nil {
+		return err
+	} else if doesPatientVisitExist == false {
+		return entities.ErrPatientVisitNotFound
+	}
 
 	a := patient.Admin
 	pmh := patient.PastMedicalHistory
@@ -363,175 +346,149 @@ func (p *postgresPatientRepository) UpdatePatientByID(ctx context.Context, id in
 	haw := patient.HeightAndWeight
 	va := patient.VisualAcuity
 	dc := patient.DoctorsConsultation
-
-	// Check that patient exists already
-	rows := tx.QueryRowContext(ctx, "SELECT * FROM admin WHERE id = $1;", id)
-	prevAdmin := entities.Admin{}
-	err = rows.Scan(
-		&prevAdmin.ID,
-		&prevAdmin.FamilyGroup,
-		&prevAdmin.RegDate,
-		&prevAdmin.QueueNo,
-		&prevAdmin.Name,
-		&prevAdmin.KhmerName,
-		&prevAdmin.Dob,
-		&prevAdmin.Age,
-		&prevAdmin.Gender,
-		&prevAdmin.Village,
-		&prevAdmin.ContactNo,
-		&prevAdmin.Pregnant,
-		&prevAdmin.LastMenstrualPeriod,
-		&prevAdmin.DrugAllergies,
-		&prevAdmin.SentToID,
-		&prevAdmin.Photo,
-	)
-
-	if err != nil { // no patient found
-		return -1, entities.ErrPatientNotFound
-	}
 	if a != nil { // Update admin
 		_, err = tx.ExecContext(ctx, `UPDATE admin SET family_group = $1, reg_date = $2, queue_no = $3, name = $4, khmer_name = $5, dob = $6, age = $7, 
 		gender = $8, village = $9, contact_no = $10, pregnant = $11, last_menstrual_period = $12, drug_allergies = $13,
-		sent_to_id = $14, photo = $15 WHERE id = $16`, a.FamilyGroup, a.RegDate, a.QueueNo, a.Name, a.KhmerName, a.Dob, a.Age, a.Gender, a.Village, a.ContactNo,
-			a.Pregnant, a.LastMenstrualPeriod, a.DrugAllergies, a.SentToID, a.Photo, id)
+		sent_to_id = $14, photo = $15 WHERE id = $16 AND vid = $17`, a.FamilyGroup, a.RegDate, a.QueueNo, a.Name, a.KhmerName, a.Dob, a.Age, a.Gender, a.Village, a.ContactNo,
+			a.Pregnant, a.LastMenstrualPeriod, a.DrugAllergies, a.SentToID, a.Photo, id, vid)
 		if err != nil {
-			return -1, err
+			return err
 		}
 	}
-	if pmh != nil { // Update pastmedicalhistory
+	if pmh != nil { // Update pastmedicalhistory, use insert into on conflict update because not it isn't guaranteed to exist
 		_, err = tx.ExecContext(ctx, `
-		INSERT INTO pastmedicalhistory (id, tuberculosis, diabetes, hypertension, hyperlipidemia, chronic_joint_pains,
+		INSERT INTO pastmedicalhistory (id, vid, tuberculosis, diabetes, hypertension, hyperlipidemia, chronic_joint_pains,
 										 chronic_muscle_aches, sexually_transmitted_disease, specified_stds, others) 
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
-		ON CONFLICT (id) DO UPDATE SET
-			tuberculosis = $2, 
-			diabetes = $3,
-			hypertension = $4,
-			hyperlipidemia = $5,
-			chronic_joint_pains = $6,
-			chronic_muscle_aches = $7,
-			sexually_transmitted_disease = $8,
-			specified_stds = $9,
-			others = $10
-		`, id, pmh.Tuberculosis, pmh.Diabetes, pmh.Hypertension, pmh.Hyperlipidemia,
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) 
+		ON CONFLICT (id, vid) DO UPDATE SET
+			tuberculosis = $3, 
+			diabetes = $4,
+			hypertension = $5,
+			hyperlipidemia = $6,
+			chronic_joint_pains = $7,
+			chronic_muscle_aches = $8,
+			sexually_transmitted_disease = $9,
+			specified_stds = $10,
+			others = $11
+		`, id, vid, pmh.Tuberculosis, pmh.Diabetes, pmh.Hypertension, pmh.Hyperlipidemia,
 			pmh.ChronicJointPains, pmh.ChronicMuscleAches, pmh.SexuallyTransmittedDisease,
 			pmh.SpecifiedSTDs, pmh.Others)
 		if err != nil {
-			return -1, err
+			return err
 		}
 	}
 	if socialhistory != nil {
 		_, err = tx.ExecContext(ctx, `
-		INSERT INTO socialhistory (id, past_smoking_history, no_of_years, current_smoking_history, cigarettes_per_day, 
+		INSERT INTO socialhistory (id, vid, past_smoking_history, no_of_years, current_smoking_history, cigarettes_per_day, 
 		alcohol_history, how_regular) 
-		VALUES ($1, $2, $3, $4, $5, $6, $7) 
-		ON CONFLICT (id) DO UPDATE SET
-			past_smoking_history = $2,
-			no_of_years = $3,
-			current_smoking_history = $4,
-			cigarettes_per_day = $5,
-			alcohol_history = $6,
-			how_regular = $7
-		`, id, socialhistory.PastSmokingHistory, socialhistory.NumberOfYears, socialhistory.CurrentSmokingHistory,
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+		ON CONFLICT (id, vid) DO UPDATE SET
+			past_smoking_history = $3,
+			no_of_years = $4,
+			current_smoking_history = $5,
+			cigarettes_per_day = $6,
+			alcohol_history = $7,
+			how_regular = $8
+		`, id, vid, socialhistory.PastSmokingHistory, socialhistory.NumberOfYears, socialhistory.CurrentSmokingHistory,
 			socialhistory.CigarettesPerDay, socialhistory.AlcoholHistory, socialhistory.HowRegular)
 
 		if err != nil {
-			return -1, err
+			return err
 		}
 	}
 	if vs != nil {
 		_, err = tx.ExecContext(ctx, `
-		INSERT INTO vitalstatistics (id, temperature, spO2, systolic_bp1, diastolic_bp1, systolic_bp2, diastolic_bp2, 
+		INSERT INTO vitalstatistics (id, vid, temperature, spO2, systolic_bp1, diastolic_bp1, systolic_bp2, diastolic_bp2, 
 		avg_systolic_bp, avg_diastolic_bp, hr1, hr2, avg_hr, rand_blood_glucose_mmolL, rand_blood_glucose_mmolLp) 
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) 
-		ON CONFLICT (id) DO UPDATE SET
-			temperature = $2,
-			spO2 = $3,
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) 
+		ON CONFLICT (id, vid) DO UPDATE SET
+			temperature = $3,
+			spO2 = $4,
 			systolic_bp1 = $4,
-			diastolic_bp1 = $5,
-			systolic_bp2 = $6,
-			diastolic_bp2 = $7,
-			avg_systolic_bp = $8,
-			avg_diastolic_bp = $9,
-			hr1 = $10,
-			hr2 = $11,
-			avg_hr = $12,
-			rand_blood_glucose_mmolL = $13,
-			rand_blood_glucose_mmolLp = $14
-		`, id, vs.Temperature, vs.SpO2, vs.SystolicBP1, vs.DiastolicBP1, vs.SystolicBP2, vs.DiastolicBP2,
+			diastolic_bp1 = $6,
+			systolic_bp2 = $7,
+			diastolic_bp2 = $8,
+			avg_systolic_bp = $9,
+			avg_diastolic_bp = $10,
+			hr1 = $11,
+			hr2 = $12,
+			avg_hr = $13,
+			rand_blood_glucose_mmolL = $14,
+			rand_blood_glucose_mmolLp = $15
+		`, id, vid, vs.Temperature, vs.SpO2, vs.SystolicBP1, vs.DiastolicBP1, vs.SystolicBP2, vs.DiastolicBP2,
 			vs.AverageSystolicBP, vs.AverageDiastolicBP, vs.HR1, vs.HR2, vs.AverageHR, vs.RandomBloodGlucoseMmolL,
 			vs.RandomBloodGlucoseMmolLp)
 
 		if err != nil {
-			return -1, err
+			return err
 		}
 	}
 	if haw != nil {
 		_, err = tx.ExecContext(ctx, `
-		INSERT INTO heightandweight (id, height, weight, bmi, bmi_analysis, paeds_height, paeds_weight) 
-		VALUES ($1, $2, $3, $4, $5, $6, $7) 
-		ON CONFLICT (id) DO UPDATE SET
-			height = $2,
-			weight = $3,
-			bmi = $4,
-			bmi_analysis = $5,
-			paeds_height = $6,
-			paeds_weight = $7
-		`, id, haw.Height, haw.Weight, haw.BMI, haw.BMIAnalysis, haw.PaedsHeight, haw.PaedsWeight)
+		INSERT INTO heightandweight (id, vid, height, weight, bmi, bmi_analysis, paeds_height, paeds_weight) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+		ON CONFLICT (id, vid) DO UPDATE SET
+			height = $3,
+			weight = $4,
+			bmi = $5,
+			bmi_analysis = $6,
+			paeds_height = $7,
+			paeds_weight = $8
+		`, id, vid, haw.Height, haw.Weight, haw.BMI, haw.BMIAnalysis, haw.PaedsHeight, haw.PaedsWeight)
 
 		if err != nil {
-			return -1, err
+			return err
 		}
 	}
 	if va != nil {
 		_, err = tx.ExecContext(ctx, `
-		INSERT INTO visualacuity (id, l_eye_vision, r_eye_vision, additional_intervention) 
-		VALUES ($1, $2, $3, $4) 
-		ON CONFLICT (id) DO UPDATE SET
-			l_eye_vision = $2,
-			r_eye_vision = $3,
-			additional_intervention = $4
-		`, id, va.LEyeVision, va.REyeVision, va.AdditionalIntervention)
+		INSERT INTO visualacuity (id, vid, l_eye_vision, r_eye_vision, additional_intervention) 
+		VALUES ($1, $2, $3, $4, $5) 
+		ON CONFLICT (id, vid) DO UPDATE SET
+			l_eye_vision = $3,
+			r_eye_vision = $4,
+			additional_intervention = $5
+		`, id, vid, va.LEyeVision, va.REyeVision, va.AdditionalIntervention)
 
 		if err != nil {
-			return -1, err
+			return err
 		}
 	}
 	if dc != nil {
 		_, err = tx.ExecContext(ctx, `
-		INSERT INTO doctorsconsultation (id, healthy, msk, cvs, respi, gu, git, eye, derm, others, 
+		INSERT INTO doctorsconsultation (id, vid, healthy, msk, cvs, respi, gu, git, eye, derm, others, 
 		consultation_notes, diagnosis, treatment, referral_needed, referral_loc, remarks) 
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) 
-		ON CONFLICT(id) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) 
+		ON CONFLICT(id, vid) 
 		DO UPDATE SET
-			healthy = $2,
-			msk = $3,
-			cvs = $4,
-			respi = $5,
-			gu = $6,
-			git = $7,
-			eye = $8,
-			derm = $9,
-			others = $10,
-			consultation_notes = $11,
-			diagnosis = $12,
-			treatment = $13,
-			referral_needed = $14,
-			referral_loc = $15,
-			remarks = $16
+			healthy = $3,
+			msk = $4,
+			cvs = $5,
+			respi = $6,
+			gu = $7,
+			git = $8,
+			eye = $9,
+			derm = $10,
+			others = $11,
+			consultation_notes = $12,
+			diagnosis = $13,
+			treatment = $14,
+			referral_needed = $15,
+			referral_loc = $16,
+			remarks = $17
 		`,
-			id, dc.Healthy, dc.Msk, dc.Cvs, dc.Respi, dc.Gu, dc.Git, dc.Eye, dc.Derm, dc.Others, dc.ConsultationNotes,
+			id, vid, dc.Healthy, dc.Msk, dc.Cvs, dc.Respi, dc.Gu, dc.Git, dc.Eye, dc.Derm, dc.Others, dc.ConsultationNotes,
 			dc.Diagnosis, dc.Treatment, dc.ReferralNeeded, dc.ReferralLoc, dc.Remarks)
 
 		if err != nil {
-			return -1, err
+			return err
 		}
 	}
 
 	if err = tx.Commit(); err != nil {
-		return -1, err
+		return err
 	}
-	return id, nil
+	return nil
 }
 
 func (p *postgresPatientRepository) GetAllAdmin(ctx context.Context) ([]entities.PartAdmin, error) {
@@ -556,6 +513,22 @@ func (p *postgresPatientRepository) GetAllAdmin(ctx context.Context) ([]entities
 	}
 
 	return result, nil
+}
+
+func (p *postgresPatientRepository) GetPatientMeta(ctx context.Context, id int32) (*entities.Patient, error) {
+	//
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p *postgresPatientRepository) GetPatientVisitMeta(ctx context.Context, id int32, vid int32) (*entities.Patient, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p *postgresPatientRepository) GetAllPatientVisitMeta(ctx context.Context) ([]entities.PartAdmin, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (p *postgresPatientRepository) SearchPatients(ctx context.Context, search string) ([]entities.PartAdmin, error) {
@@ -693,4 +666,66 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context) err
 	}
 
 	return nil
+}
+
+func (p *postgresPatientRepository) checkPatientExists(ctx context.Context, id int32) (bool, error) {
+	prevAdmin := entities.Admin{}
+	err := p.Conn.QueryRowContext(ctx, "SELECT * FROM admin WHERE id = $1;", id).Scan(
+		&prevAdmin.ID,
+		&prevAdmin.VID,
+		&prevAdmin.FamilyGroup,
+		&prevAdmin.RegDate,
+		&prevAdmin.QueueNo,
+		&prevAdmin.Name,
+		&prevAdmin.KhmerName,
+		&prevAdmin.Dob,
+		&prevAdmin.Age,
+		&prevAdmin.Gender,
+		&prevAdmin.Village,
+		&prevAdmin.ContactNo,
+		&prevAdmin.Pregnant,
+		&prevAdmin.LastMenstrualPeriod,
+		&prevAdmin.DrugAllergies,
+		&prevAdmin.SentToID,
+		&prevAdmin.Photo,
+	)
+	if err == sql.ErrNoRows {
+		return false, nil
+	} else if err != nil {
+		log.Fatalf("query error: %v\n", err)
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (p *postgresPatientRepository) checkPatientVisitExists(ctx context.Context, id int32, vid int32) (bool, error) {
+	prevAdmin := entities.Admin{}
+	err := p.Conn.QueryRowContext(ctx, "SELECT * FROM admin WHERE id = $1 AND vid = $2;", id, vid).Scan(
+		&prevAdmin.ID,
+		&prevAdmin.VID,
+		&prevAdmin.FamilyGroup,
+		&prevAdmin.RegDate,
+		&prevAdmin.QueueNo,
+		&prevAdmin.Name,
+		&prevAdmin.KhmerName,
+		&prevAdmin.Dob,
+		&prevAdmin.Age,
+		&prevAdmin.Gender,
+		&prevAdmin.Village,
+		&prevAdmin.ContactNo,
+		&prevAdmin.Pregnant,
+		&prevAdmin.LastMenstrualPeriod,
+		&prevAdmin.DrugAllergies,
+		&prevAdmin.SentToID,
+		&prevAdmin.Photo,
+	)
+	if err == sql.ErrNoRows {
+		return false, nil
+	} else if err != nil {
+		log.Fatalf("query error: %v\n", err)
+		return false, err
+	}
+
+	return true, nil
 }

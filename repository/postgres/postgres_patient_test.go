@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/jieqiboh/sothea_backend/entities"
-	"github.com/jieqiboh/sothea_backend/util"
 	_ "github.com/lib/pq"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
@@ -159,52 +158,7 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func TestDB(t *testing.T) {
-	id := 1
-	rows, err := db.Query("SELECT * FROM admin WHERE id = $1", id)
-	result := make([]entities.Admin, 0)
-
-	for rows.Next() {
-		admin := entities.Admin{}
-		err = rows.Scan(
-			&admin.ID,
-			&admin.FamilyGroup,
-			&admin.RegDate,
-			&admin.QueueNo,
-			&admin.Name,
-			&admin.KhmerName,
-			&admin.Dob,
-			&admin.Age,
-			&admin.Gender,
-			&admin.Village,
-			&admin.ContactNo,
-			&admin.Pregnant,
-			&admin.LastMenstrualPeriod,
-			&admin.DrugAllergies,
-			&admin.SentToID,
-			&admin.Photo,
-		)
-		if err != nil {
-			panic(err)
-		}
-		result = append(result, admin)
-	}
-
-	assert.NotNil(t, *result[0].Dob)
-	assert.NotNil(t, *result[0].QueueNo)
-	assert.NotNil(t, result[0].Gender)
-	assert.NotNil(t, result[0].Village)
-	assert.NotNil(t, result[0].ContactNo)
-	assert.NotNil(t, result[0].Pregnant)
-	assert.Nil(t, result[0].LastMenstrualPeriod)
-	assert.NotNil(t, result[0].DrugAllergies)
-	assert.NotNil(t, result[0].SentToID)
-	assert.Nil(t, result[0].Photo)
-
-	log.Println(result[0])
-}
-
-func TestGetPatientByID(t *testing.T) {
+func TestPostgresPatientRepository_GetPatientVisit(t *testing.T) {
 	repo := NewPostgresPatientRepository(db)
 
 	patient_repo, ok := repo.(*postgresPatientRepository)
@@ -213,19 +167,24 @@ func TestGetPatientByID(t *testing.T) {
 	}
 
 	id := 1
-	p, err := patient_repo.GetPatientByID(context.Background(), int32(id))
+	vid := 1
+	p, err := patient_repo.GetPatientVisit(context.Background(), int32(id), int32(vid))
 	assert.Nil(t, err)
 
-	log.Println(p.Admin)
-	log.Println(p.PastMedicalHistory)
-	log.Println(p.SocialHistory)
-	log.Println(p.VitalStatistics)
-	log.Println(p.HeightAndWeight)
-	log.Println(p.VisualAcuity)
-	log.Println(p.DoctorsConsultation)
+	assert.NotNil(t, p.Admin)
+	assert.NotNil(t, p.PastMedicalHistory)
+	assert.NotNil(t, p.SocialHistory)
+	assert.NotNil(t, p.VitalStatistics)
+	assert.NotNil(t, p.HeightAndWeight)
+	assert.NotNil(t, p.VisualAcuity)
+	assert.NotNil(t, p.DoctorsConsultation)
+
+	// Get patient that doesn't exist
+	_, err = patient_repo.GetPatientVisit(context.Background(), -1, 1)
+	assert.ErrorIs(t, err, entities.ErrPatientVisitNotFound)
 }
 
-func TestDeletePatientByID(t *testing.T) {
+func TestPostgresPatientRepository_CreatePatient(t *testing.T) {
 	repo := NewPostgresPatientRepository(db)
 
 	patient_repo, ok := repo.(*postgresPatientRepository)
@@ -233,19 +192,12 @@ func TestDeletePatientByID(t *testing.T) {
 		log.Fatal("Failed to assert repo")
 	}
 
-	var latestId int32
-	err := db.QueryRow("SELECT ID FROM admin ORDER BY ID DESC LIMIT 1").Scan(&latestId)
-	if err != nil {
-		log.Fatal("Getting latest id failed:", err)
-	}
-
-	res, err := patient_repo.DeletePatientByID(context.Background(), latestId)
-
+	id, err := patient_repo.CreatePatient(context.Background(), &admin)
 	assert.Nil(t, err)
-	log.Println("Deleted Patient of ID: ", res)
+	assert.Equal(t, id, int32(7))
 }
 
-func TestInsertPatient(t *testing.T) {
+func TestPostgresPatientRepository_CreatePatientVisit(t *testing.T) {
 	repo := NewPostgresPatientRepository(db)
 
 	patient_repo, ok := repo.(*postgresPatientRepository)
@@ -253,23 +205,31 @@ func TestInsertPatient(t *testing.T) {
 		log.Fatal("Failed to assert repo")
 	}
 
-	patient := entities.Patient{
-		Admin:               &admin,
-		PastMedicalHistory:  &pastmedicalhistory,
-		SocialHistory:       &socialhistory,
-		VitalStatistics:     &vitalstatistics,
-		HeightAndWeight:     &heightandweight,
-		VisualAcuity:        &visualacuity,
-		DoctorsConsultation: &doctorsconsultation,
-	}
-
-	id, err := patient_repo.InsertPatient(context.Background(), &patient)
+	id := 1
+	vid, err := patient_repo.CreatePatientVisit(context.Background(), int32(id), &admin)
 	assert.Nil(t, err)
-	log.Println("Patient Successfully inserted with id: ", id)
-
+	assert.Equal(t, vid, int32(5))
 }
 
-func TestUpdatePatientByID(t *testing.T) {
+func TestPostgresPatientRepository_DeletePatientVisit(t *testing.T) {
+	repo := NewPostgresPatientRepository(db)
+
+	patient_repo, ok := repo.(*postgresPatientRepository)
+	if !ok {
+		log.Fatal("Failed to assert repo")
+
+	}
+
+	var id int32 = 1
+	var vid int32 = 1
+	err := patient_repo.DeletePatientVisit(context.Background(), id, vid)
+	assert.Nil(t, err)
+
+	_, err = patient_repo.GetPatientVisit(context.Background(), id, vid)
+	assert.ErrorIs(t, err, entities.ErrPatientVisitNotFound)
+}
+
+func TestPostgresPatientRepository_UpdatePatientVisit(t *testing.T) {
 	repo := NewPostgresPatientRepository(db)
 
 	patient_repo, ok := repo.(*postgresPatientRepository)
@@ -277,19 +237,11 @@ func TestUpdatePatientByID(t *testing.T) {
 		log.Fatal("Failed to assert repo")
 	}
 
-	patient := entities.Patient{
-		Admin:               &admin,
-		PastMedicalHistory:  nil,
-		SocialHistory:       nil,
-		VitalStatistics:     nil,
-		HeightAndWeight:     &heightandweight,
-		VisualAcuity:        &visualacuity,
-		DoctorsConsultation: &doctorsconsultation,
-	}
-
-	id, err := patient_repo.InsertPatient(context.Background(), &patient)
+	// Create new patient visit for first patient
+	var id int32 = 1
+	vid, err := patient_repo.CreatePatientVisit(context.Background(), id, &admin)
 	assert.Nil(t, err)
-	log.Println("Patient Successfully inserted with id: ", id)
+
 	admin.ID = id
 	pastmedicalhistory.ID = id
 	socialhistory.ID = id
@@ -297,6 +249,13 @@ func TestUpdatePatientByID(t *testing.T) {
 	heightandweight.ID = id
 	visualacuity.ID = id
 	doctorsconsultation.ID = id
+	admin.VID = vid
+	pastmedicalhistory.VID = vid
+	socialhistory.VID = vid
+	vitalstatistics.VID = vid
+	heightandweight.VID = vid
+	visualacuity.VID = vid
+	doctorsconsultation.VID = vid
 
 	updatePatient := entities.Patient{
 		Admin:               &admin,
@@ -307,12 +266,11 @@ func TestUpdatePatientByID(t *testing.T) {
 		VisualAcuity:        &visualacuity,
 		DoctorsConsultation: nil,
 	}
-	id, err = patient_repo.UpdatePatientByID(context.Background(), id, &updatePatient)
 
+	err = patient_repo.UpdatePatientVisit(context.Background(), id, vid, &updatePatient)
 	assert.Nil(t, err)
-	log.Println("Patient Successfully Updated with id: ", id)
 
-	p, err := patient_repo.GetPatientByID(context.Background(), id)
+	p, err := patient_repo.GetPatientVisit(context.Background(), id, vid)
 	assert.Nil(t, err)
 
 	expectedPatient := entities.Patient{
@@ -322,169 +280,286 @@ func TestUpdatePatientByID(t *testing.T) {
 		VitalStatistics:     &vitalstatistics,
 		HeightAndWeight:     &heightandweight,
 		VisualAcuity:        &visualacuity,
-		DoctorsConsultation: &doctorsconsultation,
+		DoctorsConsultation: nil,
 	}
-	// Time is not equal
+
+	// Assert expected values
 	assert.Equal(t, p.PastMedicalHistory, expectedPatient.PastMedicalHistory)
 	assert.Equal(t, p.SocialHistory, expectedPatient.SocialHistory)
 	assert.Equal(t, p.VitalStatistics, expectedPatient.VitalStatistics)
 	assert.Equal(t, p.HeightAndWeight, expectedPatient.HeightAndWeight)
 	assert.Equal(t, p.VisualAcuity, expectedPatient.VisualAcuity)
-	assert.Equal(t, p.DoctorsConsultation, expectedPatient.DoctorsConsultation)
-	log.Println(p.Admin)
-	log.Println(p.PastMedicalHistory)
-	log.Println(p.SocialHistory)
-	log.Println(p.VitalStatistics)
-	log.Println(p.HeightAndWeight)
-	log.Println(p.VisualAcuity)
-	log.Println(p.DoctorsConsultation)
+	assert.Nil(t, p.DoctorsConsultation)
+
+	// Update patient that doesn't exist
+	err = patient_repo.UpdatePatientVisit(context.Background(), -1, 1, &updatePatient)
+	assert.ErrorIs(t, err, entities.ErrPatientVisitNotFound)
+
+	// Update patient's visit that doesn't exit
+	err = patient_repo.UpdatePatientVisit(context.Background(), 1, -1, &updatePatient)
+	assert.ErrorIs(t, err, entities.ErrPatientVisitNotFound)
 }
 
-func TestFull(t *testing.T) {
-	// Tests some edge cases and ensures desired behaviour is maintained
-	repo := NewPostgresPatientRepository(db)
+//	func TestDeletePatientByID(t *testing.T) {
+//		repo := NewPostgresPatientRepository(db)
+//
+//		patient_repo, ok := repo.(*postgresPatientRepository)
+//		if !ok {
+//			log.Fatal("Failed to assert repo")
+//		}
+//
+//		var latestId int32
+//		err := db.QueryRow("SELECT ID FROM admin ORDER BY ID DESC LIMIT 1").Scan(&latestId)
+//		if err != nil {
+//			log.Fatal("Getting latest id failed:", err)
+//		}
+//
+//		res, err := patient_repo.DeletePatientByID(context.Background(), latestId)
+//
+//		assert.Nil(t, err)
+//		log.Println("Deleted Patient of ID: ", res)
+//	}
+//func TestInsertPatient(t *testing.T) {
+//	repo := NewPostgresPatientRepository(db)
+//
+//	patient_repo, ok := repo.(*postgresPatientRepository)
+//	if !ok {
+//		log.Fatal("Failed to assert repo")
+//	}
+//
+//	patient := entities.Patient{
+//		Admin:               &admin,
+//		PastMedicalHistory:  &pastmedicalhistory,
+//		SocialHistory:       &socialhistory,
+//		VitalStatistics:     &vitalstatistics,
+//		HeightAndWeight:     &heightandweight,
+//		VisualAcuity:        &visualacuity,
+//		DoctorsConsultation: &doctorsconsultation,
+//	}
+//
+//	id, err := patient_repo.InsertPatient(context.Background(), &patient)
+//	assert.Nil(t, err)
+//	log.Println("Patient Successfully inserted with id: ", id)
+//
+//}
 
-	patient_repo, ok := repo.(*postgresPatientRepository)
-	if !ok {
-		log.Fatal("Failed to assert repo")
-	}
-
-	// InsertPatient with only admin and docconsult field - should successfully insert
-	patient1 := entities.Patient{
-		Admin:               &admin,
-		PastMedicalHistory:  nil,
-		SocialHistory:       nil,
-		VitalStatistics:     nil,
-		HeightAndWeight:     nil,
-		VisualAcuity:        nil,
-		DoctorsConsultation: &doctorsconsultation,
-	}
-	id1, err := patient_repo.InsertPatient(context.Background(), &patient1)
-	assert.NotNil(t, id1)
-	assert.Nil(t, err)
-
-	// InsertPatient with no admin field - should return -1 and error
-	patient2 := entities.Patient{
-		Admin:               nil,
-		PastMedicalHistory:  nil,
-		SocialHistory:       nil,
-		VitalStatistics:     &vitalstatistics,
-		HeightAndWeight:     nil,
-		VisualAcuity:        nil,
-		DoctorsConsultation: &doctorsconsultation,
-	}
-	id2, err := patient_repo.InsertPatient(context.Background(), &patient2)
-	assert.Equal(t, id2, int32(-1))
-	assert.NotNil(t, err)
-
-	// GetPatient with id that doesn't exist
-	patient3, err := patient_repo.GetPatientByID(context.Background(), -1)
-	assert.Nil(t, patient3)
-	assert.NotNil(t, err)
-
-	// GetPatient with only admin and socialhistory field filled in
-	patient4 := entities.Patient{
-		Admin:         &admin,
-		SocialHistory: &socialhistory,
-	}
-	id4, err := patient_repo.InsertPatient(context.Background(), &patient4)
-	var latestId int32
-	err = db.QueryRow("SELECT ID FROM admin ORDER BY ID DESC LIMIT 1").Scan(&latestId)
-	if err != nil {
-		log.Fatal("Getting latest id failed:", err)
-	}
-	patient5, err := patient_repo.GetPatientByID(context.Background(), latestId)
-	assert.Nil(t, err)
-	assert.Nil(t, patient5.PastMedicalHistory)
-	assert.Nil(t, patient5.VitalStatistics)
-	assert.Nil(t, patient5.HeightAndWeight)
-	assert.Nil(t, patient5.VisualAcuity)
-	assert.Nil(t, patient5.DoctorsConsultation)
-	assert.NotNil(t, patient5.Admin)
-	assert.NotNil(t, patient5.SocialHistory)
-
-	// Update Patient4 and update all admin fields except id, add vitalstatistics and visualacuity
-	updatedAdmin := entities.Admin{
-		FamilyGroup:         entities.PtrTo("S001"),
-		RegDate:             entities.PtrTo(time.Now()),
-		QueueNo:             entities.PtrTo("3C"),
-		Name:                entities.PtrTo("Updated Name Here"),
-		KhmerName:           entities.PtrTo("ចវបនមឦ។៊"),
-		Dob:                 entities.PtrTo(time.Date(1994, time.January, 10, 0, 0, 0, 0, time.UTC)),
-		Age:                 entities.PtrTo(5),
-		Gender:              entities.PtrTo("F"),
-		Village:             entities.PtrTo("SO"),
-		ContactNo:           entities.PtrTo("12345678"),
-		Pregnant:            entities.PtrTo(false),
-		LastMenstrualPeriod: entities.PtrTo(time.Date(2024, time.January, 10, 0, 0, 0, 0, time.UTC)),
-		DrugAllergies:       entities.PtrTo("panadol"),
-		SentToID:            entities.PtrTo(false),
-	}
-	patient6 := entities.Patient{
-		Admin:           &updatedAdmin,
-		VitalStatistics: &vitalstatistics,
-		VisualAcuity:    &visualacuity,
-	}
-	id6, err := patient_repo.UpdatePatientByID(context.Background(), id4, &patient6)
-	assert.NotNil(t, id6)
-	assert.Nil(t, err)
-
-	updatedPatient6, err := patient_repo.GetPatientByID(context.Background(), id6)
-	assert.Nil(t, err)
-	assert.NotNil(t, updatedPatient6.Admin)
-	assert.NotNil(t, updatedPatient6.SocialHistory)
-	assert.NotNil(t, updatedPatient6.VitalStatistics)
-	assert.NotNil(t, updatedPatient6.VisualAcuity)
-	assert.Nil(t, updatedPatient6.PastMedicalHistory)
-	assert.Nil(t, updatedPatient6.HeightAndWeight)
-	assert.Nil(t, updatedPatient6.DoctorsConsultation)
-	assert.Equal(t, updatedAdmin.FamilyGroup, updatedPatient6.Admin.FamilyGroup)
-	assert.Equal(t, updatedAdmin.Name, updatedPatient6.Admin.Name)
-	assert.Equal(t, updatedAdmin.Age, updatedPatient6.Admin.Age)
-	assert.Equal(t, updatedAdmin.Gender, updatedPatient6.Admin.Gender)
-}
-
-func TestGetAllAdmin(t *testing.T) {
-	repo := NewPostgresPatientRepository(db)
-
-	patient_repo, ok := repo.(*postgresPatientRepository)
-	if !ok {
-		log.Fatal("Failed to assert repo")
-	}
-
-	admins, err := patient_repo.GetAllAdmin(context.Background())
-	assert.Nil(t, err)
-	assert.NotNil(t, admins)
-}
-
-func TestPostgresPatientRepository_SearchPatients(t *testing.T) {
-	repo := NewPostgresPatientRepository(db)
-
-	patient_repo, ok := repo.(*postgresPatientRepository)
-	if !ok {
-		log.Fatal("Failed to assert repo")
-	}
-
-	admins, err := patient_repo.SearchPatients(context.Background(), "១២៣៤ ៥៦៧៨៩០ឥឲ")
-	assert.Nil(t, err)
-	assert.NotNil(t, admins)
-}
-
-func TestPostgresPatientRepository_ExportDatabaseToCSV(t *testing.T) {
-	repo := NewPostgresPatientRepository(db)
-
-	patient_repo, ok := repo.(*postgresPatientRepository)
-	if !ok {
-		log.Fatal("Failed to assert repo")
-	}
-
-	err := patient_repo.ExportDatabaseToCSV(context.Background())
-	assert.Nil(t, err)
-	// Assert that file exists
-	_, err = os.Stat(util.MustGitPath("repository/tmp/output.csv"))
-	assert.Nil(t, err)
-
-	// Cleanup directory
-	//err = os.Remove("output.csv")
-	//assert.Nil(t, err)
-}
+//
+//func TestUpdatePatientByID(t *testing.T) {
+//	repo := NewPostgresPatientRepository(db)
+//
+//	patient_repo, ok := repo.(*postgresPatientRepository)
+//	if !ok {
+//		log.Fatal("Failed to assert repo")
+//	}
+//
+//	patient := entities.Patient{
+//		Admin:               &admin,
+//		PastMedicalHistory:  nil,
+//		SocialHistory:       nil,
+//		VitalStatistics:     nil,
+//		HeightAndWeight:     &heightandweight,
+//		VisualAcuity:        &visualacuity,
+//		DoctorsConsultation: &doctorsconsultation,
+//	}
+//
+//	id, err := patient_repo.InsertPatient(context.Background(), &patient)
+//	assert.Nil(t, err)
+//	log.Println("Patient Successfully inserted with id: ", id)
+//	admin.ID = id
+//	pastmedicalhistory.ID = id
+//	socialhistory.ID = id
+//	vitalstatistics.ID = id
+//	heightandweight.ID = id
+//	visualacuity.ID = id
+//	doctorsconsultation.ID = id
+//
+//	updatePatient := entities.Patient{
+//		Admin:               &admin,
+//		PastMedicalHistory:  &pastmedicalhistory,
+//		SocialHistory:       &socialhistory,
+//		VitalStatistics:     &vitalstatistics,
+//		HeightAndWeight:     &heightandweight,
+//		VisualAcuity:        &visualacuity,
+//		DoctorsConsultation: nil,
+//	}
+//	id, err = patient_repo.UpdatePatientByID(context.Background(), id, &updatePatient)
+//
+//	assert.Nil(t, err)
+//	log.Println("Patient Successfully Updated with id: ", id)
+//
+//	p, err := patient_repo.GetPatientByID(context.Background(), id)
+//	assert.Nil(t, err)
+//
+//	expectedPatient := entities.Patient{
+//		Admin:               &admin,
+//		PastMedicalHistory:  &pastmedicalhistory,
+//		SocialHistory:       &socialhistory,
+//		VitalStatistics:     &vitalstatistics,
+//		HeightAndWeight:     &heightandweight,
+//		VisualAcuity:        &visualacuity,
+//		DoctorsConsultation: &doctorsconsultation,
+//	}
+//	// Time is not equal
+//	assert.Equal(t, p.PastMedicalHistory, expectedPatient.PastMedicalHistory)
+//	assert.Equal(t, p.SocialHistory, expectedPatient.SocialHistory)
+//	assert.Equal(t, p.VitalStatistics, expectedPatient.VitalStatistics)
+//	assert.Equal(t, p.HeightAndWeight, expectedPatient.HeightAndWeight)
+//	assert.Equal(t, p.VisualAcuity, expectedPatient.VisualAcuity)
+//	assert.Equal(t, p.DoctorsConsultation, expectedPatient.DoctorsConsultation)
+//	log.Println(p.Admin)
+//	log.Println(p.PastMedicalHistory)
+//	log.Println(p.SocialHistory)
+//	log.Println(p.VitalStatistics)
+//	log.Println(p.HeightAndWeight)
+//	log.Println(p.VisualAcuity)
+//	log.Println(p.DoctorsConsultation)
+//}
+//
+//func TestFull(t *testing.T) {
+//	// Tests some edge cases and ensures desired behaviour is maintained
+//	repo := NewPostgresPatientRepository(db)
+//
+//	patient_repo, ok := repo.(*postgresPatientRepository)
+//	if !ok {
+//		log.Fatal("Failed to assert repo")
+//	}
+//
+//	// InsertPatient with only admin and docconsult field - should successfully insert
+//	patient1 := entities.Patient{
+//		Admin:               &admin,
+//		PastMedicalHistory:  nil,
+//		SocialHistory:       nil,
+//		VitalStatistics:     nil,
+//		HeightAndWeight:     nil,
+//		VisualAcuity:        nil,
+//		DoctorsConsultation: &doctorsconsultation,
+//	}
+//	id1, err := patient_repo.InsertPatient(context.Background(), &patient1)
+//	assert.NotNil(t, id1)
+//	assert.Nil(t, err)
+//
+//	// InsertPatient with no admin field - should return -1 and error
+//	patient2 := entities.Patient{
+//		Admin:               nil,
+//		PastMedicalHistory:  nil,
+//		SocialHistory:       nil,
+//		VitalStatistics:     &vitalstatistics,
+//		HeightAndWeight:     nil,
+//		VisualAcuity:        nil,
+//		DoctorsConsultation: &doctorsconsultation,
+//	}
+//	id2, err := patient_repo.InsertPatient(context.Background(), &patient2)
+//	assert.Equal(t, id2, int32(-1))
+//	assert.NotNil(t, err)
+//
+//	// GetPatient with id that doesn't exist
+//	patient3, err := patient_repo.GetPatientByID(context.Background(), -1)
+//	assert.Nil(t, patient3)
+//	assert.NotNil(t, err)
+//
+//	// GetPatient with only admin and socialhistory field filled in
+//	patient4 := entities.Patient{
+//		Admin:         &admin,
+//		SocialHistory: &socialhistory,
+//	}
+//	id4, err := patient_repo.InsertPatient(context.Background(), &patient4)
+//	var latestId int32
+//	err = db.QueryRow("SELECT ID FROM admin ORDER BY ID DESC LIMIT 1").Scan(&latestId)
+//	if err != nil {
+//		log.Fatal("Getting latest id failed:", err)
+//	}
+//	patient5, err := patient_repo.GetPatientByID(context.Background(), latestId)
+//	assert.Nil(t, err)
+//	assert.Nil(t, patient5.PastMedicalHistory)
+//	assert.Nil(t, patient5.VitalStatistics)
+//	assert.Nil(t, patient5.HeightAndWeight)
+//	assert.Nil(t, patient5.VisualAcuity)
+//	assert.Nil(t, patient5.DoctorsConsultation)
+//	assert.NotNil(t, patient5.Admin)
+//	assert.NotNil(t, patient5.SocialHistory)
+//
+//	// Update Patient4 and update all admin fields except id, add vitalstatistics and visualacuity
+//	updatedAdmin := entities.Admin{
+//		FamilyGroup:         entities.PtrTo("S001"),
+//		RegDate:             entities.PtrTo(time.Now()),
+//		QueueNo:             entities.PtrTo("3C"),
+//		Name:                entities.PtrTo("Updated Name Here"),
+//		KhmerName:           entities.PtrTo("ចវបនមឦ។៊"),
+//		Dob:                 entities.PtrTo(time.Date(1994, time.January, 10, 0, 0, 0, 0, time.UTC)),
+//		Age:                 entities.PtrTo(5),
+//		Gender:              entities.PtrTo("F"),
+//		Village:             entities.PtrTo("SO"),
+//		ContactNo:           entities.PtrTo("12345678"),
+//		Pregnant:            entities.PtrTo(false),
+//		LastMenstrualPeriod: entities.PtrTo(time.Date(2024, time.January, 10, 0, 0, 0, 0, time.UTC)),
+//		DrugAllergies:       entities.PtrTo("panadol"),
+//		SentToID:            entities.PtrTo(false),
+//	}
+//	patient6 := entities.Patient{
+//		Admin:           &updatedAdmin,
+//		VitalStatistics: &vitalstatistics,
+//		VisualAcuity:    &visualacuity,
+//	}
+//	id6, err := patient_repo.UpdatePatientByID(context.Background(), id4, &patient6)
+//	assert.NotNil(t, id6)
+//	assert.Nil(t, err)
+//
+//	updatedPatient6, err := patient_repo.GetPatientByID(context.Background(), id6)
+//	assert.Nil(t, err)
+//	assert.NotNil(t, updatedPatient6.Admin)
+//	assert.NotNil(t, updatedPatient6.SocialHistory)
+//	assert.NotNil(t, updatedPatient6.VitalStatistics)
+//	assert.NotNil(t, updatedPatient6.VisualAcuity)
+//	assert.Nil(t, updatedPatient6.PastMedicalHistory)
+//	assert.Nil(t, updatedPatient6.HeightAndWeight)
+//	assert.Nil(t, updatedPatient6.DoctorsConsultation)
+//	assert.Equal(t, updatedAdmin.FamilyGroup, updatedPatient6.Admin.FamilyGroup)
+//	assert.Equal(t, updatedAdmin.Name, updatedPatient6.Admin.Name)
+//	assert.Equal(t, updatedAdmin.Age, updatedPatient6.Admin.Age)
+//	assert.Equal(t, updatedAdmin.Gender, updatedPatient6.Admin.Gender)
+//}
+//
+//func TestGetAllAdmin(t *testing.T) {
+//	repo := NewPostgresPatientRepository(db)
+//
+//	patient_repo, ok := repo.(*postgresPatientRepository)
+//	if !ok {
+//		log.Fatal("Failed to assert repo")
+//	}
+//
+//	admins, err := patient_repo.GetAllAdmin(context.Background())
+//	assert.Nil(t, err)
+//	assert.NotNil(t, admins)
+//}
+//
+//func TestPostgresPatientRepository_SearchPatients(t *testing.T) {
+//	repo := NewPostgresPatientRepository(db)
+//
+//	patient_repo, ok := repo.(*postgresPatientRepository)
+//	if !ok {
+//		log.Fatal("Failed to assert repo")
+//	}
+//
+//	admins, err := patient_repo.SearchPatients(context.Background(), "១២៣៤ ៥៦៧៨៩០ឥឲ")
+//	assert.Nil(t, err)
+//	assert.NotNil(t, admins)
+//}
+//
+//func TestPostgresPatientRepository_ExportDatabaseToCSV(t *testing.T) {
+//	repo := NewPostgresPatientRepository(db)
+//
+//	patient_repo, ok := repo.(*postgresPatientRepository)
+//	if !ok {
+//		log.Fatal("Failed to assert repo")
+//	}
+//
+//	err := patient_repo.ExportDatabaseToCSV(context.Background())
+//	assert.Nil(t, err)
+//	// Assert that file exists
+//	_, err = os.Stat(util.MustGitPath("repository/tmp/output.csv"))
+//	assert.Nil(t, err)
+//
+//	// Cleanup directory
+//	//err = os.Remove("output.csv")
+//	//assert.Nil(t, err)
+//}

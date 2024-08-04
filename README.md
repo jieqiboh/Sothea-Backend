@@ -49,3 +49,396 @@ Do ensure that the frontend is appropriately configured to make requests to the 
 ### Common Issues
 - Database role not found / Authentication Failed
 This usually happens if there are already pre-existing Postgres instances running on port 5432. To resolve this, stop check the processes running on port 5432, and stop the existing Postgres processes.
+
+### API Endpoints
+API endpoints are detailed below:
+
+#### GetPatientVisit
+Get an existing patient's visit by their ID and Visit ID.
+
+```plaintext
+GET /patient/:id/:vid
+```
+
+If successful, returns `200` and the following
+response attributes:
+
+| Attribute            | Type   | Description          |
+|----------------------|--------|----------------------|
+| `admin`              | object | Guaranteed to exist. |
+| `pastmedicalhistory` | object | May not exist.       |
+| `socialhistory`      | object | May not exist.       |
+| `vitalstatistics`    | object | May not exist.       |
+| `heightandweight`    | object | May not exist.       |
+| `visualacuity`       | object | May not exist.       |
+
+Unsuccessful responses include:
+`404` - Patient not found.  
+`401` - Unauthorized.  
+`500` - Internal server error.
+
+Example request:
+
+```shell
+curl --url 'http://localhost:9090/patient/1/1' \
+--header 'Authorization: Bearer <your_access_token>'
+```
+
+Example response:
+
+```json
+{
+ "admin": {
+  "id": 1,
+  "vid": 1,
+  "familyGroup": "S001",
+  "regDate": "2024-01-10T00:00:00Z",
+  "queueNo": "3B",
+  "name": "Patient's Name Here",
+  "khmerName": "តតតតតតត",
+  "dob": "1994-01-10T00:00:00Z",
+  "age": 30,
+  "gender": "M",
+  "village": "SO",
+  "contactNo": "12345678",
+  "pregnant": false,
+  "lastMenstrualPeriod": null,
+  "drugAllergies": "panadol",
+  "sentToId": false,
+  "photo": "<photo_encoded_as_base64_string>"
+ },
+ "pastmedicalhistory": {
+  "id": 1,
+  "vid": 1,
+  "tuberculosis": true,
+  "diabetes": false,
+  "hypertension": true,
+  "hyperlipidemia": false,
+  "chronicJointPains": false,
+  "chronicMuscleAches": true,
+  "sexuallyTransmittedDisease": true,
+  "specifiedSTDs": "TRICHOMONAS",
+  "others": "None"
+ },
+ "socialhistory": {
+  "id": 1,
+  "vid": 1,
+  "pastSmokingHistory": true,
+  "numberOfYears": 15,
+  "currentSmokingHistory": false,
+  "cigarettesPerDay": null,
+  "alcoholHistory": true,
+  "howRegular": "A"
+ },
+ "vitalstatistics": {
+  "id": 1,
+  "vid": 1,
+  "temperature": 36.5,
+  "spO2": 98,
+  "systolicBP1": 98,
+  "diastolicBP1": 80,
+  "systolicBP2": 122,
+  "diastolicBP2": 78,
+  "averageSystolicBP": 121,
+  "averageDiastolicBP": 79,
+  "hr1": 72,
+  "hr2": 71,
+  "averageHR": 71.5,
+  "randomBloodGlucoseMmolL": 5.4,
+  "randomBloodGlucoseMmolLp": 5.3
+ },
+ "heightandweight": {
+  "id": 1,
+  "vid": 1,
+  "height": 170,
+  "weight": 70,
+  "bmi": 24.2,
+  "bmiAnalysis": "normal weight",
+  "paedsHeight": 90,
+  "paedsWeight": 80
+ },
+ "visualacuity": {
+  "id": 1,
+  "vid": 1,
+  "lEyeVision": 20,
+  "rEyeVision": 20,
+  "additionalIntervention": "VISUAL FIELD TEST REQUIRED"
+ },
+ "doctorsconsultation": {
+  "id": 1,
+  "vid": 1,
+  "healthy": true,
+  "msk": false,
+  "cvs": false,
+  "respi": true,
+  "gu": true,
+  "git": false,
+  "eye": true,
+  "derm": false,
+  "others": "TRICHOMONAS VAGINALIS",
+  "consultationNotes": "CHEST PAIN, SHORTNESS OF BREATH, COUGH",
+  "diagnosis": "ACUTE BRONCHITIS",
+  "treatment": "REST, HYDRATION, COUGH SYRUP",
+  "referralNeeded": false,
+  "referralLoc": null,
+  "remarks": "MONITOR FOR RESOLUTION"
+ }
+}
+```
+
+#### CreatePatient
+Create an entirely new patient.
+
+```plaintext
+POST /patient
+```
+
+If successful, returns `200` and the following
+response attributes:
+
+| Attribute | Type    | Description                       |
+|-----------|---------|-----------------------------------|
+| `id`      | integer | Integer id of new patient created |
+
+Unsuccessful responses include:
+`400` - Missing Admin Category
+`400` - Json Marshalling Error (Attempts to marshal the JSON request body into a struct failed)
+`400` - Invalid Parameters (e.g. A required field is not present)
+`401` - Unauthorized.  
+`500` - Internal server error.
+
+Example request:
+
+```shell
+curl --url 'http://localhost:9090/patient/' \
+--header 'Authorization: Bearer <your_access_token>'\
+--header 'Content-Type: application/json' \
+--data '
+{
+    "familyGroup": "S001",
+    "regDate": "2024-01-10T00:00:00Z",
+    "queueNo": "1A",
+    "name": "Patient's Name Here",
+    "khmerName": "តតតតតតត",
+    "dob": "1994-01-10T00:00:00Z",
+    "age": 30,
+    "gender": "M",
+    "village": "SO",
+    "contactNo": "12345678",
+    "pregnant": false,
+    "lastMenstrualPeriod": null,
+    "drugAllergies": "panadol",
+    "sentToID": false,
+    "photo": "<photo_encoded_as_base64_string>"
+}'
+```
+
+Example response:
+```json
+{
+ "id": 7
+}
+```
+
+#### CreatePatientVisit
+Create a new visit for an existing patient.
+
+```plaintext
+POST /patient/:id
+```
+
+If successful, returns `200` and the following
+response attributes:
+
+| Attribute | Type    | Description                           |
+|-----------|---------|---------------------------------------|
+| `vid`     | integer | Integer visit id of new visit created |
+
+Unsuccessful responses include:
+`404` - Patient not found.
+`400` - Json Marshalling Error (Attempts to marshal the JSON request body into a struct failed)
+`400` - Invalid Parameters (e.g. A required field is not present)
+`400` - Empty Request Body
+`400` - Bad Request URL
+`401` - Unauthorized.  
+`500` - Internal server error.
+
+Example request:
+
+```shell
+curl --url 'http://localhost:9090/patient/1' \
+--header 'Authorization: Bearer <your_access_token>'\
+--header 'Content-Type: application/json' \
+--data '{
+    "familyGroup": "S001",
+    "regDate": "2024-01-10T00:00:00Z",
+    "queueNo": "1A",
+    "name": "Patient's Name Here",
+    "khmerName": "តតតតតតត",
+    "dob": "1994-01-10T00:00:00Z",
+    "age": 30,
+    "gender": "M",
+    "village": "SO",
+    "contactNo": "12345678",
+    "pregnant": false,
+    "lastMenstrualPeriod": null,
+    "drugAllergies": "panadol",
+    "sentToID": false,
+    "photo": "<photo_encoded_as_base64_string>"
+}'
+```
+
+Example response:
+```json
+{
+ "vid": 5
+}
+```
+
+#### DeletePatientVisit
+Deletes a specified visit of an existing patient.  
+To avoid accidentally deleting entire patients, only deleting entries one at a time is allowed.
+
+```plaintext
+DELETE /patient/:id/:vid
+```
+
+If successful, returns `200`
+
+Unsuccessful responses include:
+`404` - Patient Visit not found.  
+`400` - Bad Request URL
+`401` - Unauthorized.  
+`500` - Internal server error.
+
+Example request:
+
+```shell
+curl --url --request DELETE 'http://localhost:9090/patient/1/1' \
+--header 'Authorization: Bearer <your_access_token>'
+```
+
+#### UpdatePatientVisit
+Update a visit of an existing patient.
+
+```plaintext
+PATCH /patient/:id/:vid
+```
+
+If successful, returns `200`
+
+Unsuccessful responses include:
+`404` - Patient visit not found.  
+`400` - Empty Request Body
+`400` - Json Marshalling Error (Attempts to marshal the JSON request body into a struct failed)
+`400` - Invalid Parameters (e.g. A required field is not present)
+`400` - Bad Request URL
+`401` - Unauthorized.  
+`500` - Internal server error.
+
+Example request:
+
+```shell
+curl --location --request PATCH 'http://localhost:9090/patient/1/1' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjI4MTAzNzIsInVzZXJuYW1lIjoiYWRtaW4ifQ.ap0GiJ3fnlxHFYlRDQ2Bk21KVhZyTTH4500tZoWA4rc' \
+--header 'Content-Type: application/json' \
+--data '{
+    "admin": {
+        "familyGroup": "S001",
+        "regDate": "2024-01-10T00:00:00Z",
+        "queueNo": "3B",
+        "name": "Patient'\''s Name Here",
+        "khmerName": "តតតតតតត",
+        "dob": "1994-01-10T00:00:00Z",
+        "age": 30,
+        "gender": "M",
+        "village": "SO",
+        "contactNo": "12345678",
+        "pregnant": false,
+        "lastMenstrualPeriod": null,
+        "drugAllergies": "panadol",
+        "sentToID": false,
+        "photo": "<photo_encoded_as_base64_string>"
+    },
+    "pastMedicalHistory": {
+        "tuberculosis": true,
+        "diabetes": false,
+        "hypertension": true,
+        "hyperlipidemia": false,
+        "chronicJointPains": false,
+        "chronicMuscleAches": true,
+        "sexuallyTransmittedDisease": true,
+        "specifiedSTDs": "TRICHOMONAS",
+        "others": "None"
+    },
+    "socialHistory": {
+        "pastSmokingHistory": true,
+        "numberOfYears": 15,
+        "currentSmokingHistory": false,
+        "cigarettesPerDay": null,
+        "alcoholHistory": true,
+        "howRegular": "A"
+    },
+    "vitalStatistics": {
+        "temperature": 36.5,
+        "spO2": 98,
+        "systolicBP1": 120,
+        "diastolicBP1": 80,
+        "systolicBP2": 122,
+        "diastolicBP2": 78,
+        "averageSystolicBP": 121,
+        "averageDiastolicBP": 79,
+        "hr1": 72,
+        "hr2": 71,
+        "averageHR": 71.5,
+        "randomBloodGlucoseMmolL": 5.4,
+        "randomBloodGlucoseMmolLp": 5.3
+    },
+    "heightAndWeight": {
+        "height": 170,
+        "weight": 70,
+        "bmi": 24.2,
+        "bmiAnalysis": "normal weight",
+        "paedsHeight": 90,
+        "paedsWeight": 80
+    },
+    "visualAcuity": {
+        "lEyeVision": 20,
+        "rEyeVision": 20,
+        "additionalIntervention": "VISUAL FIELD TEST REQUIRED"
+    },
+    "doctorsConsultation": {
+        "healthy": true,
+        "msk": false,
+        "cvs": false,
+        "respi": true,
+        "gu": true,
+        "git": false,
+        "eye": true,
+        "derm": false,
+        "others": "TRICHOMONAS VAGINALIS",
+        "consultationNotes": "CHEST PAIN, SHORTNESS OF BREATH, COUGH",
+        "diagnosis": "ACUTE BRONCHITIS",
+        "treatment": "REST, HYDRATION, COUGH SYRUP",
+        "referralNeeded": false,
+        "referralLoc": null,
+        "remarks": "MONITOR FOR RESOLUTION"
+    }
+}'
+```
+
+#### GetPatientMeta
+Retrieve metadata for a specific patient, allowing further requests to be made to retrieve individual patient visit data.
+
+#### GetAllPatientMeta
+Retrieve and return metadata for all patients in an array.
+
+#### GetPatientVisitMeta
+Retrieve metadata for a specific patient visit, used for rendering in view patients page.
+
+#### GetAllPatientVisitMeta
+Retrieve and return metadata for all patient visits.
+
+#### Search Patients
+
+#### Export Patients

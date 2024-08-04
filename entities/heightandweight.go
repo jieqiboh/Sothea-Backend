@@ -4,6 +4,7 @@ import "fmt"
 
 type HeightAndWeight struct {
 	ID          int32    `json:"id" binding:"-"`
+	VID         int32    `json:"vid" binding:"-"`
 	Height      *float64 `json:"height" binding:"required"`
 	Weight      *float64 `json:"weight" binding:"required"`
 	BMI         *float64 `json:"bmi" binding:"required"`
@@ -23,6 +24,7 @@ func (HeightAndWeight) TableName() string {
 func (haw HeightAndWeight) String() string {
 	result := fmt.Sprintf("\nHEIGHT AND WEIGHT\n")
 	result += fmt.Sprintf("ID: %d\n", haw.ID)
+	result += fmt.Sprintf("VID: %d\n", haw.VID)
 	result += fmt.Sprintf("Height: %.2f\n", *haw.Height)
 	result += fmt.Sprintf("Weight: %.2f\n", *haw.Weight)
 	result += fmt.Sprintf("BMI: %.2f\n", *haw.BMI)

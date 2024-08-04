@@ -6,6 +6,7 @@ import (
 
 type PastMedicalHistory struct {
 	ID                         int32   `json:"id" binding:"-"`
+	VID                        int32   `json:"vid" binding:"-"`
 	Tuberculosis               *bool   `json:"tuberculosis" binding:"required"`
 	Diabetes                   *bool   `json:"diabetes" binding:"required"`
 	Hypertension               *bool   `json:"hypertension" binding:"required"`
@@ -28,6 +29,7 @@ func (PastMedicalHistory) TableName() string {
 func (pmh PastMedicalHistory) String() string {
 	result := fmt.Sprintf("\nPAST MEDICAL HISTORY\n")
 	result += fmt.Sprintf("ID: %d\n", pmh.ID)
+	result += fmt.Sprintf("VID: %d\n", pmh.VID)
 	result += fmt.Sprintf("Tuberculosis: %t\n", *pmh.Tuberculosis)
 	result += fmt.Sprintf("Diabetes: %t\n", *pmh.Diabetes)
 	result += fmt.Sprintf("Hypertension: %t\n", *pmh.Hypertension)
