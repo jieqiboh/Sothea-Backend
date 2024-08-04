@@ -72,7 +72,7 @@ response attributes:
 | `heightandweight`    | object | May not exist.       |
 | `visualacuity`       | object | May not exist.       |
 
-Unsuccessful responses include:
+Unsuccessful responses include:  
 `404` - Patient not found.  
 `401` - Unauthorized.  
 `500` - Internal server error.
@@ -200,10 +200,10 @@ response attributes:
 |-----------|---------|-----------------------------------|
 | `id`      | integer | Integer id of new patient created |
 
-Unsuccessful responses include:
-`400` - Missing Admin Category
-`400` - Json Marshalling Error (Attempts to marshal the JSON request body into a struct failed)
-`400` - Invalid Parameters (e.g. A required field is not present)
+Unsuccessful responses include:  
+`400` - Missing Admin Category  
+`400` - Json Marshalling Error (Attempts to marshal the JSON request body into a struct failed)  
+`400` - Invalid Parameters (e.g. A required field is not present)  
 `401` - Unauthorized.  
 `500` - Internal server error.
 
@@ -255,11 +255,11 @@ response attributes:
 | `vid`     | integer | Integer visit id of new visit created |
 
 Unsuccessful responses include:
-`404` - Patient not found.
-`400` - Json Marshalling Error (Attempts to marshal the JSON request body into a struct failed)
-`400` - Invalid Parameters (e.g. A required field is not present)
-`400` - Empty Request Body
-`400` - Bad Request URL
+`404` - Patient not found.  
+`400` - Json Marshalling Error (Attempts to marshal the JSON request body into a struct failed)  
+`400` - Invalid Parameters (e.g. A required field is not present)  
+`400` - Empty Request Body  
+`400` - Bad Request URL  
 `401` - Unauthorized.  
 `500` - Internal server error.
 
@@ -305,11 +305,11 @@ DELETE /patient/:id/:vid
 
 If successful, returns `200`
 
-Unsuccessful responses include:
+Unsuccessful responses include:  
 `404` - Patient Visit not found.  
-`400` - Bad Request URL
+`400` - Bad Request URL  
 `401` - Unauthorized.  
-`500` - Internal server error.
+`500` - Internal server error.  
 
 Example request:
 
