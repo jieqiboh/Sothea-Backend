@@ -54,18 +54,18 @@ func (p *patientUsecase) UpdatePatientVisit(ctx context.Context, id int32, vid i
 	return p.patientRepo.UpdatePatientVisit(ctx, id, vid, patient)
 }
 
-func (p *patientUsecase) GetAllAdmin(ctx context.Context) ([]entities.PartAdmin, error) {
+func (p *patientUsecase) GetPatientMeta(ctx context.Context, id int32) (*entities.PatientMeta, error) {
 	ctx, cancel := context.WithTimeout(ctx, p.contextTimeout)
 	defer cancel()
 
-	return p.patientRepo.GetAllAdmin(ctx)
+	return p.patientRepo.GetPatientMeta(ctx, id)
 }
 
-func (p *patientUsecase) SearchPatients(ctx context.Context, search string) ([]entities.PartAdmin, error) {
+func (p *patientUsecase) GetAllPatientVisitMeta(ctx context.Context, date time.Time) ([]entities.PatientVisitMeta, error) {
 	ctx, cancel := context.WithTimeout(ctx, p.contextTimeout)
 	defer cancel()
 
-	return p.patientRepo.SearchPatients(ctx, search)
+	return p.patientRepo.GetAllPatientVisitMeta(ctx, date)
 }
 
 func (p *patientUsecase) ExportDatabaseToCSV(ctx context.Context) error {

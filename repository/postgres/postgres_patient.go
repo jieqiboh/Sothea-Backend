@@ -11,6 +11,7 @@ import (
 	_ "github.com/lib/pq"
 	"log"
 	"os"
+	"time"
 )
 
 type postgresPatientRepository struct {
@@ -22,7 +23,7 @@ func NewPostgresPatientRepository(conn *sql.DB) entities.PatientRepository {
 	return &postgresPatientRepository{conn}
 }
 
-// GetPatientVisit returns a Patient struct representing a single visit based on ID, and Entry ID. Only guaranteed field is Admin
+// GetPatientVisit returns a Patient struct representing a single visit based on ID, and Visit ID. Only guaranteed field is Admin
 func (p *postgresPatientRepository) GetPatientVisit(ctx context.Context, id int32, vid int32) (res *entities.Patient, err error) {
 	// Start a new transaction
 	tx, err := p.Conn.BeginTx(ctx, nil)
@@ -491,68 +492,92 @@ func (p *postgresPatientRepository) UpdatePatientVisit(ctx context.Context, id i
 	return nil
 }
 
-func (p *postgresPatientRepository) GetAllAdmin(ctx context.Context) ([]entities.PartAdmin, error) {
-	var rows *sql.Rows
-	result := make([]entities.PartAdmin, 0)
-	query := "SELECT id, queue_no, name, khmer_name, dob, gender, contact_no FROM ADMIN"
-	rows, err := p.Conn.QueryContext(ctx, query)
+func (p *postgresPatientRepository) GetPatientMeta(ctx context.Context, id int32) (*entities.PatientMeta, error) {
+	// Check that patient exists
+	doesPatientExist, err := p.checkPatientExists(ctx, id)
+	if err != nil { // query error
+		return nil, err
+	} else if doesPatientExist == false { // no query error, and patient doesn't exist
+		return nil, entities.ErrPatientNotFound
+	}
+
+	// Gets metadata for a specific patient, invoked when navigating to other visits of a patient
+	// For FamilyGroup, RegDate, QueueNo, Name and KhmerName, the values from the latest visit are used
+	patientMeta := entities.PatientMeta{}
+	patientMeta.Visits = make(map[int32]time.Time) // Initialize the Visits map
+
+	// Get latest row
+	latestRow := p.Conn.QueryRowContext(ctx, `SELECT id, vid, family_group, reg_date, queue_no, name, khmer_name FROM admin WHERE id = $1 ORDER BY reg_date DESC LIMIT 1`, id)
+	err = latestRow.Scan(&patientMeta.ID, &patientMeta.VID, &patientMeta.FamilyGroup, &patientMeta.RegDate, &patientMeta.QueueNo, &patientMeta.Name, &patientMeta.KhmerName)
 	if err != nil {
 		return nil, err
 	}
 
-	defer rows.Close()
-
-	for rows.Next() {
-		partadmin := entities.PartAdmin{}
-		err = rows.Scan(&partadmin.ID, &partadmin.QueueNo, &partadmin.Name, &partadmin.KhmerName, &partadmin.Dob, &partadmin.Gender, &partadmin.ContactNo)
-
-		if err != nil {
-			return nil, err
-		}
-		result = append(result, partadmin)
-	}
-
-	return result, nil
-}
-
-func (p *postgresPatientRepository) GetPatientMeta(ctx context.Context, id int32) (*entities.Patient, error) {
-	//
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p *postgresPatientRepository) GetPatientVisitMeta(ctx context.Context, id int32, vid int32) (*entities.Patient, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p *postgresPatientRepository) GetAllPatientVisitMeta(ctx context.Context) ([]entities.PartAdmin, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p *postgresPatientRepository) SearchPatients(ctx context.Context, search string) ([]entities.PartAdmin, error) {
-	var rows *sql.Rows
-	result := make([]entities.PartAdmin, 0)
-
-	rows, err := p.Conn.QueryContext(ctx, `
-				SELECT id, name, khmer_name, dob, gender, contact_no 
-				FROM ADMIN 
-				WHERE LOWER(name) = LOWER($1) OR LOWER(khmer_name) = LOWER($2)`, search, search)
+	// Get vid and reg_date
+	rows, err := p.Conn.QueryContext(ctx, "SELECT vid, reg_date FROM ADMIN WHERE id = $1", id)
 	if err != nil {
 		return nil, err
 	}
-
 	defer rows.Close()
-
+	// Iterate through the result set and populate the Visits map
 	for rows.Next() {
-		partadmin := entities.PartAdmin{}
-		err = rows.Scan(&partadmin.ID, &partadmin.Name, &partadmin.KhmerName, &partadmin.Dob, &partadmin.Gender, &partadmin.ContactNo)
+		var vid int32
+		var visitDate time.Time
+		if err := rows.Scan(&vid, &visitDate); err != nil {
+			return nil, err
+		}
+		patientMeta.Visits[vid] = visitDate
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
 
+	return &patientMeta, nil
+}
+
+func (p *postgresPatientRepository) GetAllPatientVisitMeta(ctx context.Context, date time.Time) ([]entities.PatientVisitMeta, error) {
+	// If date is non-empty, for every patient, return patientvisitmeta of their visit on that date if it exists
+	// If date is empty aka default constructor, for every patient, return patientvisitmeta of their latest visit
+	var rows *sql.Rows
+	var err error
+	result := make([]entities.PatientVisitMeta, 0)
+
+	if date.IsZero() { // Date is empty
+		rows, err = p.Conn.QueryContext(ctx, "SELECT DISTINCT ON (id) id, vid, family_group, reg_date, queue_no, name, khmer_name, gender, village, contact_no, drug_allergies, sent_to_id FROM admin ORDER BY id, vid DESC;")
 		if err != nil {
 			return nil, err
 		}
-		result = append(result, partadmin)
+	} else { // Date is non-empty
+		formattedDate := date.Format("2006-01-02")
+		rows, err = p.Conn.QueryContext(ctx, "SELECT DISTINCT ON (id) id, vid, family_group, reg_date, queue_no, name, khmer_name, gender, village, contact_no, drug_allergies, sent_to_id FROM admin WHERE reg_date = $1;", formattedDate)
+		if err != nil {
+			return nil, err
+		}
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		patientVisitMeta := entities.PatientVisitMeta{}
+		err = rows.Scan(
+			&patientVisitMeta.ID,
+			&patientVisitMeta.VID,
+			&patientVisitMeta.FamilyGroup,
+			&patientVisitMeta.RegDate,
+			&patientVisitMeta.QueueNo,
+			&patientVisitMeta.Name,
+			&patientVisitMeta.KhmerName,
+			&patientVisitMeta.Gender,
+			&patientVisitMeta.Village,
+			&patientVisitMeta.ContactNo,
+			&patientVisitMeta.DrugAllergies,
+			&patientVisitMeta.SentToID)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, patientVisitMeta)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 
 	return result, nil
@@ -669,26 +694,9 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context) err
 }
 
 func (p *postgresPatientRepository) checkPatientExists(ctx context.Context, id int32) (bool, error) {
-	prevAdmin := entities.Admin{}
-	err := p.Conn.QueryRowContext(ctx, "SELECT * FROM admin WHERE id = $1;", id).Scan(
-		&prevAdmin.ID,
-		&prevAdmin.VID,
-		&prevAdmin.FamilyGroup,
-		&prevAdmin.RegDate,
-		&prevAdmin.QueueNo,
-		&prevAdmin.Name,
-		&prevAdmin.KhmerName,
-		&prevAdmin.Dob,
-		&prevAdmin.Age,
-		&prevAdmin.Gender,
-		&prevAdmin.Village,
-		&prevAdmin.ContactNo,
-		&prevAdmin.Pregnant,
-		&prevAdmin.LastMenstrualPeriod,
-		&prevAdmin.DrugAllergies,
-		&prevAdmin.SentToID,
-		&prevAdmin.Photo,
-	)
+	// Helper method to check that a patient exists
+	var resId int32
+	err := p.Conn.QueryRowContext(ctx, "SELECT id FROM admin WHERE id = $1;", id).Scan(&resId)
 	if err == sql.ErrNoRows {
 		return false, nil
 	} else if err != nil {
@@ -700,26 +708,9 @@ func (p *postgresPatientRepository) checkPatientExists(ctx context.Context, id i
 }
 
 func (p *postgresPatientRepository) checkPatientVisitExists(ctx context.Context, id int32, vid int32) (bool, error) {
-	prevAdmin := entities.Admin{}
-	err := p.Conn.QueryRowContext(ctx, "SELECT * FROM admin WHERE id = $1 AND vid = $2;", id, vid).Scan(
-		&prevAdmin.ID,
-		&prevAdmin.VID,
-		&prevAdmin.FamilyGroup,
-		&prevAdmin.RegDate,
-		&prevAdmin.QueueNo,
-		&prevAdmin.Name,
-		&prevAdmin.KhmerName,
-		&prevAdmin.Dob,
-		&prevAdmin.Age,
-		&prevAdmin.Gender,
-		&prevAdmin.Village,
-		&prevAdmin.ContactNo,
-		&prevAdmin.Pregnant,
-		&prevAdmin.LastMenstrualPeriod,
-		&prevAdmin.DrugAllergies,
-		&prevAdmin.SentToID,
-		&prevAdmin.Photo,
-	)
+	var resId int32
+	var resVid int32
+	err := p.Conn.QueryRowContext(ctx, "SELECT id, vid FROM admin WHERE id = $1 AND vid = $2;", id, vid).Scan(&resId, &resVid)
 	if err == sql.ErrNoRows {
 		return false, nil
 	} else if err != nil {

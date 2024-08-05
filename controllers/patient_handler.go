@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // PatientHandler represent the httphandler for patient
@@ -33,8 +34,8 @@ func NewPatientHandler(e *gin.Engine, us entities.PatientUseCase, secretKey []by
 		authorized.POST("/patient/:id", handler.CreatePatientVisit)
 		authorized.DELETE("/patient/:id/:vid", handler.DeletePatientVisit)
 		authorized.PATCH("/patient/:id/:vid", handler.UpdatePatientVisit)
-		authorized.GET("/get-all-admin", handler.GetAllAdmin)
-		authorized.GET("/search-patients/:search-name", handler.SearchPatients)
+		authorized.GET("/patient-meta/:id", handler.GetPatientMeta)
+		authorized.GET("/all-patient-visit-meta/:date", handler.GetAllPatientVisitMeta)
 		authorized.GET("/export-db", handler.ExportDatabaseToCSV)
 	}
 }
@@ -204,35 +205,49 @@ func (p *PatientHandler) UpdatePatientVisit(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func (p *PatientHandler) GetAllAdmin(c *gin.Context) {
+func (p *PatientHandler) GetPatientMeta(c *gin.Context) {
+	idP, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	id32 := int32(idP)
 	ctx := c.Request.Context()
 
-	adminlist, err := p.Usecase.GetAllAdmin(ctx)
+	patientMeta, err := p.Usecase.GetPatientMeta(ctx, id32)
 	if err != nil {
 		c.JSON(getStatusCode(err), gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, adminlist)
+	c.JSON(http.StatusOK, patientMeta)
 }
 
-func (p *PatientHandler) SearchPatients(c *gin.Context) {
+func (p *PatientHandler) GetAllPatientVisitMeta(c *gin.Context) {
+	dateStr := c.Param("date")
+
 	ctx := c.Request.Context()
 
-	patientName := c.Param("search-name")
-	// Check if the search-name parameter is empty
-	if patientName == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "search-name parameter cannot be empty"})
-		return
+	var date time.Time
+	var err error
+	if dateStr == "default" {
+		date = time.Time{}
+	} else {
+		date, err = time.Parse("2006-01-02", dateStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("invalid date format: %s", dateStr)})
+			return
+		}
 	}
 
-	foundPatients, err := p.Usecase.SearchPatients(ctx, patientName)
+	patientVisitMeta, err := p.Usecase.GetAllPatientVisitMeta(ctx, date)
 	if err != nil {
 		c.JSON(getStatusCode(err), gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, foundPatients)
+	c.JSON(http.StatusOK, patientVisitMeta)
 }
 
 func (p *PatientHandler) ExportDatabaseToCSV(c *gin.Context) {
