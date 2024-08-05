@@ -245,8 +245,13 @@ INSERT INTO admin (id, family_group, reg_date, queue_no, name, khmer_name, dob, 
 VALUES (2, 'B009', '2023-07-03', 'Q125', 'Walter White', 'អាលីស ស្ម៊ីត', '1990-01-010', 52, 'M', 'ABQ',
         '555666777', false, '2023-05-01', 'None', false, NULL);
 
+INSERT INTO admin (id, family_group, reg_date, queue_no, name, khmer_name, dob, age, gender, village, contact_no,
+                   pregnant, last_menstrual_period, drug_allergies, sent_to_id, photo)
+VALUES (2, 'B009', '2023-10-03', 'Q125', 'Walter White', 'អាលីស ស្ម៊ីត', '1990-01-010', 52, 'M', 'ABQ',
+        '555666777', false, '2023-05-01', 'None', false, NULL);
+
 /*******************
-    Add remaining categories for second entry for patient 1 and 2
+    Add remaining categories for second visit for patient 1 and 2
  */
 
 INSERT INTO pastmedicalhistory(id, vid, tuberculosis, diabetes, hypertension, hyperlipidemia, chronic_joint_pains,

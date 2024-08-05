@@ -115,8 +115,8 @@ func newTestPatientHandler(e *gin.Engine, us entities.PatientUseCase) {
 	e.POST("/patient/:id", handler.CreatePatientVisit)
 	e.DELETE("/patient/:id/:vid", handler.DeletePatientVisit)
 	e.PATCH("/patient/:id/:vid", handler.UpdatePatientVisit)
-	e.GET("/get-all-admin", handler.GetAllAdmin)
-	e.GET("/search-patients/:search-name", handler.SearchPatients)
+	e.GET("/patient-meta/:id", handler.GetPatientMeta)
+	e.GET("/all-patient-visit-meta/:date", handler.GetAllPatientVisitMeta)
 	e.GET("/export-db", handler.ExportDatabaseToCSV)
 }
 
@@ -368,32 +368,6 @@ func TestDeletePatientByID_BadRequest_Failure(t *testing.T) {
 	assert.Equal(t, 400, w.Code)
 }
 
-//func TestDeletePatientByID_NotFound_Failure(t *testing.T) {
-//	var mockUsecase mocks.PatientUseCase
-//	id := 1
-//	wrongId := -1
-//	vid := 1
-//	wrongVid := -1
-//	mockUsecase.On("DeletePatientVisit", context.Background(), int32(id), int32(wrongVid)).Return(entities.ErrPatientVisitNotFound)
-//	mockUsecase.On("DeletePatientVisit", context.Background(), int32(wrongId), int32(vid)).Return(entities.ErrPatientVisitNotFound)
-//
-//	router := gin.Default()
-//	newTestPatientHandler(router, &mockUsecase)
-//
-//	w := httptest.NewRecorder()
-//	req, _ := http.NewRequest("DELETE", "/patient/"+strconv.Itoa(wrongId)+"/"+strconv.Itoa(vid), nil)
-//
-//	router.ServeHTTP(w, req)
-//
-//	assert.Equal(t, 404, w.Code)
-//
-//	req, _ = http.NewRequest("DELETE", "/patient/"+strconv.Itoa(id)+"/"+strconv.Itoa(wrongVid), nil)
-//
-//	router.ServeHTTP(w, req)
-//
-//	assert.Equal(t, 404, w.Code)
-//}
-
 // Success - 200 OK
 // Patient Not Found - 404 Not Found
 // Bad Request (id or vid is not a number) - 400 Bad Request
@@ -503,34 +477,86 @@ func TestUpdatePatientVisit_EmptyRequestBody_Failure(t *testing.T) {
 }
 
 // Success - 200 OK
-func TestGetAllAdmin_Success(t *testing.T) {
+// Patient Not Found - 404 Not Found
+// Bad Request (id or vid is not a number) - 400 Bad Request
+func TestGetPatientMeta_Success(t *testing.T) {
 	var mockUsecase mocks.PatientUseCase
-	mockUsecase.On("GetAllAdmin", context.Background()).Return(mocks.AdminArray, nil)
+	id := 1
+	mockUsecase.On("GetPatientMeta", context.Background(), int32(id)).Return(&mocks.ValidPatientMeta, nil)
 	router := gin.Default()
 	newTestPatientHandler(router, &mockUsecase)
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/get-all-admin", nil)
+	req, _ := http.NewRequest("GET", "/patient-meta/1", nil)
 
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
 }
 
-// Success - 200 OK
-// Empty Search Name - 400 Bad Request
-func TestSearchPatients_Success(t *testing.T) {
+func TestGetPatientMeta_NotFound_Failure(t *testing.T) {
 	var mockUsecase mocks.PatientUseCase
-	mockUsecase.On("SearchPatients", context.Background(), "១២៣៤ ៥៦៧៨៩០ឥ").Return(mocks.AdminArray, nil)
+	id := -1
+	mockUsecase.On("GetPatientMeta", context.Background(), int32(id)).Return(nil, entities.ErrPatientNotFound)
 	router := gin.Default()
 	newTestPatientHandler(router, &mockUsecase)
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/search-patients/១២៣៤ ៥៦៧៨៩០ឥ", nil)
+	req, _ := http.NewRequest("GET", "/patient-meta/-1", nil)
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 404, w.Code)
+}
+
+func TestGetPatientMeta_BadRequest_Failure(t *testing.T) {
+	var mockUsecase mocks.PatientUseCase
+	router := gin.Default()
+	newTestPatientHandler(router, &mockUsecase)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/patient-meta/hello", nil)
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 400, w.Code)
+}
+
+// Success - 200 OK
+// Bad Request (id is not a number) - 400 Bad Request
+func TestGetAllPatientVisitMeta_Success(t *testing.T) {
+	var mockUsecase mocks.PatientUseCase
+	date := time.Date(2024, time.January, 10, 0, 0, 0, 0, time.UTC)
+	mockUsecase.On("GetAllPatientVisitMeta", context.Background(), date).Return(mocks.ValidPatientVisitMetaArray, nil)
+	mockUsecase.On("GetAllPatientVisitMeta", context.Background(), time.Time{}).Return(mocks.ValidPatientVisitMetaArray, nil)
+	router := gin.Default()
+	newTestPatientHandler(router, &mockUsecase)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/all-patient-visit-meta/2024-01-10", nil)
 
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
+
+	req, _ = http.NewRequest("GET", "/all-patient-visit-meta/default", nil)
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 200, w.Code)
+}
+
+func TestGetAllPatientVisitMeta_BadRequest_Failure(t *testing.T) {
+	var mockUsecase mocks.PatientUseCase
+	router := gin.Default()
+	newTestPatientHandler(router, &mockUsecase)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/all-patient-visit-meta/hello", nil)
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 400, w.Code)
 }
 
 // Success - 200 OK

@@ -6,17 +6,14 @@ import (
 )
 
 type PatientMeta struct {
-	ID          int32       `json:"id" binding:"-"`
-	VID         int32       `json:"vid" binding:"-"`
-	FamilyGroup *string     `json:"familyGroup" binding:"required"`
-	RegDate     *time.Time  `json:"regDate" binding:"required"`
-	QueueNo     *string     `json:"queueNo" binding:"required"`
-	Name        *string     `json:"name" binding:"required"`
-	KhmerName   *string     `json:"khmerName" binding:"required"`
-	Gender      *string     `json:"gender" binding:"required"`
-	Village     *string     `json:"village" binding:"required"`
-	ContactNo   *string     `json:"contactNo" binding:"required"`
-	Visits      []time.Time `json:"visits"` // Slice of visit dates, 1-indexed according to the visit id
+	ID          int32               `json:"id" binding:"-"`
+	VID         int32               `json:"vid" binding:"-"`
+	FamilyGroup *string             `json:"familyGroup" binding:"required"`
+	RegDate     *time.Time          `json:"regDate" binding:"required"`
+	QueueNo     *string             `json:"queueNo" binding:"required"`
+	Name        *string             `json:"name" binding:"required"`
+	KhmerName   *string             `json:"khmerName" binding:"required"`
+	Visits      map[int32]time.Time `json:"visits"` // Map of visit id to visit date
 }
 
 // TableName specifies the table name for the PatientMeta model.
@@ -34,9 +31,6 @@ func (pm PatientMeta) String() string {
 	result += fmt.Sprintf("QueueNo: %s\n", *pm.QueueNo)
 	result += fmt.Sprintf("Name: %s\n", *pm.Name)
 	result += fmt.Sprintf("KhmerName: %s\n", *pm.KhmerName)
-	result += fmt.Sprintf("Gender: %s\n", *pm.Gender)
-	result += fmt.Sprintf("Village: %s\n", *pm.Village)
-	result += fmt.Sprintf("ContactNo: %s\n", *pm.ContactNo)
 	result += fmt.Sprintf("Visits: %v\n", pm.Visits)
 	return result
 }
