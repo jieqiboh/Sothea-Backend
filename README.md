@@ -430,15 +430,158 @@ curl --location --request PATCH 'http://localhost:9090/patient/1/1' \
 #### GetPatientMeta
 Retrieve metadata for a specific patient, allowing further requests to be made to retrieve individual patient visit data.
 
-#### GetAllPatientMeta
-Retrieve and return metadata for all patients in an array.
+```plaintext
+GET /patient-meta/:id
+```
 
-#### GetPatientVisitMeta
-Retrieve metadata for a specific patient visit, used for rendering in view patients page.
+If successful, returns `200`
+
+Unsuccessful responses include:
+`404` - Patient visit not found.  
+`400` - Bad Request URL
+`401` - Unauthorized.  
+`500` - Internal server error.
+
+Example request:
+
+```shell
+curl --location 'http://localhost:9090/patient-meta/1' \
+--header 'Authorization: Bearer <your_access_token>'
+```
+
+Example response:
+```json
+{
+    "id": 1,
+    "vid": 1,
+    "familyGroup": "S001",
+    "regDate": "2024-01-10T00:00:00Z",
+    "queueNo": "1A",
+    "name": "John Doe",
+    "khmerName": "១២៣៤ ៥៦៧៨៩០ឥឲ",
+    "visits": {
+        "1": "2024-01-10T00:00:00Z",
+        "2": "2023-07-01T00:00:00Z",
+        "3": "2023-07-02T00:00:00Z",
+        "4": "2023-07-03T00:00:00Z"
+    }
+}
+```
 
 #### GetAllPatientVisitMeta
-Retrieve and return metadata for all patient visits.
+Retrieve and return patient visit metadata for all patients on a specific date
 
-#### Search Patients
+```plaintext
+GET /all-patient-visit-meta/:date
+```
+
+If successful, returns `200`
+
+Unsuccessful responses include:
+`400` - Bad Request URL
+`401` - Unauthorized.  
+`500` - Internal server error.
+
+Example request:
+
+```shell
+curl --location 'http://localhost:9090/all-patient-visit-meta/default' \
+--header 'Authorization: Bearer <your_access_token>'
+```
+
+Example response:
+```json
+[
+ {
+  "id": 1,
+  "vid": 4,
+  "familyGroup": "Family 1",
+  "regDate": "2023-07-03T00:00:00Z",
+  "queueNo": "Q125",
+  "name": "Alice Doe",
+  "khmerName": "អាលីស ស្ម៊ីត",
+  "gender": "F",
+  "village": "Village 1",
+  "contactNo": "555666777",
+  "drugAllergies": "None",
+  "sentToId": false
+ },
+ {
+  "id": 2,
+  "vid": 3,
+  "familyGroup": "B009",
+  "regDate": "2023-10-03T00:00:00Z",
+  "queueNo": "Q125",
+  "name": "Walter White",
+  "khmerName": "អាលីស ស្ម៊ីត",
+  "gender": "M",
+  "village": "ABQ",
+  "contactNo": "555666777",
+  "drugAllergies": "None",
+  "sentToId": false
+ },
+ {
+  "id": 3,
+  "vid": 1,
+  "familyGroup": "S002B",
+  "regDate": "2024-01-10T00:00:00Z",
+  "queueNo": "2B",
+  "name": "Bob Smith",
+  "khmerName": "១២៣៤ ៥៦៧៨៩០ឥឲ",
+  "gender": "M",
+  "village": "R1",
+  "contactNo": "99999999",
+  "drugAllergies": "aspirin",
+  "sentToId": false
+ },
+ {
+  "id": 4,
+  "vid": 1,
+  "familyGroup": "S003",
+  "regDate": "2024-01-10T00:00:00Z",
+  "queueNo": "3A",
+  "name": "Bob Johnson",
+  "khmerName": "១២៣៤ ៥៦៧៨៩០ឥឲ",
+  "gender": "M",
+  "village": "R1",
+  "contactNo": "11111111",
+  "drugAllergies": null,
+  "sentToId": false
+ },
+ {
+  "id": 5,
+  "vid": 1,
+  "familyGroup": "S004",
+  "regDate": "2024-01-10T00:00:00Z",
+  "queueNo": "4B",
+  "name": "Alice Brown",
+  "khmerName": "១២៣៤ ៥៦៧៨៩០ឥឲ",
+  "gender": "F",
+  "village": "R1",
+  "contactNo": "17283948",
+  "drugAllergies": null,
+  "sentToId": false
+ },
+ {
+  "id": 6,
+  "vid": 1,
+  "familyGroup": "S005A",
+  "regDate": "2024-01-10T00:00:00Z",
+  "queueNo": "5C",
+  "name": "Charlie Davis",
+  "khmerName": "១២៣៤ ៥៦៧៨៩០ឥឲ",
+  "gender": "M",
+  "village": "R1",
+  "contactNo": "09876543",
+  "drugAllergies": null,
+  "sentToId": false
+ }
+]
+```
 
 #### Export Patients
+Export all patient data to a CSV file.
+
+```plaintext
+GET /export-db
+```

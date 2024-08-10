@@ -586,6 +586,7 @@ func (p *postgresPatientRepository) GetAllPatientVisitMeta(ctx context.Context, 
 func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context) error {
 	query := `SELECT
         a.id,
+		a.vid,
         a.family_group,
         a.reg_date,
         a.queue_no,
@@ -600,6 +601,7 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context) err
         a.last_menstrual_period,
         a.drug_allergies,
         a.sent_to_id,
+        a.photo,
         -- Past Medical History
         p.tuberculosis,
         p.diabetes,
@@ -661,17 +663,17 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context) err
     FROM
         admin a
     LEFT JOIN
-        pastmedicalhistory p ON a.id = p.id
+        pastmedicalhistory p ON a.id = p.id AND a.vid = p.vid
     LEFT JOIN
-        socialhistory s ON a.id = s.id
+        socialhistory s ON a.id = s.id AND a.vid = s.vid
     LEFT JOIN
-        vitalstatistics v ON a.id = v.id
+        vitalstatistics v ON a.id = v.id AND a.vid = v.vid
     LEFT JOIN
-        heightandweight h ON a.id = h.id
+        heightandweight h ON a.id = h.id AND a.vid = h.vid
     LEFT JOIN
-        visualacuity va ON a.id = va.id
+        visualacuity va ON a.id = va.id AND a.vid = va.vid
     LEFT JOIN
-        doctorsconsultation d ON a.id = d.id`
+        doctorsconsultation d ON a.id = d.id AND a.vid = d.vid`
 	// Execute the query
 	rows, err := p.Conn.QueryContext(ctx, query)
 	if err != nil {
