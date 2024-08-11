@@ -687,7 +687,10 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context) err
 	}
 	defer file.Close()
 
-	err = sqltocsv.WriteFile(filePath, rows)
+	conv := sqltocsv.New(rows)
+	conv.TimeFormat = "2006-01-02"
+
+	err = conv.WriteFile(filePath)
 	if err != nil {
 		panic(err)
 	}

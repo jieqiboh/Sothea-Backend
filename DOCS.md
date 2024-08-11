@@ -1,4 +1,5 @@
 # Backend Developer Documentation
+### Last Updated: August 11, 2024
 
 For future developers, this document will serve as a guide to understanding the backend and how to work with it, as well as the numerous design choices made.
 
@@ -185,10 +186,17 @@ JSON Fields: camelCase
 e.g. `pastSmokingHistory`  
 
 ## Miscellaneous
-1. Export to DB Feature
+### Export to DB Feature
 An important feature of the backend is for users to be able to easily export the patient data to a CSV file.
-Due to the lack of support for CSV exports in the lib/pq database drivers, we had to implement the feature manually. 
-One of the approaches used was to execute the `COPY` command in the PostgresQL server to generate a csv file, leveraging the in-built feature. However, due to storage being isolated in the Docker container, an additional volume mount is needed to access the generated file. 
-While it is a little messy, this method doesn't require us to use an external client such as psql, and doesn't us to handle the messy typecasting of data to strings.
+Due to the lack of support for CSV exports in the lib/pq database drivers, we had to implement the feature manually.  
+~~One of the approaches used was to execute the `COPY` command in the PostgresQL server to generate a csv file, leveraging the in-built feature. However, due to storage being isolated in the Docker container, an additional volume mount is needed to access the generated file. 
+While it is a little messy, this method doesn't require us to use an external client such as psql, and doesn't us to handle the messy typecasting of data to strings.~~
+We have since moved to using a simple existing golang library, [sqltocsv](https://github.com/joho/sqltocsv), which writes the rows to a csv file easily.
 
-2. 
+### Import to DB Feature
+This feature allows importing existing CSV files to the database. The CSV file must be in the correct format, with the correct headers, and the correct order of columns.  
+Note: This feature is not accessible to users since it should be rarely invoked, only to reset the database to a known state in the event of system failures :O  
+
+Some desired properties of the import to DB feature include:
+- Ability to use exported csv files from /export-db as a backup
+- Easy to use and debug (If I ever have to use this feature, I need it to be quick to minimise downtime)
