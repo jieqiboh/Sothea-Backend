@@ -698,6 +698,18 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context) err
 	return nil
 }
 
+func (p *postgresPatientRepository) GetDBUser(ctx context.Context, username string) (*entities.DBUser, error) {
+	user := entities.DBUser{}
+
+	// Get latest row
+	latestRow := p.Conn.QueryRowContext(ctx, `SELECT username, password_hash FROM users WHERE username = $1`, username)
+	err := latestRow.Scan(&user.Username, &user.PasswordHash)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
 func (p *postgresPatientRepository) checkPatientExists(ctx context.Context, id int32) (bool, error) {
 	// Helper method to check that a patient exists
 	var resId int32

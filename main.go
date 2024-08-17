@@ -76,12 +76,12 @@ func main() {
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
+	patientRepo := _patientPostgresRepository.NewPostgresPatientRepository(db)
 	// Set up login routes
-	loginUseCase := _useCase.NewLoginUseCase(5*time.Second, secretKey)
+	loginUseCase := _useCase.NewLoginUseCase(patientRepo, 5*time.Second, secretKey)
 	_httpDelivery.NewLoginHandler(router, loginUseCase, secretKey)
 
 	// Set up patient routes
-	patientRepo := _patientPostgresRepository.NewPostgresPatientRepository(db)
 	patientUseCase := _useCase.NewPatientUsecase(patientRepo, 2*time.Second)
 	_httpDelivery.NewPatientHandler(router, patientUseCase, secretKey)
 
