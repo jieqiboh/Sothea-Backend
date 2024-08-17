@@ -372,7 +372,7 @@ func TestPostgresPatientRepository_GetUser(t *testing.T) {
 		log.Fatal("Failed to assert repo")
 	}
 
-	user, err := patient_repo.GetUser(context.Background(), "admin")
+	user, err := patient_repo.GetDBUser(context.Background(), "admin")
 	assert.Nil(t, err)
 	assert.NotNil(t, user)
 }
