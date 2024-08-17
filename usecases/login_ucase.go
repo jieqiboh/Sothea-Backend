@@ -4,17 +4,20 @@ import (
 	"context"
 	"github.com/jieqiboh/sothea_backend/controllers/middleware"
 	"github.com/jieqiboh/sothea_backend/entities"
+	"golang.org/x/crypto/bcrypt"
 	"time"
 )
 
 type loginUsecase struct {
+	patientRepo    entities.PatientRepository
 	contextTimeout time.Duration
 	secretKey      []byte
 }
 
 // NewLoginUseCase
-func NewLoginUseCase(timeout time.Duration, secretKey []byte) entities.LoginUseCase {
+func NewLoginUseCase(p entities.PatientRepository, timeout time.Duration, secretKey []byte) entities.LoginUseCase {
 	return &loginUsecase{
+		patientRepo:    p,
 		contextTimeout: timeout,
 		secretKey:      secretKey,
 	}
@@ -24,10 +27,19 @@ func (l *loginUsecase) Login(ctx context.Context, user entities.User) (string, e
 	ctx, cancel := context.WithTimeout(ctx, l.contextTimeout)
 	defer cancel()
 
-	if user.Username == "admin" && user.Password == "admin" { // Todo: replace this with a database query
-		token, err := middleware.CreateToken(user.Username, l.secretKey)
-		return token, err
-	} else {
+	dbUser, err := l.patientRepo.GetDBUser(ctx, user.Username)
+	if err != nil {
+		return "", err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(dbUser.PasswordHash), []byte(user.Password))
+	if err != nil {
 		return "", entities.ErrLoginFailed
 	}
+
+	token, err := middleware.CreateToken(user.Username, l.secretKey)
+	if err != nil {
+		return "", err
+	}
+	return token, err
 }

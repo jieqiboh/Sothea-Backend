@@ -36,4 +36,5 @@ type PatientRepository interface {
 	GetPatientMeta(ctx context.Context, id int32) (*PatientMeta, error)                     // Returns a Patient's Meta Data
 	GetAllPatientVisitMeta(ctx context.Context, date time.Time) ([]PatientVisitMeta, error) // Returns all Patient's Visit's Meta Data
 	ExportDatabaseToCSV(ctx context.Context) error
+	GetDBUser(ctx context.Context, username string) (*DBUser, error)
 }

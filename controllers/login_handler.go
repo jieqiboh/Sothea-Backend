@@ -42,8 +42,13 @@ func (l *LoginHandler) Login(c *gin.Context) {
 
 	tokenString, err := l.Usecase.Login(ctx, u)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": entities.ErrLoginFailed.Error()})
-		return
+		if err == entities.ErrLoginFailed {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": entities.ErrLoginFailed.Error()})
+			return
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
 	}
 	c.JSON(http.StatusOK, gin.H{"token": tokenString})
 	return
