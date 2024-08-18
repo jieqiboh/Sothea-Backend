@@ -6,18 +6,19 @@ import (
 )
 
 type PatientVisitMeta struct {
-	ID            int32      `json:"id" binding:"-"`
-	VID           int32      `json:"vid" binding:"-"`
-	FamilyGroup   *string    `json:"familyGroup" binding:"required"`
-	RegDate       *time.Time `json:"regDate" binding:"required"`
-	QueueNo       *string    `json:"queueNo" binding:"required"`
-	Name          *string    `json:"name" binding:"required"`
-	KhmerName     *string    `json:"khmerName" binding:"required"`
-	Gender        *string    `json:"gender" binding:"required"`
-	Village       *string    `json:"village" binding:"required"`
-	ContactNo     *string    `json:"contactNo" binding:"required"`
-	DrugAllergies *string    `json:"drugAllergies"`
-	SentToID      *bool      `json:"sentToId" binding:"required"`
+	ID             int32      `json:"id" binding:"-"`
+	VID            int32      `json:"vid" binding:"-"`
+	FamilyGroup    *string    `json:"familyGroup" binding:"required"`
+	RegDate        *time.Time `json:"regDate" binding:"required"`
+	QueueNo        *string    `json:"queueNo" binding:"required"`
+	Name           *string    `json:"name" binding:"required"`
+	KhmerName      *string    `json:"khmerName" binding:"required"`
+	Gender         *string    `json:"gender" binding:"required"`
+	Village        *string    `json:"village" binding:"required"`
+	ContactNo      *string    `json:"contactNo" binding:"required"`
+	DrugAllergies  *string    `json:"drugAllergies"`
+	SentToID       *bool      `json:"sentToId" binding:"required"`
+	ReferralNeeded *bool      `json:"referralNeeded" binding:"required"`
 }
 
 // TableName specifies the table name for the PatientVisitMeta model.
@@ -40,5 +41,6 @@ func (pvm PatientVisitMeta) String() string {
 	result += fmt.Sprintf("ContactNo: %s\n", *pvm.ContactNo)
 	result += fmt.Sprintf("DrugAllergies: %v\n", SafeDeref(pvm.DrugAllergies))
 	result += fmt.Sprintf("SentToID: %t\n", *pvm.SentToID)
+	result += fmt.Sprintf("ReferralNeeded: %t\n", *pvm.ReferralNeeded)
 	return result
 }
