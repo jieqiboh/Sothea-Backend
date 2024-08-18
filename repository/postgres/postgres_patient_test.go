@@ -185,6 +185,31 @@ func TestPostgresPatientRepository_GetPatientVisit(t *testing.T) {
 	assert.ErrorIs(t, err, entities.ErrPatientVisitNotFound)
 }
 
+func TestPostgresPatientRepository_GetAllPatientVisitMeta(t *testing.T) {
+	repo := NewPostgresPatientRepository(db)
+
+	patient_repo, ok := repo.(*postgresPatientRepository)
+	if !ok {
+		log.Fatal("Failed to assert repo")
+	}
+
+	dateStr := "2024-01-10"
+	date, err := time.Parse("2006-01-02", dateStr)
+	if err != nil {
+		fmt.Println("Error parsing date:", err)
+		return
+	}
+
+	allPatientVisitMeta, err := patient_repo.GetAllPatientVisitMeta(context.Background(), date)
+	assert.Nil(t, err)
+	assert.NotNil(t, allPatientVisitMeta)
+	assert.Equal(t, 6, len(allPatientVisitMeta))
+
+	latestAllPatientVisitMeta, err := patient_repo.GetAllPatientVisitMeta(context.Background(), time.Time{})
+	assert.Nil(t, err)
+	assert.Equal(t, 6, len(latestAllPatientVisitMeta))
+}
+
 func TestPostgresPatientRepository_CreatePatient(t *testing.T) {
 	repo := NewPostgresPatientRepository(db)
 
@@ -299,31 +324,6 @@ func TestPostgresPatientRepository_UpdatePatientVisit(t *testing.T) {
 	// Update patient's visit that doesn't exit
 	err = patient_repo.UpdatePatientVisit(context.Background(), 1, -1, &updatePatient)
 	assert.ErrorIs(t, err, entities.ErrPatientVisitNotFound)
-}
-
-func TestPostgresPatientRepository_GetAllPatientVisitMeta(t *testing.T) {
-	repo := NewPostgresPatientRepository(db)
-
-	patient_repo, ok := repo.(*postgresPatientRepository)
-	if !ok {
-		log.Fatal("Failed to assert repo")
-	}
-
-	dateStr := "2024-01-10"
-	date, err := time.Parse("2006-01-02", dateStr)
-	if err != nil {
-		fmt.Println("Error parsing date:", err)
-		return
-	}
-
-	allPatientVisitMeta, err := patient_repo.GetAllPatientVisitMeta(context.Background(), date)
-	assert.Nil(t, err)
-	assert.NotNil(t, allPatientVisitMeta)
-	assert.Equal(t, len(allPatientVisitMeta), 7)
-
-	latestAllPatientVisitMeta, err := patient_repo.GetAllPatientVisitMeta(context.Background(), time.Time{})
-	assert.Nil(t, err)
-	assert.Equal(t, len(latestAllPatientVisitMeta), 7)
 }
 
 func TestPostgresPatientRepository_GetPatientMeta(t *testing.T) {

@@ -543,13 +543,45 @@ func (p *postgresPatientRepository) GetAllPatientVisitMeta(ctx context.Context, 
 	result := make([]entities.PatientVisitMeta, 0)
 
 	if date.IsZero() { // Date is empty
-		rows, err = p.Conn.QueryContext(ctx, "SELECT DISTINCT ON (id) id, vid, family_group, reg_date, queue_no, name, khmer_name, gender, village, contact_no, drug_allergies, sent_to_id FROM admin ORDER BY id, vid DESC;")
+		rows, err = p.Conn.QueryContext(ctx, `WITH LatestDates AS (SELECT id, MAX(reg_date) AS latest_reg_date FROM admin GROUP BY id)
+													SELECT DISTINCT ON (a.id) 
+														a.id, a.vid, a.family_group, a.reg_date, a.queue_no, a.name, 
+														a.khmer_name, a.gender, a.village, a.contact_no, a.drug_allergies, 
+														a.sent_to_id, dc.referral_needed
+													FROM 
+														admin a
+													LEFT JOIN 
+														doctorsconsultation dc
+													ON 
+														a.id = dc.id -- assuming the foreign key relationship
+													INNER JOIN 
+														LatestDates ld
+													ON 
+														a.id = ld.id AND a.reg_date = ld.latest_reg_date
+													ORDER BY 
+														a.id, 
+														a.vid DESC;`)
 		if err != nil {
 			return nil, err
 		}
 	} else { // Date is non-empty
 		formattedDate := date.Format("2006-01-02")
-		rows, err = p.Conn.QueryContext(ctx, "SELECT DISTINCT ON (id) id, vid, family_group, reg_date, queue_no, name, khmer_name, gender, village, contact_no, drug_allergies, sent_to_id FROM admin WHERE reg_date = $1;", formattedDate)
+		rows, err = p.Conn.QueryContext(ctx, `SELECT DISTINCT ON (a.id) 
+													a.id, a.vid, a.family_group, a.reg_date, a.queue_no, a.name, 
+													a.khmer_name, a.gender, a.village, a.contact_no, a.drug_allergies, 
+													a.sent_to_id, dc.referral_needed
+												FROM 
+													admin a
+												LEFT JOIN 
+													doctorsconsultation dc
+												ON 
+													a.id = dc.id
+												WHERE 
+													a.reg_date = $1
+												ORDER BY 
+													a.id, 
+													a.vid DESC;`, formattedDate)
+
 		if err != nil {
 			return nil, err
 		}
@@ -570,7 +602,8 @@ func (p *postgresPatientRepository) GetAllPatientVisitMeta(ctx context.Context, 
 			&patientVisitMeta.Village,
 			&patientVisitMeta.ContactNo,
 			&patientVisitMeta.DrugAllergies,
-			&patientVisitMeta.SentToID)
+			&patientVisitMeta.SentToID,
+			&patientVisitMeta.ReferralNeeded)
 		if err != nil {
 			return nil, err
 		}
