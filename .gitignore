@@ -10,4 +10,4 @@ tmp/*
 *.exe
 *.out
 *.app
-bin/*
+sothea-backend
