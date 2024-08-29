@@ -1,5 +1,5 @@
 # Project Sothea Backend
-### Last Updated: August 11, 2024
+### Last Updated: August 29, 2024
 ## Overview
 
 This is the backend for the patient management system for Project Sothea, and is to be set up in conjunction with the frontend.  
@@ -17,12 +17,11 @@ Before you begin, ensure you have the following installed:
 ### Installation and Setup
 1. Clone the repository to your local machine: `git clone https://github.com/Project-Sothea/Sothea-Backend.git`
  
-2. In the project folder, build the project with `go build -o bin/sothea-backend` 
- (this ensures the binary is located in the `/bin` folder, so it can be gitignored)
+2. In the project folder, build the project with `go build -o sothea-backend` 
 
 3. Set up the required docker containers for the database (see below).
 
-4. Run the Go binary with `./bin/sothea-backend --mode=dev`, starting it up in development mode.
+4. Run the Go binary with `./sothea-backend --mode=dev`, starting it up in development mode.
  
 5. The server should now be accessible on `http://localhost:9090`
 
@@ -32,7 +31,7 @@ Before you begin, ensure you have the following installed:
 
 ### Setting Up Docker
 To facilitate easy setup of the patients database with preloaded data, we've opted to use Docker with a PostgreSQL image. To set up the database, follow the steps below:
-1. Make sure Docker is running in the background.
+1. Make sure the Docker daemon is running in the background.
 
 2. Build the Docker image for the Postgres database: `docker build -t sothea-db .`
 
@@ -44,7 +43,7 @@ To facilitate easy setup of the patients database with preloaded data, we've opt
 When running the Go binary, you can specify the mode of operation using the `--mode` flag. The available modes are:  
 - `dev` - Development mode, using config.json for configuration. This mode will run the server on port 9090.
 - `prod` - Production mode, using prod.json for configuration. This mode will run the server on "192.168.0.100:9090", a static IP address that we use on our production server on the deployed network.   
-Do ensure that the frontend is appropriately configured to make requests to the correct server address.
+Do ensure that the frontend is appropriately configured to make requests to the correct backend address.
 
 ### Common Issues
 - Database role not found / Authentication Failed
@@ -53,6 +52,34 @@ This usually happens if there are already pre-existing Postgres instances runnin
 ### API Endpoints
 API endpoints are detailed below:
 
+#### Login
+Authenticate a user and return an access token.
+
+```plaintext
+POST /login
+```
+
+If successful, returns `200` and the following response attributes:
+
+| Attribute | Type   | Description          |
+|-----------|--------|----------------------|
+| `token`   | string | Guaranteed to exist. |
+
+Unsuccessful responses include:  
+`401` - Unauthorized.  
+`500` - Internal server error.
+
+Example request:
+
+```shell
+curl --url 'http://localhost:9090/login' \
+--header 'Content-Type: application/json' \
+--data '{
+    "username": "admin",
+    "password": "admin"
+}'
+```
+
 #### GetPatientVisit
 Get an existing patient's visit by their ID and Visit ID.
 
@@ -60,8 +87,7 @@ Get an existing patient's visit by their ID and Visit ID.
 GET /patient/:id/:vid
 ```
 
-If successful, returns `200` and the following
-response attributes:
+If successful, returns `200` and the following response attributes:
 
 | Attribute            | Type   | Description          |
 |----------------------|--------|----------------------|
@@ -187,7 +213,7 @@ Example response:
 ```
 
 #### CreatePatient
-Create an entirely new patient.
+Create a new patient.
 
 ```plaintext
 POST /patient
@@ -297,7 +323,7 @@ Example response:
 
 #### DeletePatientVisit
 Deletes a specified visit of an existing patient.  
-To avoid accidentally deleting entire patients, only deleting entries one at a time is allowed.
+To avoid accidentally deleting entire patients, only deleting visits one at a time is allowed.
 
 ```plaintext
 DELETE /patient/:id/:vid
@@ -436,6 +462,17 @@ GET /patient-meta/:id
 
 If successful, returns `200`
 
+| Attribute     | Type    | Description                           |
+|---------------|---------|---------------------------------------|
+| `id`          | integer | Integer id of patient                 |
+| `vid`         | integer | Integer visit id                      |
+| `familyGroup` | string  | Integer visit id of new visit created |
+| `regDate`     | string  | Registration date of visit            |
+| `queueNo`     | string  | Queue number given for visit          |
+| `name`        | string  | Name of patient                       |
+| `khmerName`   | string  | Khmer name of patient                 |
+| `visits`      | object  | Mapping of visit ids to regDate       |
+
 Unsuccessful responses include:
 `404` - Patient visit not found.  
 `400` - Bad Request URL
@@ -475,7 +512,7 @@ Retrieve and return patient visit metadata for all patients on a specific date
 GET /all-patient-visit-meta/:date
 ```
 
-If successful, returns `200`
+If successful, returns `200`, and an array of patient visit metadata objects.
 
 Unsuccessful responses include:
 `400` - Bad Request URL
@@ -590,4 +627,11 @@ Export all patient data to a CSV file.
 
 ```plaintext
 GET /export-db
+```
+
+#### Is Valid Token
+Check if the authorization token in a request is valid.
+
+```plaintext
+GET /isValidToken
 ```
