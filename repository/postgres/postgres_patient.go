@@ -616,10 +616,11 @@ func (p *postgresPatientRepository) GetAllPatientVisitMeta(ctx context.Context, 
 	return result, nil
 }
 
-func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context) error {
+func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context, includePhoto bool) error {
+	// Base query without the photo field
 	query := `SELECT
         a.id,
-		a.vid,
+        a.vid,
         a.family_group,
         a.reg_date,
         a.queue_no,
@@ -634,7 +635,6 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context) err
         a.last_menstrual_period,
         a.drug_allergies,
         a.sent_to_id,
-        a.photo,
         -- Past Medical History
         p.tuberculosis,
         p.diabetes,
@@ -707,6 +707,13 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context) err
         visualacuity va ON a.id = va.id AND a.vid = va.vid
     LEFT JOIN
         doctorsconsultation d ON a.id = d.id AND a.vid = d.vid`
+
+	// Conditionally add the photo field to the query if includePhoto is true
+	if includePhoto {
+		query = `SELECT
+            a.photo, ` + query[7:] // Adds 'a.photo' to the select fields
+	}
+
 	// Execute the query
 	rows, err := p.Conn.QueryContext(ctx, query)
 	if err != nil {
