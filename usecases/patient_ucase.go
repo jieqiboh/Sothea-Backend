@@ -68,9 +68,9 @@ func (p *patientUsecase) GetAllPatientVisitMeta(ctx context.Context, date time.T
 	return p.patientRepo.GetAllPatientVisitMeta(ctx, date)
 }
 
-func (p *patientUsecase) ExportDatabaseToCSV(ctx context.Context) error {
+func (p *patientUsecase) ExportDatabaseToCSV(ctx context.Context, includePhoto bool) error {
 	ctx, cancel := context.WithTimeout(ctx, p.contextTimeout)
 	defer cancel()
 
-	return p.patientRepo.ExportDatabaseToCSV(ctx)
+	return p.patientRepo.ExportDatabaseToCSV(ctx, includePhoto)
 }

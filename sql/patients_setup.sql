@@ -8,6 +8,7 @@ DROP TABLE IF EXISTS heightandweight;
 DROP TABLE IF EXISTS visualacuity;
 DROP TABLE IF EXISTS doctorsconsultation;
 DROP TABLE IF EXISTS admin;
+DROP TABLE IF EXISTS users;
 
 /*******************
 Create the schema and Load Extensions

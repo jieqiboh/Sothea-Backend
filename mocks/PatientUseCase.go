@@ -90,17 +90,17 @@ func (_m *PatientUseCase) DeletePatientVisit(ctx context.Context, id int32, vid 
 	return r0
 }
 
-// ExportDatabaseToCSV provides a mock function with given fields: ctx
-func (_m *PatientUseCase) ExportDatabaseToCSV(ctx context.Context) error {
-	ret := _m.Called(ctx)
+// ExportDatabaseToCSV provides a mock function with given fields: ctx, includePhoto
+func (_m *PatientUseCase) ExportDatabaseToCSV(ctx context.Context, includePhoto bool) error {
+	ret := _m.Called(ctx, includePhoto)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ExportDatabaseToCSV")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context) error); ok {
-		r0 = rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, bool) error); ok {
+		r0 = rf(ctx, includePhoto)
 	} else {
 		r0 = ret.Error(0)
 	}

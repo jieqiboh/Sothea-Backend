@@ -253,8 +253,17 @@ func (p *PatientHandler) GetAllPatientVisitMeta(c *gin.Context) {
 func (p *PatientHandler) ExportDatabaseToCSV(c *gin.Context) {
 	ctx := c.Request.Context()
 
+	// Get the "includePhoto" query parameter and convert it to a boolean
+	includePhotoParam := c.Query("includePhoto")
+	includePhoto, err := strconv.ParseBool(includePhotoParam)
+	if err != nil {
+		// If the conversion fails, return an error response
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid includePhoto parameter"})
+		return
+	}
+
 	filePath := util.MustGitPath("repository/tmp/output.csv")
-	err := p.Usecase.ExportDatabaseToCSV(ctx)
+	err = p.Usecase.ExportDatabaseToCSV(ctx, includePhoto)
 	if err != nil {
 		log.Printf("Failed to export data to CSV: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to export data"})

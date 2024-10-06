@@ -24,9 +24,11 @@ func main() {
 	// Determine the mode and print a message
 	switch *mode {
 	case "dev":
+		gin.SetMode(gin.DebugMode)
 		fmt.Println("Running in development mode")
 		viper.SetConfigFile(`config.json`)
 	case "prod":
+		gin.SetMode(gin.ReleaseMode)
 		fmt.Println("Running in production mode")
 		viper.SetConfigFile(`prod.json`)
 	default:

@@ -90,17 +90,17 @@ func (_m *PatientRepository) DeletePatientVisit(ctx context.Context, id int32, v
 	return r0
 }
 
-// ExportDatabaseToCSV provides a mock function with given fields: ctx
-func (_m *PatientRepository) ExportDatabaseToCSV(ctx context.Context) error {
-	ret := _m.Called(ctx)
+// ExportDatabaseToCSV provides a mock function with given fields: ctx, includePhoto
+func (_m *PatientRepository) ExportDatabaseToCSV(ctx context.Context, includePhoto bool) error {
+	ret := _m.Called(ctx, includePhoto)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ExportDatabaseToCSV")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context) error); ok {
-		r0 = rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, bool) error); ok {
+		r0 = rf(ctx, includePhoto)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -131,6 +131,36 @@ func (_m *PatientRepository) GetAllPatientVisitMeta(ctx context.Context, date ti
 
 	if rf, ok := ret.Get(1).(func(context.Context, time.Time) error); ok {
 		r1 = rf(ctx, date)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetDBUser provides a mock function with given fields: ctx, username
+func (_m *PatientRepository) GetDBUser(ctx context.Context, username string) (*entities.DBUser, error) {
+	ret := _m.Called(ctx, username)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetDBUser")
+	}
+
+	var r0 *entities.DBUser
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*entities.DBUser, error)); ok {
+		return rf(ctx, username)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *entities.DBUser); ok {
+		r0 = rf(ctx, username)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*entities.DBUser)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, username)
 	} else {
 		r1 = ret.Error(1)
 	}
