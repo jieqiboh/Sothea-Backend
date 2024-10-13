@@ -193,7 +193,6 @@ Example response:
  "doctorsconsultation": {
   "id": 1,
   "vid": 1,
-  "healthy": true,
   "msk": false,
   "cvs": false,
   "respi": true,
@@ -434,7 +433,6 @@ curl --location --request PATCH 'http://localhost:9090/patient/1/1' \
         "additionalIntervention": "VISUAL FIELD TEST REQUIRED"
     },
     "doctorsConsultation": {
-        "healthy": true,
         "msk": false,
         "cvs": false,
         "respi": true,

@@ -139,7 +139,6 @@ Optional Fields: `additional_intervention`
 |----------------------|---------|----------------------------------------------------------------------------|
 | `id`                 | integer | Auto-incrementing primary key                                              |
 | `vid`                | integer | Auto-incrementing with each new visit created, for each respective patient |
-| `healthy`            | boolean | Boolean indicating if the patient is healthy                               |
 | `msk`                | boolean | Boolean indicating if musculoskeletal system is healthy                    |
 | `cvs`                | boolean | Boolean indicating if cardiovascular system is healthy                     |
 | `respi`              | boolean | Boolean indicating if respiratory system is healthy                        |
