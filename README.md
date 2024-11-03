@@ -1,5 +1,5 @@
 # Project Sothea Backend
-### Last Updated: August 29, 2024
+### Last Updated: 4 Nov, 2024
 ## Overview
 
 This is the backend for the patient management system for Project Sothea, and is to be set up in conjunction with the frontend.  
@@ -89,14 +89,16 @@ GET /patient/:id/:vid
 
 If successful, returns `200` and the following response attributes:
 
-| Attribute            | Type   | Description          |
-|----------------------|--------|----------------------|
-| `admin`              | object | Guaranteed to exist. |
-| `pastmedicalhistory` | object | May not exist.       |
-| `socialhistory`      | object | May not exist.       |
-| `vitalstatistics`    | object | May not exist.       |
-| `heightandweight`    | object | May not exist.       |
-| `visualacuity`       | object | May not exist.       |
+| Attribute             | Type   | Description          |
+|-----------------------|--------|----------------------|
+| `admin`               | object | Guaranteed to exist. |
+| `pastmedicalhistory`  | object | May not exist.       |
+| `socialhistory`       | object | May not exist.       |
+| `vitalstatistics`     | object | May not exist.       |
+| `heightandweight`     | object | May not exist.       |
+| `visualacuity`        | object | May not exist.       |
+| `fallrisk`            | object | May not exist.       |
+| `doctorsconsultation` | object | May not exist.       |
 
 Unsuccessful responses include:  
 `404` - Patient not found.  
@@ -114,101 +116,110 @@ Example response:
 
 ```json
 {
- "admin": {
-  "id": 1,
-  "vid": 1,
-  "familyGroup": "S001",
-  "regDate": "2024-01-10T00:00:00Z",
-  "queueNo": "3B",
-  "name": "Patient's Name Here",
-  "khmerName": "តតតតតតត",
-  "dob": "1994-01-10T00:00:00Z",
-  "age": 30,
-  "gender": "M",
-  "village": "SO",
-  "contactNo": "12345678",
-  "pregnant": false,
-  "lastMenstrualPeriod": null,
-  "drugAllergies": "panadol",
-  "sentToId": false,
-  "photo": "<photo_encoded_as_base64_string>"
- },
- "pastmedicalhistory": {
-  "id": 1,
-  "vid": 1,
-  "tuberculosis": true,
-  "diabetes": false,
-  "hypertension": true,
-  "hyperlipidemia": false,
-  "chronicJointPains": false,
-  "chronicMuscleAches": true,
-  "sexuallyTransmittedDisease": true,
-  "specifiedSTDs": "TRICHOMONAS",
-  "others": "None"
- },
- "socialhistory": {
-  "id": 1,
-  "vid": 1,
-  "pastSmokingHistory": true,
-  "numberOfYears": 15,
-  "currentSmokingHistory": false,
-  "cigarettesPerDay": null,
-  "alcoholHistory": true,
-  "howRegular": "A"
- },
- "vitalstatistics": {
-  "id": 1,
-  "vid": 1,
-  "temperature": 36.5,
-  "spO2": 98,
-  "systolicBP1": 98,
-  "diastolicBP1": 80,
-  "systolicBP2": 122,
-  "diastolicBP2": 78,
-  "averageSystolicBP": 121,
-  "averageDiastolicBP": 79,
-  "hr1": 72,
-  "hr2": 71,
-  "averageHR": 71.5,
-  "randomBloodGlucoseMmolL": 5.4,
-  "randomBloodGlucoseMmolLp": 5.3
- },
- "heightandweight": {
-  "id": 1,
-  "vid": 1,
-  "height": 170,
-  "weight": 70,
-  "bmi": 24.2,
-  "bmiAnalysis": "normal weight",
-  "paedsHeight": 90,
-  "paedsWeight": 80
- },
- "visualacuity": {
-  "id": 1,
-  "vid": 1,
-  "lEyeVision": 20,
-  "rEyeVision": 20,
-  "additionalIntervention": "VISUAL FIELD TEST REQUIRED"
- },
- "doctorsconsultation": {
-  "id": 1,
-  "vid": 1,
-  "healthy": true,
-  "msk": false,
-  "cvs": false,
-  "respi": true,
-  "gu": true,
-  "git": false,
-  "eye": true,
-  "derm": false,
-  "others": "TRICHOMONAS VAGINALIS",
-  "consultationNotes": "CHEST PAIN, SHORTNESS OF BREATH, COUGH",
-  "diagnosis": "ACUTE BRONCHITIS",
-  "treatment": "REST, HYDRATION, COUGH SYRUP",
-  "referralNeeded": false,
-  "referralLoc": null,
-  "remarks": "MONITOR FOR RESOLUTION"
- }
+  "admin": {
+    "id": 1,
+    "vid": 1,
+    "familyGroup": "S001",
+    "regDate": "2024-01-10T00:00:00Z",
+    "queueNo": "1A",
+    "name": "John Doe",
+    "khmerName": "១២៣៤ ៥៦៧៨៩០ឥឲ",
+    "dob": "1994-01-10T00:00:00Z",
+    "age": 30,
+    "gender": "M",
+    "village": "SO",
+    "contactNo": "12345678",
+    "pregnant": false,
+    "lastMenstrualPeriod": null,
+    "drugAllergies": "panadol",
+    "sentToId": false,
+    "photo": ""
+  },
+  "pastmedicalhistory": {
+    "id": 1,
+    "vid": 1,
+    "tuberculosis": true,
+    "diabetes": false,
+    "hypertension": true,
+    "hyperlipidemia": false,
+    "chronicJointPains": false,
+    "chronicMuscleAches": true,
+    "sexuallyTransmittedDisease": true,
+    "specifiedSTDs": "TRICHOMONAS",
+    "others": "None"
+  },
+  "socialhistory": {
+    "id": 1,
+    "vid": 1,
+    "pastSmokingHistory": true,
+    "numberOfYears": 15,
+    "currentSmokingHistory": false,
+    "cigarettesPerDay": null,
+    "alcoholHistory": true,
+    "howRegular": "A"
+  },
+  "vitalstatistics": {
+    "id": 1,
+    "vid": 1,
+    "temperature": 36.5,
+    "spO2": 98,
+    "systolicBP1": 120,
+    "diastolicBP1": 80,
+    "systolicBP2": 122,
+    "diastolicBP2": 78,
+    "averageSystolicBP": 121,
+    "averageDiastolicBP": 79,
+    "hr1": 72,
+    "hr2": 71,
+    "averageHR": 71.5,
+    "randomBloodGlucoseMmolL": 5.4,
+    "randomBloodGlucoseMmolLp": 5.3
+  },
+  "heightandweight": {
+    "id": 1,
+    "vid": 1,
+    "height": 170,
+    "weight": 70,
+    "bmi": 24.2,
+    "bmiAnalysis": "normal weight",
+    "paedsHeight": 90,
+    "paedsWeight": 80
+  },
+  "visualacuity": {
+    "id": 1,
+    "vid": 1,
+    "lEyeVision": 20,
+    "rEyeVision": 20,
+    "additionalIntervention": "VISUAL FIELD TEST REQUIRED"
+  },
+  "fallrisk": {
+    "id": 1,
+    "vid": 1,
+    "fallHistory": "a",
+    "cognitiveStatus": "b",
+    "continenceProblems": "e",
+    "safetyAwareness": "d",
+    "unsteadiness": "c"
+  },
+  "doctorsconsultation": {
+    "id": 1,
+    "vid": 1,
+    "healthy": true,
+    "msk": false,
+    "cvs": false,
+    "respi": true,
+    "gu": true,
+    "git": false,
+    "eye": true,
+    "derm": false,
+    "others": "LEUKAEMIA",
+    "consultationNotes": "CHEST PAIN, SHORTNESS OF BREATH, COUGH",
+    "diagnosis": "ACUTE BRONCHITIS",
+    "treatment": "REST, HYDRATION, COUGH SYRUP",
+    "referralNeeded": false,
+    "referralLoc": null,
+    "remarks": "MONITOR FOR RESOLUTION"
+  }
 }
 ```
 
@@ -433,6 +444,13 @@ curl --location --request PATCH 'http://localhost:9090/patient/1/1' \
         "rEyeVision": 20,
         "additionalIntervention": "VISUAL FIELD TEST REQUIRED"
     },
+    "fallrisk": {
+        "fallHistory": "c",
+        "cognitiveStatus": "b",
+        "continenceProblems": "e",
+        "safetyAwareness": "d",
+        "unsteadiness": "c"
+    },
     "doctorsConsultation": {
         "healthy": true,
         "msk": false,
@@ -627,6 +645,8 @@ Export all patient data to a CSV file.
 
 ```plaintext
 GET /export-db
+
+GET /export-db?includePhoto=true
 ```
 
 #### Is Valid Token
