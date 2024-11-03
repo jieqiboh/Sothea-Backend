@@ -159,6 +159,23 @@ func (p *postgresPatientRepository) GetPatientVisit(ctx context.Context, id int3
 		return nil, err
 	}
 
+	rows = tx.QueryRowContext(ctx, "SELECT * FROM fallrisk WHERE fallrisk.id = $1 AND fallrisk.vid = $2;", id, vid)
+	fallrisk := &entities.FallRisk{}
+	err = rows.Scan(
+		&fallrisk.ID,
+		&fallrisk.VID,
+		&fallrisk.FallHistory,
+		&fallrisk.CognitiveStatus,
+		&fallrisk.ContinenceProblems,
+		&fallrisk.SafetyAwareness,
+		&fallrisk.Unsteadiness,
+	)
+	if errors.Is(sql.ErrNoRows, err) { // no fallrisk found
+		fallrisk = nil
+	} else if err != nil { // unknown error
+		return nil, err
+	}
+
 	rows = tx.QueryRowContext(ctx, "SELECT * FROM doctorsconsultation WHERE doctorsconsultation.id = $1 AND doctorsconsultation.vid = $2;", id, vid)
 	doctorsconsultation := &entities.DoctorsConsultation{}
 	err = rows.Scan(
@@ -193,6 +210,7 @@ func (p *postgresPatientRepository) GetPatientVisit(ctx context.Context, id int3
 		VitalStatistics:     vitalstatistics,
 		HeightAndWeight:     heightandweight,
 		VisualAcuity:        visualacuity,
+		FallRisk:            fallrisk,
 		DoctorsConsultation: doctorsconsultation,
 	}
 
@@ -304,6 +322,10 @@ func (p *postgresPatientRepository) DeletePatientVisit(ctx context.Context, id i
 	if err != nil {
 		return err
 	}
+	_, err = tx.Exec("DELETE FROM fallrisk WHERE fallrisk.id = $1 AND fallrisk.vid = $2;", id, vid)
+	if err != nil {
+		return err
+	}
 	_, err = tx.Exec("DELETE FROM doctorsconsultation WHERE doctorsconsultation.id = $1 AND doctorsconsultation.vid = $2;", id, vid)
 	if err != nil {
 		return err
@@ -346,6 +368,7 @@ func (p *postgresPatientRepository) UpdatePatientVisit(ctx context.Context, id i
 	vs := patient.VitalStatistics
 	haw := patient.HeightAndWeight
 	va := patient.VisualAcuity
+	fr := patient.FallRisk
 	dc := patient.DoctorsConsultation
 	if a != nil { // Update admin
 		_, err = tx.ExecContext(ctx, `UPDATE admin SET family_group = $1, reg_date = $2, queue_no = $3, name = $4, khmer_name = $5, dob = $6, age = $7, 
@@ -450,6 +473,22 @@ func (p *postgresPatientRepository) UpdatePatientVisit(ctx context.Context, id i
 			r_eye_vision = $4,
 			additional_intervention = $5
 		`, id, vid, va.LEyeVision, va.REyeVision, va.AdditionalIntervention)
+
+		if err != nil {
+			return err
+		}
+	}
+	if fr != nil {
+		_, err = tx.ExecContext(ctx, `
+		INSERT INTO fallrisk (id, vid, fall_history, cognitive_status, continence_problems, safety_awareness, unsteadiness) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7) 
+		ON CONFLICT (id, vid) DO UPDATE SET
+		    fall_history = $3,
+			cognitive_status = $4,
+			continence_problems = $5,
+			safety_awareness= $6,
+			unsteadiness = $7
+		`, id, vid, fr.FallHistory, fr.CognitiveStatus, fr.ContinenceProblems, fr.SafetyAwareness, fr.Unsteadiness)
 
 		if err != nil {
 			return err
@@ -677,6 +716,12 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context, inc
         va.l_eye_vision,
         va.r_eye_vision,
         va.additional_intervention,
+        -- Fall Risk
+		fr.fall_history,
+		fr.cognitive_status,
+		fr.continence_problems,
+		fr.safety_awareness,
+		fr.unsteadiness,
         -- Doctors Consultation
         d.healthy,
         d.msk,
@@ -705,6 +750,8 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context, inc
         heightandweight h ON a.id = h.id AND a.vid = h.vid
     LEFT JOIN
         visualacuity va ON a.id = va.id AND a.vid = va.vid
+    LEFT JOIN
+        fallrisk fr ON a.id = fr.id AND a.vid = fr.vid
     LEFT JOIN
         doctorsconsultation d ON a.id = d.id AND a.vid = d.vid`
 
