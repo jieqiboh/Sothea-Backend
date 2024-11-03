@@ -127,6 +127,60 @@ CREATE TABLE IF NOT EXISTS fallrisk
     CONSTRAINT fk_admin FOREIGN KEY (id, vid) REFERENCES admin (id, vid) -- Foreign key referencing the composite key in admin
 );
 
+CREATE TABLE IF NOT EXISTS dental
+(
+    id                      INTEGER NOT NULL,                            -- Use INTEGER to match the id type from admin
+    vid                     INTEGER NOT NULL,                            -- Add vid to match the vid type from admin
+    clean_teeth_freq        INTEGER NOT NULL CHECK (oral_hygiene BETWEEN 1 AND 7),
+    sugar_consume_freq      INTEGER NOT NULL CHECK (diet BETWEEN 0 AND 6),
+    past_year_decay         BOOLEAN NOT NULL,
+    brush_teeth_pain        BOOLEAN NOT NULL,
+    drink_other_water       BOOLEAN NOT NULL,
+    dental_notes            TEXT,
+    referral_needed         BOOLEAN NOT NULL,
+    referral_loc            TEXT,
+
+    -- Teeth Chart (FDI numbering)
+    tooth_11               BOOLEAN NOT NULL DEFAULT FALSE,  -- Right Upper
+    tooth_12               BOOLEAN NOT NULL DEFAULT FALSE,
+    tooth_13               BOOLEAN NOT NULL DEFAULT FALSE,
+    tooth_14               BOOLEAN NOT NULL DEFAULT FALSE,
+    tooth_15               BOOLEAN NOT NULL DEFAULT FALSE,
+    tooth_16               BOOLEAN NOT NULL DEFAULT FALSE,
+    tooth_17               BOOLEAN NOT NULL DEFAULT FALSE,
+    tooth_18               BOOLEAN NOT NULL DEFAULT FALSE,
+
+    tooth_21               BOOLEAN NOT NULL DEFAULT FALSE,  -- Left Upper
+    tooth_22               BOOLEAN NOT NULL DEFAULT FALSE,
+    tooth_23               BOOLEAN NOT NULL DEFAULT FALSE,
+    tooth_24               BOOLEAN NOT NULL DEFAULT FALSE,
+    tooth_25               BOOLEAN NOT NULL DEFAULT FALSE,
+    tooth_26               BOOLEAN NOT NULL DEFAULT FALSE,
+    tooth_27               BOOLEAN NOT NULL DEFAULT FALSE,
+    tooth_28               BOOLEAN NOT NULL DEFAULT FALSE,
+
+    tooth_31               BOOLEAN NOT NULL DEFAULT FALSE,  -- Left Lower
+    tooth_32               BOOLEAN NOT NULL DEFAULT FALSE,
+    tooth_33               BOOLEAN NOT NULL DEFAULT FALSE,
+    tooth_34               BOOLEAN NOT NULL DEFAULT FALSE,
+    tooth_35               BOOLEAN NOT NULL DEFAULT FALSE,
+    tooth_36               BOOLEAN NOT NULL DEFAULT FALSE,
+    tooth_37               BOOLEAN NOT NULL DEFAULT FALSE,
+    tooth_38               BOOLEAN NOT NULL DEFAULT FALSE,
+
+    tooth_41               BOOLEAN NOT NULL DEFAULT FALSE,  -- Right Lower
+    tooth_42               BOOLEAN NOT NULL DEFAULT FALSE,
+    tooth_43               BOOLEAN NOT NULL DEFAULT FALSE,
+    tooth_44               BOOLEAN NOT NULL DEFAULT FALSE,
+    tooth_45               BOOLEAN NOT NULL DEFAULT FALSE,
+    tooth_46               BOOLEAN NOT NULL DEFAULT FALSE,
+    tooth_47               BOOLEAN NOT NULL DEFAULT FALSE,
+    tooth_48               BOOLEAN NOT NULL DEFAULT FALSE,
+
+    PRIMARY KEY (id, vid),                                               -- Composite primary key
+    CONSTRAINT fk_admin FOREIGN KEY (id, vid) REFERENCES admin (id, vid) -- Foreign key referencing the composite key in admin
+);
+
 CREATE TABLE IF NOT EXISTS doctorsconsultation
 (
     id                 INTEGER NOT NULL,                                 -- Use INTEGER to match the id type from admin
