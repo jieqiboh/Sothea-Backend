@@ -131,8 +131,8 @@ CREATE TABLE IF NOT EXISTS dental
 (
     id                      INTEGER NOT NULL,                            -- Use INTEGER to match the id type from admin
     vid                     INTEGER NOT NULL,                            -- Add vid to match the vid type from admin
-    clean_teeth_freq        INTEGER NOT NULL CHECK (oral_hygiene BETWEEN 1 AND 7),
-    sugar_consume_freq      INTEGER NOT NULL CHECK (diet BETWEEN 0 AND 6),
+    clean_teeth_freq        INTEGER NOT NULL CHECK (clean_teeth_freq BETWEEN 1 AND 7),
+    sugar_consume_freq      INTEGER NOT NULL CHECK (sugar_consume_freq BETWEEN 0 AND 6),
     past_year_decay         BOOLEAN NOT NULL,
     brush_teeth_pain        BOOLEAN NOT NULL,
     drink_other_water       BOOLEAN NOT NULL,
@@ -287,6 +287,22 @@ VALUES (1, 1, 20, 20, 'VISUAL FIELD TEST REQUIRED'),
 INSERT INTO fallrisk (id, vid, fall_history, cognitive_status, continence_problems, safety_awareness, unsteadiness)
 VALUES (1, 1, 'a', 'b', 'e', 'd', 'c'),
        (2, 1, 'd', 'd', 'c', 'b', 'a');
+
+INSERT INTO dental (id, vid, clean_teeth_freq, sugar_consume_freq, past_year_decay, brush_teeth_pain, drink_other_water,
+                    dental_notes, referral_needed, referral_loc, tooth_11, tooth_12, tooth_13, tooth_14, tooth_15, tooth_16,
+                    tooth_17, tooth_18, tooth_21, tooth_22, tooth_23, tooth_24, tooth_25, tooth_26, tooth_27, tooth_28,
+                    tooth_31, tooth_32, tooth_33, tooth_34, tooth_35, tooth_36, tooth_37, tooth_38, tooth_41, tooth_42,
+                    tooth_43, tooth_44, tooth_45, tooth_46, tooth_47, tooth_48)
+VALUES (1, 1, 2, 3, TRUE, TRUE, FALSE, 'None', TRUE, 'Dentist',
+        TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE,
+        FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE,
+        TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE,
+        TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE),
+         (2, 1, 3, 4, FALSE, FALSE, TRUE, 'None', FALSE, NULL,
+        FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+        FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE);
 
 INSERT INTO doctorsconsultation (id, vid, healthy, msk, cvs, respi, gu, git, eye, derm, others,
                                  consultation_notes, diagnosis, treatment, referral_needed,

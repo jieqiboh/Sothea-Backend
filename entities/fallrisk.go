@@ -21,7 +21,7 @@ func (FallRisk) TableName() string {
 
 // ToString generates a simple string representation of the FallRisk struct.
 func (fr FallRisk) String() string {
-	result := fmt.Sprintf("\nADMIN\n")
+	result := fmt.Sprintf("\nFALL RISK\n")
 	result += fmt.Sprintf("ID: %d\n", fr.ID)
 	result += fmt.Sprintf("VID: %d\n", fr.VID)
 	result += fmt.Sprintf("FallHistory: %s\n", *fr.FallHistory)
