@@ -98,6 +98,7 @@ If successful, returns `200` and the following response attributes:
 | `heightandweight`     | object | May not exist.       |
 | `visualacuity`        | object | May not exist.       |
 | `fallrisk`            | object | May not exist.       |
+| `dental`              | object | May not exist.       |
 | `doctorsconsultation` | object | May not exist.       |
 
 Unsuccessful responses include:  
@@ -200,6 +201,50 @@ Example response:
     "continenceProblems": "e",
     "safetyAwareness": "d",
     "unsteadiness": "c"
+  },
+  "dental": {
+    "id": 1,
+    "vid": 1,
+    "cleanTeethFreq": 2,
+    "sugarConsumeFreq": 3,
+    "pastYearDecay": true,
+    "brushTeethPain": true,
+    "drinkOtherWater": false,
+    "dentalNotes": "None",
+    "referralNeeded": true,
+    "referralLoc": "Dentist",
+    "tooth11": true,
+    "tooth12": false,
+    "tooth13": true,
+    "tooth14": false,
+    "tooth15": true,
+    "tooth16": false,
+    "tooth17": true,
+    "tooth18": false,
+    "tooth21": true,
+    "tooth22": false,
+    "tooth23": true,
+    "tooth24": false,
+    "tooth25": true,
+    "tooth26": false,
+    "tooth27": true,
+    "tooth28": false,
+    "tooth31": true,
+    "tooth32": true,
+    "tooth33": false,
+    "tooth34": true,
+    "tooth35": false,
+    "tooth36": true,
+    "tooth37": false,
+    "tooth38": true,
+    "tooth41": false,
+    "tooth42": true,
+    "tooth43": false,
+    "tooth44": true,
+    "tooth45": false,
+    "tooth46": true,
+    "tooth47": false,
+    "tooth48": true
   },
   "doctorsconsultation": {
     "id": 1,

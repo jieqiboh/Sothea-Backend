@@ -14,6 +14,7 @@ type Patient struct {
 	HeightAndWeight     *HeightAndWeight     `json:"heightandweight"`
 	VisualAcuity        *VisualAcuity        `json:"visualacuity"`
 	FallRisk            *FallRisk            `json:"fallrisk"`
+	Dental              *Dental              `json:"dental"`
 	DoctorsConsultation *DoctorsConsultation `json:"doctorsconsultation"`
 }
 
