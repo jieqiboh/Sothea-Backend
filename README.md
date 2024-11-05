@@ -249,7 +249,6 @@ Example response:
   "doctorsconsultation": {
     "id": 1,
     "vid": 1,
-    "healthy": true,
     "msk": false,
     "cvs": false,
     "respi": true,

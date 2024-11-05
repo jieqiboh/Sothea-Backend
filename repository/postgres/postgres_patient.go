@@ -871,7 +871,6 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context, inc
 		d.tooth_47,
 		d.tooth_48,  -- Right Lower
         -- Doctors Consultation
-        dc.healthy,
         dc.msk,
         dc.cvs,
         dc.respi,

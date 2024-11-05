@@ -297,12 +297,12 @@ INSERT INTO dental (id, vid, clean_teeth_freq, sugar_consume_freq, past_year_dec
 VALUES (2, 1, 3, 4, FALSE, FALSE, TRUE, 'None', FALSE, NULL,
         FALSE, FALSE, FALSE, FALSE, FALSE);
 
-INSERT INTO doctorsconsultation (id, vid, healthy, msk, cvs, respi, gu, git, eye, derm, others,
+INSERT INTO doctorsconsultation (id, vid, msk, cvs, respi, gu, git, eye, derm, others,
                                  consultation_notes, diagnosis, treatment, referral_needed,
                                  referral_loc, remarks)
-VALUES (1, 1, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, 'LEUKAEMIA',
+VALUES (1, 1,  FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, 'LEUKAEMIA',
         'CHEST PAIN, SHORTNESS OF BREATH, COUGH', 'ACUTE BRONCHITIS',
-        'REST, HYDRATION, COUGH SYRUP', FALSE, NULL, 'MONITOR FOR RESOLUTION');
+        'REST, HYDRATION, COUGH SYRUP', FALSE, NULL,'MONITOR FOR RESOLUTION');
 
 /*******************
     Add additional entries for patient 1 and 2
