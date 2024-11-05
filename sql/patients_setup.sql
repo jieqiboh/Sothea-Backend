@@ -185,7 +185,6 @@ CREATE TABLE IF NOT EXISTS doctorsconsultation
 (
     id                 INTEGER NOT NULL,                                 -- Use INTEGER to match the id type from admin
     vid                INTEGER NOT NULL,                                 -- Add vid to match the vid type from admin
-    healthy            BOOLEAN NOT NULL,
     msk                BOOLEAN NOT NULL,
     cvs                BOOLEAN NOT NULL,
     respi              BOOLEAN NOT NULL,
@@ -298,12 +297,12 @@ INSERT INTO dental (id, vid, clean_teeth_freq, sugar_consume_freq, past_year_dec
 VALUES (2, 1, 3, 4, FALSE, FALSE, TRUE, 'None', FALSE, NULL,
         FALSE, FALSE, FALSE, FALSE, FALSE);
 
-INSERT INTO doctorsconsultation (id, vid, healthy, msk, cvs, respi, gu, git, eye, derm, others,
+INSERT INTO doctorsconsultation (id, vid, msk, cvs, respi, gu, git, eye, derm, others,
                                  consultation_notes, diagnosis, treatment, referral_needed,
                                  referral_loc, remarks)
-VALUES (1, 1, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, 'LEUKAEMIA',
+VALUES (1, 1,  FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, 'LEUKAEMIA',
         'CHEST PAIN, SHORTNESS OF BREATH, COUGH', 'ACUTE BRONCHITIS',
-        'REST, HYDRATION, COUGH SYRUP', FALSE, NULL, 'MONITOR FOR RESOLUTION');
+        'REST, HYDRATION, COUGH SYRUP', FALSE, NULL,'MONITOR FOR RESOLUTION');
 
 /*******************
     Add additional entries for patient 1 and 2
@@ -361,16 +360,16 @@ INSERT INTO visualacuity (id, vid, l_eye_vision, r_eye_vision, additional_interv
 VALUES (1, 2, 20, 20, 'VISUAL FIELD TEST REQUIRED'),
        (2, 2, 15, 20, 'REFERRED TO BOC');
 
-INSERT INTO doctorsconsultation (id, vid, healthy, msk, cvs, respi, gu, git, eye, derm, others,
+INSERT INTO doctorsconsultation (id, vid, msk, cvs, respi, gu, git, eye, derm, others,
                                  consultation_notes, diagnosis, treatment, referral_needed,
                                  referral_loc, remarks)
-VALUES (1, 2, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, 'LEUKAEMIA',
+VALUES (1, 2,  FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, 'LEUKAEMIA',
         'CHEST PAIN, SHORTNESS OF BREATH, COUGH', 'ACUTE BRONCHITIS',
         'REST, HYDRATION, COUGH SYRUP', FALSE, NULL, 'MONITOR FOR RESOLUTION');
-INSERT INTO doctorsconsultation (id, vid, healthy, msk, cvs, respi, gu, git, eye, derm, others,
+INSERT INTO doctorsconsultation (id, vid, msk, cvs, respi, gu, git, eye, derm, others,
                                  consultation_notes, diagnosis, treatment, referral_needed,
                                  referral_loc, remarks)
-VALUES (2, 2, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, 'LEUKAEMIA',
+VALUES (2, 2, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, 'LEUKAEMIA',
         'CHEST PAIN, SHORTNESS OF BREATH, COUGH', 'ACUTE BRONCHITIS',
         'REST, HYDRATION, COUGH SYRUP', FALSE, NULL, 'MONITOR FOR RESOLUTION');
 

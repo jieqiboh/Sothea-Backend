@@ -233,7 +233,6 @@ func (p *postgresPatientRepository) GetPatientVisit(ctx context.Context, id int3
 	err = rows.Scan(
 		&doctorsconsultation.ID,
 		&doctorsconsultation.VID,
-		&doctorsconsultation.Healthy,
 		&doctorsconsultation.Msk,
 		&doctorsconsultation.Cvs,
 		&doctorsconsultation.Respi,
@@ -605,28 +604,27 @@ func (p *postgresPatientRepository) UpdatePatientVisit(ctx context.Context, id i
 	}
 	if dc != nil {
 		_, err = tx.ExecContext(ctx, `
-		INSERT INTO doctorsconsultation (id, vid, healthy, msk, cvs, respi, gu, git, eye, derm, others, 
+		INSERT INTO doctorsconsultation (id, vid, msk, cvs, respi, gu, git, eye, derm, others, 
 		consultation_notes, diagnosis, treatment, referral_needed, referral_loc, remarks) 
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) 
 		ON CONFLICT(id, vid) 
 		DO UPDATE SET
-			healthy = $3,
-			msk = $4,
-			cvs = $5,
-			respi = $6,
-			gu = $7,
-			git = $8,
-			eye = $9,
-			derm = $10,
-			others = $11,
-			consultation_notes = $12,
-			diagnosis = $13,
-			treatment = $14,
-			referral_needed = $15,
-			referral_loc = $16,
-			remarks = $17
+			msk = $3,
+			cvs = $4,
+			respi = $5,
+			gu = $6,
+			git = $7,
+			eye = $8,
+			derm = $9,
+			others = $10,
+			consultation_notes = $11,
+			diagnosis = $12,
+			treatment = $13,
+			referral_needed = $14,
+			referral_loc = $15,
+			remarks = $16
 		`,
-			id, vid, dc.Healthy, dc.Msk, dc.Cvs, dc.Respi, dc.Gu, dc.Git, dc.Eye, dc.Derm, dc.Others, dc.ConsultationNotes,
+			id, vid, dc.Msk, dc.Cvs, dc.Respi, dc.Gu, dc.Git, dc.Eye, dc.Derm, dc.Others, dc.ConsultationNotes,
 			dc.Diagnosis, dc.Treatment, dc.ReferralNeeded, dc.ReferralLoc, dc.Remarks)
 
 		if err != nil {
@@ -873,7 +871,6 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context, inc
 		d.tooth_47,
 		d.tooth_48,  -- Right Lower
         -- Doctors Consultation
-        dc.healthy,
         dc.msk,
         dc.cvs,
         dc.respi,
