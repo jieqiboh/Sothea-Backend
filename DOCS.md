@@ -1,60 +1,75 @@
 # Backend Developer Documentation
-### Last Updated: August 29, 2024
 
-For future developers, this document will serve as a guide to understanding the backend and how to work with it, as well as the numerous design choices made.
+### Last Updated: 4 Nov, 2024
+
+For future developers, this document will serve as a guide to understanding the backend and how to work with it, as well
+as the numerous design choices made.
 
 ## Overview
-Sothea-Backend provides a REST API for Sothea-Frontend to interact with, to do CRUD operations on patients. 
-It is written in Go, due to its speed, reliability and ease of use. The backend uses a PostgreSQL database to store patient data.  
-It also draws inspiration from [Bob's Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html). 
-Some key concepts used include Dependency Rules and use cases, which make testing and maintenance easier.
-For basic deployment instructions, refer to the README.md file. 
 
-## Entity Design 
-The center of the backend is the patients entity, a representation of a patient's data. A patient comprises the following categories, each with their own fields:  
+Sothea-Backend provides a REST API for Sothea-Frontend to interact with, to do CRUD operations on patients.
+It is written in Go, due to its speed, reliability and ease of use. The backend uses a PostgreSQL database to store
+patient data.  
+It also draws inspiration
+from [Bob's Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html).
+Some key concepts used include Dependency Rules and use cases, which make testing and maintenance easier.
+For basic deployment instructions, refer to the README.md file.
+
+## Entity Design
+
+The center of the backend is the patients entity, a representation of a patient's data. A patient comprises the
+following categories, each with their own fields:  
 Patient SQL schema: `/sql/patients_setup.sql`
 Patient Golang struct schema: `/entities`
+
 - Admin
 - Past Medical History
 - Social History
 - Vital Statistics
 - Height and Weight
 - Visual Acuity
+- Fall Risk
 - Doctor's Consultation
 
-Patients go through the physical health screening stations with the admin station first, and the rest having no guaranteed order.
+Patients go through the physical health screening stations with the admin station first, and the rest having no
+guaranteed order.
 Hence, if a patient exists, they will have an admin row, but may not have the other categories present yet.  
-Additionally, patients may have multiple visits, with multiple rows for each category, representing the previous years of visits.  
-Every row in the patient database will have the following structure:  
+Additionally, patients may have multiple visits, with multiple rows for each category, representing the previous years
+of visits.  
+Every row in the patient database will have the following structure:
+
 ```
 +------------+----------+-----------------------+  
 | patient_id | visit_id | rest of categories    |  
 +------------+----------+-----------------------+  
 ```
-The patient id is used to uniquely identify a patient, while the visit id is used to narrow down which visit the visit is associated with.
-The choice to use an visit id to identify the visit an visit is associated with, instead of the date was made to allow for easier querying, since the Date data type might be tricker to work with.
 
-#### Admin Category:  
+The patient id is used to uniquely identify a patient, while the visit id is used to narrow down which visit the visit
+is associated with.
+The choice to use an visit id to identify the visit an visit is associated with, instead of the date was made to allow
+for easier querying, since the Date data type might be tricker to work with.
 
-| Attribute               | Type    | Description                                                                                                         |
-|-------------------------|---------|---------------------------------------------------------------------------------------------------------------------|
-| `id`                    | integer | Auto-incrementing with each new patient created                                                                     |
-| `vid`                   | integer | Auto-incrementing with each new visit created, for each respective patient                                          |
-| `family_group`          | string  | Generally a string of the form "S001", "S002A" identifying the village and family number, not enforced in the db.   |
-| `reg_date`              | date    | Date of registration. Set by the doctors.                                                                           |
-| `queue_no`              | string  | String that can be of the form "1A", "2A", etc, not enforced                                                        |
-| `name`                  | string  | Patient Name                                                                                                        |
-| `khmer_name`            | string  | Patient Khmer Name                                                                                                  |
-| `dob`                   | date    | Patient date of birth                                                                                               |
-| `age`                   | integer | Patient age                                                                                                         |
-| `gender`                | char(1) | Patient gender. Not enforced M or F.                                                                                |
-| `village`               | string  | Patient village of origin.                                                                                          |
-| `contact_no`            | string  | Patient contact number                                                                                              |
-| `pregnant`              | boolean | Boolean indicating if patient is pregnant.                                                                          |
-| `last_menstrual_period` | date    | Date of last menstrual period.                                                                                      |
-| `drug_allergies`        | string  | Patient drug allergies                                                                                              |
-| `sent_to_id`            | boolean | Boolean indicating if patient was sent to infectious diseases station.                                              |
-| `photo`                 | bytea   | Postgres binary string data type, used to store photo                                                               |
+#### Admin Category:
+
+| Attribute               | Type    | Description                                                                                                       |
+|-------------------------|---------|-------------------------------------------------------------------------------------------------------------------|
+| `id`                    | integer | Auto-incrementing with each new patient created                                                                   |
+| `vid`                   | integer | Auto-incrementing with each new visit created, for each respective patient                                        |
+| `family_group`          | string  | Generally a string of the form "S001", "S002A" identifying the village and family number, not enforced in the db. |
+| `reg_date`              | date    | Date of registration. Set by the doctors.                                                                         |
+| `queue_no`              | string  | String that can be of the form "1A", "2A", etc, not enforced                                                      |
+| `name`                  | string  | Patient Name                                                                                                      |
+| `khmer_name`            | string  | Patient Khmer Name                                                                                                |
+| `dob`                   | date    | Patient date of birth                                                                                             |
+| `age`                   | integer | Patient age                                                                                                       |
+| `gender`                | char(1) | Patient gender. Not enforced M or F.                                                                              |
+| `village`               | string  | Patient village of origin.                                                                                        |
+| `contact_no`            | string  | Patient contact number                                                                                            |
+| `pregnant`              | boolean | Boolean indicating if patient is pregnant.                                                                        |
+| `last_menstrual_period` | date    | Date of last menstrual period.                                                                                    |
+| `drug_allergies`        | string  | Patient drug allergies                                                                                            |
+| `sent_to_id`            | boolean | Boolean indicating if patient was sent to infectious diseases station.                                            |
+| `photo`                 | bytea   | Postgres binary string data type, used to store photo                                                             |
 Optional Fields: `dob`, `age`, `contact_no`, `photo`
 
 #### Past Medical History Category:
@@ -133,6 +148,39 @@ Optional Fields: `paeds_height`, `paeds_weight`
 | `additional_intervention` | string  | Details of any additional intervention or notes                            |
 Optional Fields: `additional_intervention`
 
+#### Fall Risk Category:
+
+| Attribute             | Type       | Description                                                                |
+|-----------------------|------------|----------------------------------------------------------------------------|
+| `id`                  | integer    | Auto-incrementing primary key                                              |
+| `vid`                 | integer    | Auto-incrementing with each new visit created, for each respective patient |
+| `fall_history`        | varchar(1) | Multiple option question regarding fall in past 12 months                  |
+| `cognitive_status`    | varchar(1) | Multiple option question                                                   |
+| `continence_problems` | varchar(1) | Multiple option question                                                   |
+| `safety_awareness`    | varchar(1) | Multiple option question                                                   |
+| `unsteadiness`        | varchar(1) | Multiple option question                                                   |
+For each of the multiple option questions, their respective options (a,b,c,d,e..) have scores associated with them. SEE APPENDIX!
+To avoid complicating the database schema, the full question and options are not stored in the database.
+A total score >= 8 is a 'High Risk' for fall
+
+#### Dental Category:
+
+| Attribute            | Type    | Description                                                                                                                                                                |
+|----------------------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `id`                 | integer | Auto-incrementing primary key                                                                                                                                              |
+| `vid`                | integer | Auto-incrementing with each new visit created, for each respective patient                                                                                                 |
+| `clean_teeth_freq`   | integer | Integer range [1,7]. Oral Hygiene Question: How many days per week do you clean your child's teeth or supervise / monitor them brush with fluoride toothpaste twice a day? |
+| `sugar_consume_freq` | integer | Integer range [0,6]. Diet Question: On average, how many times daily does your child consume starch or sugar (food or drinks) between meals?                               |
+| `past_year_decay`    | boolean | Bacterial Exposure Question: Has anyone in the immediate family (including a caregiver) had tooth decay or lost a tooth from tooth decay in the past year?                 |
+| `brush_teeth_pain`   | boolean | Oral Symptoms Question: Does your child complain of tooth pain or bleeding gums when they brush their teeth?                                                               |
+| `drink_other_water`  | boolean | Oral Hygiene Question: Does your child wake up to drink anything other than water throughout the night?                                                                    |
+| `dental_notes`       | string  | Additional notes                                                                                                                                                           |
+| `referral_needed`    | boolean | Is additional referral needed                                                                                                                                              |
+| `referral_loc`       | string  | Referral location if applicable                                                                                                                                            |
+| `tooth_[FDI]`        | boolean | Indicates whether this tooth has a cavity. Defaults to null.                                                                                                               |
+Optional Fields: `dental_notes, referral_loc, tooth_[FDI]`
+Note: Tooth fields are named `tooth_[FDI]` where FDI is the FDI tooth notation. For example, tooth_11, tooth_12, tooth_13, etc.
+
 #### Doctors Consultation Category:
 
 | Attribute            | Type    | Description                                                                |
@@ -153,16 +201,23 @@ Optional Fields: `additional_intervention`
 | `referral_needed`    | boolean | Boolean indicating if a referral is needed                                 |
 | `referral_loc`       | string  | Location or details for the referral, if needed                            |
 | `remarks`            | string  | Additional remarks or comments                                             |
+
 Optional Fields: `others`, `consultation_notes`, `diagnosis`, `treatment`, `referral_loc`, `remarks`
 
 ## Database and Database Schema
-The database used is PostgreSQL. To interact with the db, the Golang database driver used is [lib/pq](https://github.com/lib/pq),
-with raw SQL statements. We have decided against using an ORM due to the interesting nature of the patient entity, which may or may not have all categories filled out, save for the admin category.
-Safer alternatives such as [sqlx](https://github.com/jmoiron/sqlx) or [sqlcl](https://github.com/sqlc-dev/sqlc) could be considered in the future, but we decided to stick with raw SQL for now.
 
-Additionally, we've tried to keep the schema simple, choosing not to compute derived fields at the database or backend level.
+The database used is PostgreSQL. To interact with the db, the Golang database driver used
+is [lib/pq](https://github.com/lib/pq),
+with raw SQL statements. We have decided against using an ORM due to the interesting nature of the patient entity, which
+may or may not have all categories filled out, save for the admin category.
+Safer alternatives such as [sqlx](https://github.com/jmoiron/sqlx) or [sqlcl](https://github.com/sqlc-dev/sqlc) could be
+considered in the future, but we decided to stick with raw SQL for now.
+
+Additionally, we've tried to keep the schema simple, choosing not to compute derived fields at the database or backend
+level.
 
 ## Directory Structure
+
 ```
 .
 ├── README.md - Contains basic instructions for setting up the backend.
@@ -207,72 +262,137 @@ Additionally, we've tried to keep the schema simple, choosing not to compute der
 ├── util 
 │   └── helper.go - Contains general helper functions for the backend.
 ```
+
 Test files have been excluded from the directory structure for brevity.
 
 ## Error Handling
+
 We have defined some custom errors in `entities/errors.go`.  
-They serve to make passing errors around easier, and to provide more context to the error, such as whether a Patient or PatientVisit was not found.
+They serve to make passing errors around easier, and to provide more context to the error, such as whether a Patient or
+PatientVisit was not found.
 
 HTTP Error Codes Used:
+
 - 400: Bad Request
 - 401: Unauthorized
 - 404: Not Found
 - 500: Internal Server Error
 
 ## Middleware
-The backend uses a simple authentication middleware to check if the user is authenticated in the `controllers/middleware/auth.go` file.
-The middleware checks for the presence of a JWT token in the Authorization header, and verifies it using the secret key in the config file.
+
+The backend uses a simple authentication middleware to check if the user is authenticated in the
+`controllers/middleware/auth.go` file.
+The middleware checks for the presence of a JWT token in the Authorization header, and verifies it using the secret key
+in the config file.
 
 ## Configuration
-The backend uses a `config.json` or `prod.json` file to store configuration settings, and extracts the values on startup using Viper.
+
+The backend uses a `config.json` or `prod.json` file to store configuration settings, and extracts the values on startup
+using Viper.
 The configuration file helps to keep sensitive information such as the database URL and JWT secret key secure.
 
 ## Testing
+
 The backend uses the standard Go testing package for testing.
 Testing is done at the controller and repository levels, with the use of mocks to simulate the usecases.
 
-For testing at the controller level, we used [vektra/mockery](https://github.com/vektra/mockery) to generate mocks for the usecases and repositories.
+For testing at the controller level, we used [vektra/mockery](https://github.com/vektra/mockery) to generate mocks for
+the usecases and repositories.
 The mocks are stored in the `mocks` folder, and are used in the controller tests.  
-For testing at the repository level, we opted for using [Dockertest](https://github.com/ory/dockertest) to spin up a temporary PostgreSQL container for testing, and to run the tests against it.
+For testing at the repository level, we opted for using [Dockertest](https://github.com/ory/dockertest) to spin up a
+temporary PostgreSQL container for testing, and to run the tests against it.
 This is to ensure that the data access layer, which is far more complex to mock, performs exactly as expected.
-See why you probably shouldn't mock the database [here](https://dominikbraun.io/blog/you-probably-shouldnt-mock-the-database/).
+See why you probably shouldn't mock the
+database [here](https://dominikbraun.io/blog/you-probably-shouldnt-mock-the-database/).
 
 ## Naming and Code Conventions
+
 SQL Fields: snake_case  
-e.g. `consultation_notes`  
+e.g. `consultation_notes`
 
 Golang Struct Fields: CamelCase with first letter capitalised  
-e.g. `RegDate`  
+e.g. `RegDate`
 
 JSON Fields: camelCase  
-e.g. `pastSmokingHistory`  
+e.g. `pastSmokingHistory`
 
 ## Miscellaneous Design Choices
+
 ### Using Pointers instead of Defined Null Types
-We have chosen to use pointers for fields that can be null in the database, such as `dob`, `age`, `sent_to_id`, `photo`, etc.  
+
+We have chosen to use pointers for fields that can be null in the database, such as `dob`, `age`, `sent_to_id`, `photo`,
+etc.  
 While null types exist in the [lib/pq](https://github.com/lib/pq) library, we have chosen to use pointers instead.
 For example, instead of using `sql.NullString`, we use `*string` for fields that can be null.
-This works at the data access layer, but fails at the controller layer where JSON marshalling happens.  
+This works at the data access layer, but fails at the controller layer where JSON marshalling happens.
 
-For primitive types like bool, they can only take on 2 values: true, false. When I marshal JSON into a struct, null fields get converted into the false value for booleans. For `binding: required` gotags, this gets treated as the field being null.
-For both optional and not null fields, this means the validator cannot tell if a value is false because it is explicitly assigned to be false, or because it was null, and got marshalled into the false value.
+For primitive types like bool, they can only take on 2 values: true, false. When I marshal JSON into a struct, null
+fields get converted into the false value for booleans. For `binding: required` gotags, this gets treated as the field
+being null.
+For both optional and not null fields, this means the validator cannot tell if a value is false because it is explicitly
+assigned to be false, or because it was null, and got marshalled into the false value.
 
 The only workaround is to use a pointer, which allows it to take on a third value, nil.
 
-Additionally, I updated String() methods to use SafeDeref, a helper method, to dereference pointers to their respective null types if needed instead of just nil, which cannot be printed.
-
+Additionally, I updated String() methods to use SafeDeref, a helper method, to dereference pointers to their respective
+null types if needed instead of just nil, which cannot be printed.
 
 ### Export to DB Feature
+
 An important feature of the backend is for users to be able to easily export the patient data to a CSV file.
 Due to the lack of support for CSV exports in the lib/pq database drivers, we had to implement the feature manually.  
-~~One of the approaches used was to execute the `COPY` command in the PostgresQL server to generate a csv file, leveraging the in-built feature. However, due to storage being isolated in the Docker container, an additional volume mount is needed to access the generated file. 
-While it is a little messy, this method doesn't require us to use an external client such as psql, and doesn't us to handle the messy typecasting of data to strings.~~
-We have since moved to using a simple existing golang library, [sqltocsv](https://github.com/joho/sqltocsv), which writes the rows to a csv file easily.
+~~One of the approaches used was to execute the `COPY` command in the PostgresQL server to generate a csv file,
+leveraging the in-built feature. However, due to storage being isolated in the Docker container, an additional volume
+mount is needed to access the generated file.
+While it is a little messy, this method doesn't require us to use an external client such as psql, and doesn't us to
+handle the messy typecasting of data to strings.~~
+We have since moved to using a simple existing golang library, [sqltocsv](https://github.com/joho/sqltocsv), which
+writes the rows to a csv file easily.
 
 ### Import to DB Feature
-This feature allows importing existing CSV files to the database. The CSV file must be in the correct format, with the correct headers, and the correct order of columns.  
-Note: This feature is not accessible to users since it should be rarely invoked, only to reset the database to a known state in the event of system failures :O  
+
+This feature allows importing existing CSV files to the database. The CSV file must be in the correct format, with the
+correct headers, and the correct order of columns.  
+Note: This feature is not accessible to users since it should be rarely invoked, only to reset the database to a known
+state in the event of system failures :O
 
 Some desired properties of the import to DB feature include:
+
 - Ability to use exported csv files from /export-db as a backup
 - Easy to use and debug (If I ever have to use this feature, I need it to be quick to minimise downtime)
+
+## Appendix
+
+### Fall Risk Questions
+**Total Score >= 8 is a 'High Risk' for fall** 
+
+History of fall within past 12 months  
+a. No fall (Score 0)  
+b. 1 fall prior to admission (Score 1)  
+c. 2 or more falls prior to admission (Score 5)  
+d. 1 or more falls during current admission (Score 5)  
+
+Cognitive status  
+a. Intact (Score 0)  
+b. Minimally impaired (Score 1)  
+c. Moderately impaired (Score 2)  
+d. Severely impaired (Score 3)  
+
+Continence problems  
+a. No continence problems or IDC in-situ (Score 0)  
+b. Incontinence of urine and/or faeces (Score 1)  
+c. Frequency (empties bladder > 6 times daily)/ Diarrhoea (Score 1)  
+d. Urgency (Score 1)  
+e. Needing nocturnal toileting more than 2 times daily (Score 1)  
+
+Safety Awareness  
+a. Good awareness and requests appropriate assistance (Score 0)  
+b. Occasional risk taking behaviours (Score 1)  
+c. Inappropriate fear for activities (Score 2)  
+d. Frequent risk-taking behaviours (Score 3)  
+
+Unsteadiness when standing, transferring and/or walking  
+a. Steady gait or complete dependent or on traction (Score 0)  
+b. Minimally unsteadiness which needs supervision (Score 1)  
+c. Moderately unsteadiness which require hands on assist at times (Score 4)  
+d. Severely unsteadiness and need constant hands on assist (Score 5)  

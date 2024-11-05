@@ -80,6 +80,55 @@ var visualacuity = entities.VisualAcuity{
 	REyeVision:             entities.PtrTo(int32(20)),
 	AdditionalIntervention: entities.PtrTo("VISUAL FIELD TEST REQUIRED"),
 }
+var fallrisk = entities.FallRisk{
+	FallHistory:        entities.PtrTo("a"),
+	CognitiveStatus:    entities.PtrTo("b"),
+	ContinenceProblems: entities.PtrTo("c"),
+	SafetyAwareness:    entities.PtrTo("d"),
+	Unsteadiness:       entities.PtrTo("b"),
+}
+var dental = entities.Dental{
+	CleanTeethFreq:   entities.PtrTo(1),
+	SugarConsumeFreq: entities.PtrTo(2),
+	PastYearDecay:    entities.PtrTo(true),
+	BrushTeethPain:   entities.PtrTo(false),
+	DrinkOtherWater:  entities.PtrTo(true),
+	DentalNotes:      entities.PtrTo("NONE"),
+	ReferralNeeded:   entities.PtrTo(false),
+	ReferralLoc:      nil,
+	Tooth11:          entities.PtrTo(true),
+	Tooth12:          entities.PtrTo(true),
+	Tooth13:          entities.PtrTo(true),
+	Tooth14:          entities.PtrTo(true),
+	Tooth15:          entities.PtrTo(true),
+	Tooth16:          entities.PtrTo(true),
+	Tooth17:          entities.PtrTo(true),
+	Tooth18:          entities.PtrTo(true),
+	Tooth21:          entities.PtrTo(true),
+	Tooth22:          entities.PtrTo(true),
+	Tooth23:          entities.PtrTo(true),
+	Tooth24:          entities.PtrTo(true),
+	Tooth25:          entities.PtrTo(true),
+	Tooth26:          entities.PtrTo(true),
+	Tooth27:          entities.PtrTo(true),
+	Tooth28:          entities.PtrTo(true),
+	Tooth31:          entities.PtrTo(true),
+	Tooth32:          entities.PtrTo(true),
+	Tooth33:          entities.PtrTo(true),
+	Tooth34:          entities.PtrTo(true),
+	Tooth35:          entities.PtrTo(true),
+	Tooth36:          entities.PtrTo(true),
+	Tooth37:          entities.PtrTo(true),
+	Tooth38:          entities.PtrTo(true),
+	Tooth41:          entities.PtrTo(true),
+	Tooth42:          entities.PtrTo(true),
+	Tooth43:          entities.PtrTo(true),
+	Tooth44:          entities.PtrTo(true),
+	Tooth45:          entities.PtrTo(true),
+	Tooth46:          entities.PtrTo(true),
+	Tooth47:          entities.PtrTo(true),
+	Tooth48:          entities.PtrTo(true),
+}
 var doctorsconsultation = entities.DoctorsConsultation{
 	Msk:               entities.PtrTo(false),
 	Cvs:               entities.PtrTo(false),
@@ -177,6 +226,8 @@ func TestPostgresPatientRepository_GetPatientVisit(t *testing.T) {
 	assert.NotNil(t, p.VitalStatistics)
 	assert.NotNil(t, p.HeightAndWeight)
 	assert.NotNil(t, p.VisualAcuity)
+	assert.NotNil(t, p.FallRisk)
+	assert.NotNil(t, p.Dental)
 	assert.NotNil(t, p.DoctorsConsultation)
 
 	// Get patient that doesn't exist
@@ -273,6 +324,8 @@ func TestPostgresPatientRepository_UpdatePatientVisit(t *testing.T) {
 	vitalstatistics.ID = id
 	heightandweight.ID = id
 	visualacuity.ID = id
+	fallrisk.ID = id
+	dental.ID = id
 	doctorsconsultation.ID = id
 	admin.VID = vid
 	pastmedicalhistory.VID = vid
@@ -280,6 +333,8 @@ func TestPostgresPatientRepository_UpdatePatientVisit(t *testing.T) {
 	vitalstatistics.VID = vid
 	heightandweight.VID = vid
 	visualacuity.VID = vid
+	fallrisk.VID = vid
+	dental.VID = vid
 	doctorsconsultation.VID = vid
 
 	updatePatient := entities.Patient{
@@ -289,6 +344,8 @@ func TestPostgresPatientRepository_UpdatePatientVisit(t *testing.T) {
 		VitalStatistics:     &vitalstatistics,
 		HeightAndWeight:     &heightandweight,
 		VisualAcuity:        &visualacuity,
+		FallRisk:            &fallrisk,
+		Dental:              &dental,
 		DoctorsConsultation: nil,
 	}
 
@@ -305,6 +362,8 @@ func TestPostgresPatientRepository_UpdatePatientVisit(t *testing.T) {
 		VitalStatistics:     &vitalstatistics,
 		HeightAndWeight:     &heightandweight,
 		VisualAcuity:        &visualacuity,
+		FallRisk:            &fallrisk,
+		Dental:              &dental,
 		DoctorsConsultation: nil,
 	}
 
@@ -314,6 +373,8 @@ func TestPostgresPatientRepository_UpdatePatientVisit(t *testing.T) {
 	assert.Equal(t, p.VitalStatistics, expectedPatient.VitalStatistics)
 	assert.Equal(t, p.HeightAndWeight, expectedPatient.HeightAndWeight)
 	assert.Equal(t, p.VisualAcuity, expectedPatient.VisualAcuity)
+	assert.Equal(t, p.FallRisk, expectedPatient.FallRisk)
+	assert.Equal(t, p.Dental, expectedPatient.Dental)
 	assert.Nil(t, p.DoctorsConsultation)
 
 	// Update patient that doesn't exist

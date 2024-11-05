@@ -159,6 +159,75 @@ func (p *postgresPatientRepository) GetPatientVisit(ctx context.Context, id int3
 		return nil, err
 	}
 
+	rows = tx.QueryRowContext(ctx, "SELECT * FROM fallrisk WHERE fallrisk.id = $1 AND fallrisk.vid = $2;", id, vid)
+	fallrisk := &entities.FallRisk{}
+	err = rows.Scan(
+		&fallrisk.ID,
+		&fallrisk.VID,
+		&fallrisk.FallHistory,
+		&fallrisk.CognitiveStatus,
+		&fallrisk.ContinenceProblems,
+		&fallrisk.SafetyAwareness,
+		&fallrisk.Unsteadiness,
+	)
+	if errors.Is(sql.ErrNoRows, err) { // no fallrisk found
+		fallrisk = nil
+	} else if err != nil { // unknown error
+		return nil, err
+	}
+
+	rows = tx.QueryRowContext(ctx, "SELECT * FROM dental WHERE dental.id = $1 AND dental.vid = $2;", id, vid)
+	dental := &entities.Dental{}
+	err = rows.Scan(
+		&dental.ID,
+		&dental.VID,
+		&dental.CleanTeethFreq,
+		&dental.SugarConsumeFreq,
+		&dental.PastYearDecay,
+		&dental.BrushTeethPain,
+		&dental.DrinkOtherWater,
+		&dental.DentalNotes,
+		&dental.ReferralNeeded,
+		&dental.ReferralLoc,
+		&dental.Tooth11,
+		&dental.Tooth12,
+		&dental.Tooth13,
+		&dental.Tooth14,
+		&dental.Tooth15,
+		&dental.Tooth16,
+		&dental.Tooth17,
+		&dental.Tooth18,
+		&dental.Tooth21,
+		&dental.Tooth22,
+		&dental.Tooth23,
+		&dental.Tooth24,
+		&dental.Tooth25,
+		&dental.Tooth26,
+		&dental.Tooth27,
+		&dental.Tooth28,
+		&dental.Tooth31,
+		&dental.Tooth32,
+		&dental.Tooth33,
+		&dental.Tooth34,
+		&dental.Tooth35,
+		&dental.Tooth36,
+		&dental.Tooth37,
+		&dental.Tooth38,
+		&dental.Tooth41,
+		&dental.Tooth42,
+		&dental.Tooth43,
+		&dental.Tooth44,
+		&dental.Tooth45,
+		&dental.Tooth46,
+		&dental.Tooth47,
+		&dental.Tooth48,
+	)
+	if errors.Is(sql.ErrNoRows, err) { // no dental found
+		dental = nil
+	} else if err != nil { // unknown error
+		return nil, err
+	}
+
 	rows = tx.QueryRowContext(ctx, "SELECT * FROM doctorsconsultation WHERE doctorsconsultation.id = $1 AND doctorsconsultation.vid = $2;", id, vid)
 	doctorsconsultation := &entities.DoctorsConsultation{}
 	err = rows.Scan(
@@ -192,6 +261,8 @@ func (p *postgresPatientRepository) GetPatientVisit(ctx context.Context, id int3
 		VitalStatistics:     vitalstatistics,
 		HeightAndWeight:     heightandweight,
 		VisualAcuity:        visualacuity,
+		FallRisk:            fallrisk,
+		Dental:              dental,
 		DoctorsConsultation: doctorsconsultation,
 	}
 
@@ -303,6 +374,14 @@ func (p *postgresPatientRepository) DeletePatientVisit(ctx context.Context, id i
 	if err != nil {
 		return err
 	}
+	_, err = tx.Exec("DELETE FROM fallrisk WHERE fallrisk.id = $1 AND fallrisk.vid = $2;", id, vid)
+	if err != nil {
+		return err
+	}
+	_, err = tx.Exec("DELETE FROM dental WHERE dental.id = $1 AND dental.vid = $2;", id, vid)
+	if err != nil {
+		return err
+	}
 	_, err = tx.Exec("DELETE FROM doctorsconsultation WHERE doctorsconsultation.id = $1 AND doctorsconsultation.vid = $2;", id, vid)
 	if err != nil {
 		return err
@@ -345,6 +424,8 @@ func (p *postgresPatientRepository) UpdatePatientVisit(ctx context.Context, id i
 	vs := patient.VitalStatistics
 	haw := patient.HeightAndWeight
 	va := patient.VisualAcuity
+	fr := patient.FallRisk
+	d := patient.Dental
 	dc := patient.DoctorsConsultation
 	if a != nil { // Update admin
 		_, err = tx.ExecContext(ctx, `UPDATE admin SET family_group = $1, reg_date = $2, queue_no = $3, name = $4, khmer_name = $5, dob = $6, age = $7, 
@@ -453,6 +534,73 @@ func (p *postgresPatientRepository) UpdatePatientVisit(ctx context.Context, id i
 		if err != nil {
 			return err
 		}
+	}
+	if fr != nil {
+		_, err = tx.ExecContext(ctx, `
+		INSERT INTO fallrisk (id, vid, fall_history, cognitive_status, continence_problems, safety_awareness, unsteadiness) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7) 
+		ON CONFLICT (id, vid) DO UPDATE SET
+		    fall_history = $3,
+			cognitive_status = $4,
+			continence_problems = $5,
+			safety_awareness= $6,
+			unsteadiness = $7
+		`, id, vid, fr.FallHistory, fr.CognitiveStatus, fr.ContinenceProblems, fr.SafetyAwareness, fr.Unsteadiness)
+
+		if err != nil {
+			return err
+		}
+	}
+	if d != nil {
+		_, err = tx.ExecContext(ctx, `
+		INSERT INTO dental (id, vid, clean_teeth_freq, sugar_consume_freq, past_year_decay, brush_teeth_pain, drink_other_water, 
+		dental_notes, referral_needed, referral_loc, tooth_11, tooth_12, tooth_13, tooth_14, tooth_15, tooth_16, tooth_17, tooth_18, 
+		tooth_21, tooth_22, tooth_23, tooth_24, tooth_25, tooth_26, tooth_27, tooth_28, tooth_31, tooth_32, tooth_33, tooth_34, tooth_35, 
+		tooth_36, tooth_37, tooth_38, tooth_41, tooth_42, tooth_43, tooth_44, tooth_45, tooth_46, tooth_47, tooth_48) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, 
+		$26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42) 
+		ON CONFLICT (id, vid) DO UPDATE SET
+			clean_teeth_freq = $3,
+			sugar_consume_freq = $4,
+			past_year_decay = $5,
+			brush_teeth_pain = $6,
+			drink_other_water = $7,
+			dental_notes = $8,
+			referral_needed = $9,
+			referral_loc = $10,
+			tooth_11 = $11,
+			tooth_12 = $12,
+			tooth_13 = $13,
+			tooth_14 = $14,
+			tooth_15 = $15,
+			tooth_16 = $16,
+			tooth_17 = $17,
+			tooth_18 = $18,
+			tooth_21 = $19,
+			tooth_22 = $20,
+			tooth_23 = $21,
+			tooth_24 = $22,
+			tooth_25 = $23,
+			tooth_26 = $24,
+			tooth_27 = $25,
+			tooth_28 = $26,
+			tooth_31 = $27,
+			tooth_32 = $28,
+			tooth_33 = $29,
+			tooth_34 = $30,
+			tooth_35 = $31,
+			tooth_36 = $32,
+			tooth_37 = $33,
+			tooth_38 = $34,
+			tooth_41 = $35,
+			tooth_42 = $36,
+			tooth_43 = $37,
+			tooth_44 = $38,
+			tooth_45 = $39,
+			tooth_46 = $40,
+			tooth_47 = $41,
+			tooth_48 = $42
+		`, id, vid, d.CleanTeethFreq, d.SugarConsumeFreq, d.PastYearDecay, d.BrushTeethPain, d.DrinkOtherWater, d.DentalNotes, d.ReferralNeeded, d.ReferralLoc, d.Tooth11, d.Tooth12, d.Tooth13, d.Tooth14, d.Tooth15, d.Tooth16, d.Tooth17, d.Tooth18, d.Tooth21, d.Tooth22, d.Tooth23, d.Tooth24, d.Tooth25, d.Tooth26, d.Tooth27, d.Tooth28, d.Tooth31, d.Tooth32, d.Tooth33, d.Tooth34, d.Tooth35, d.Tooth36, d.Tooth37, d.Tooth38, d.Tooth41, d.Tooth42, d.Tooth43, d.Tooth44, d.Tooth45, d.Tooth46, d.Tooth47, d.Tooth48)
 	}
 	if dc != nil {
 		_, err = tx.ExecContext(ctx, `
@@ -675,21 +823,69 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context, inc
         va.l_eye_vision,
         va.r_eye_vision,
         va.additional_intervention,
+        -- Fall Risk
+		fr.fall_history,
+		fr.cognitive_status,
+		fr.continence_problems,
+		fr.safety_awareness,
+		fr.unsteadiness,
+		-- Dental
+		d.clean_teeth_freq,
+		d.sugar_consume_freq,
+		d.past_year_decay,
+		d.brush_teeth_pain,
+		d.drink_other_water,
+		d.dental_notes,
+		d.referral_needed,
+		d.referral_loc AS dental_referral_loc,
+		d.tooth_11,
+		d.tooth_12,
+		d.tooth_13,
+		d.tooth_14,
+		d.tooth_15,
+		d.tooth_16,
+		d.tooth_17,
+		d.tooth_18, -- Right Upper
+		d.tooth_21,
+		d.tooth_22,
+		d.tooth_23,
+		d.tooth_24,
+		d.tooth_25,
+		d.tooth_26,
+		d.tooth_27,
+		d.tooth_28, -- Left Upper
+		d.tooth_31,
+		d.tooth_32,
+		d.tooth_33,
+		d.tooth_34,
+		d.tooth_35,
+		d.tooth_36,
+		d.tooth_37,
+		d.tooth_38, -- Left Lower
+		d.tooth_41,
+		d.tooth_42,
+		d.tooth_43,
+		d.tooth_44,
+		d.tooth_45,
+		d.tooth_46,
+		d.tooth_47,
+		d.tooth_48,  -- Right Lower
         -- Doctors Consultation
-        d.msk,
-        d.cvs,
-        d.respi,
-        d.gu,
-        d.git,
-        d.eye,
-        d.derm,
-        d.others AS dc_others,
-        d.consultation_notes,
-        d.diagnosis,
-        d.treatment,
-        d.referral_needed,
-        d.referral_loc,
-        d.remarks
+        dc.healthy,
+        dc.msk,
+        dc.cvs,
+        dc.respi,
+        dc.gu,
+        dc.git,
+        dc.eye,
+        dc.derm,
+        dc.others AS dc_others,
+        dc.consultation_notes,
+        dc.diagnosis,
+        dc.treatment,
+        dc.referral_needed,
+        dc.referral_loc AS dc_referral_loc,
+        dc.remarks
     FROM
         admin a
     LEFT JOIN
@@ -703,7 +899,11 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context, inc
     LEFT JOIN
         visualacuity va ON a.id = va.id AND a.vid = va.vid
     LEFT JOIN
-        doctorsconsultation d ON a.id = d.id AND a.vid = d.vid`
+        fallrisk fr ON a.id = fr.id AND a.vid = fr.vid
+    LEFT JOIN 
+		dental d ON a.id = d.id AND a.vid = d.vid
+    LEFT JOIN
+        doctorsconsultation dc ON a.id = d.id AND a.vid = d.vid`
 
 	// Conditionally add the photo field to the query if includePhoto is true
 	if includePhoto {
