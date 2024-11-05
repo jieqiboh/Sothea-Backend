@@ -131,7 +131,7 @@ CREATE TABLE IF NOT EXISTS dental
 (
     id                      INTEGER NOT NULL,                            -- Use INTEGER to match the id type from admin
     vid                     INTEGER NOT NULL,                            -- Add vid to match the vid type from admin
-    clean_teeth_freq        INTEGER NOT NULL CHECK (clean_teeth_freq BETWEEN 1 AND 7),
+    clean_teeth_freq        INTEGER NOT NULL CHECK (clean_teeth_freq BETWEEN 0 AND 7),
     sugar_consume_freq      INTEGER NOT NULL CHECK (sugar_consume_freq BETWEEN 0 AND 6),
     past_year_decay         BOOLEAN NOT NULL,
     brush_teeth_pain        BOOLEAN NOT NULL,
@@ -140,42 +140,42 @@ CREATE TABLE IF NOT EXISTS dental
     referral_needed         BOOLEAN NOT NULL,
     referral_loc            TEXT,
 
-    -- Teeth Chart (FDI numbering)
-    tooth_11               BOOLEAN NOT NULL DEFAULT FALSE,  -- Right Upper
-    tooth_12               BOOLEAN NOT NULL DEFAULT FALSE,
-    tooth_13               BOOLEAN NOT NULL DEFAULT FALSE,
-    tooth_14               BOOLEAN NOT NULL DEFAULT FALSE,
-    tooth_15               BOOLEAN NOT NULL DEFAULT FALSE,
-    tooth_16               BOOLEAN NOT NULL DEFAULT FALSE,
-    tooth_17               BOOLEAN NOT NULL DEFAULT FALSE,
-    tooth_18               BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Teeth Chart (FDI numbering), True if cavity exists
+    tooth_11               BOOLEAN,  -- Right Upper
+    tooth_12               BOOLEAN,
+    tooth_13               BOOLEAN,
+    tooth_14               BOOLEAN,
+    tooth_15               BOOLEAN,
+    tooth_16               BOOLEAN,
+    tooth_17               BOOLEAN,
+    tooth_18               BOOLEAN,
 
-    tooth_21               BOOLEAN NOT NULL DEFAULT FALSE,  -- Left Upper
-    tooth_22               BOOLEAN NOT NULL DEFAULT FALSE,
-    tooth_23               BOOLEAN NOT NULL DEFAULT FALSE,
-    tooth_24               BOOLEAN NOT NULL DEFAULT FALSE,
-    tooth_25               BOOLEAN NOT NULL DEFAULT FALSE,
-    tooth_26               BOOLEAN NOT NULL DEFAULT FALSE,
-    tooth_27               BOOLEAN NOT NULL DEFAULT FALSE,
-    tooth_28               BOOLEAN NOT NULL DEFAULT FALSE,
+    tooth_21               BOOLEAN,  -- Left Upper
+    tooth_22               BOOLEAN,
+    tooth_23               BOOLEAN,
+    tooth_24               BOOLEAN,
+    tooth_25               BOOLEAN,
+    tooth_26               BOOLEAN,
+    tooth_27               BOOLEAN,
+    tooth_28               BOOLEAN,
 
-    tooth_31               BOOLEAN NOT NULL DEFAULT FALSE,  -- Left Lower
-    tooth_32               BOOLEAN NOT NULL DEFAULT FALSE,
-    tooth_33               BOOLEAN NOT NULL DEFAULT FALSE,
-    tooth_34               BOOLEAN NOT NULL DEFAULT FALSE,
-    tooth_35               BOOLEAN NOT NULL DEFAULT FALSE,
-    tooth_36               BOOLEAN NOT NULL DEFAULT FALSE,
-    tooth_37               BOOLEAN NOT NULL DEFAULT FALSE,
-    tooth_38               BOOLEAN NOT NULL DEFAULT FALSE,
+    tooth_31               BOOLEAN,  -- Left Lower
+    tooth_32               BOOLEAN,
+    tooth_33               BOOLEAN,
+    tooth_34               BOOLEAN,
+    tooth_35               BOOLEAN,
+    tooth_36               BOOLEAN,
+    tooth_37               BOOLEAN,
+    tooth_38               BOOLEAN,
 
-    tooth_41               BOOLEAN NOT NULL DEFAULT FALSE,  -- Right Lower
-    tooth_42               BOOLEAN NOT NULL DEFAULT FALSE,
-    tooth_43               BOOLEAN NOT NULL DEFAULT FALSE,
-    tooth_44               BOOLEAN NOT NULL DEFAULT FALSE,
-    tooth_45               BOOLEAN NOT NULL DEFAULT FALSE,
-    tooth_46               BOOLEAN NOT NULL DEFAULT FALSE,
-    tooth_47               BOOLEAN NOT NULL DEFAULT FALSE,
-    tooth_48               BOOLEAN NOT NULL DEFAULT FALSE,
+    tooth_41               BOOLEAN,  -- Right Lower
+    tooth_42               BOOLEAN,
+    tooth_43               BOOLEAN,
+    tooth_44               BOOLEAN,
+    tooth_45               BOOLEAN,
+    tooth_46               BOOLEAN,
+    tooth_47               BOOLEAN,
+    tooth_48               BOOLEAN,
 
     PRIMARY KEY (id, vid),                                               -- Composite primary key
     CONSTRAINT fk_admin FOREIGN KEY (id, vid) REFERENCES admin (id, vid) -- Foreign key referencing the composite key in admin
@@ -289,20 +289,14 @@ VALUES (1, 1, 'a', 'b', 'e', 'd', 'c'),
        (2, 1, 'd', 'd', 'c', 'b', 'a');
 
 INSERT INTO dental (id, vid, clean_teeth_freq, sugar_consume_freq, past_year_decay, brush_teeth_pain, drink_other_water,
-                    dental_notes, referral_needed, referral_loc, tooth_11, tooth_12, tooth_13, tooth_14, tooth_15, tooth_16,
-                    tooth_17, tooth_18, tooth_21, tooth_22, tooth_23, tooth_24, tooth_25, tooth_26, tooth_27, tooth_28,
-                    tooth_31, tooth_32, tooth_33, tooth_34, tooth_35, tooth_36, tooth_37, tooth_38, tooth_41, tooth_42,
-                    tooth_43, tooth_44, tooth_45, tooth_46, tooth_47, tooth_48)
+                    dental_notes, referral_needed, referral_loc, tooth_11, tooth_21, tooth_22, tooth_35, tooth_47, tooth_48)
 VALUES (1, 1, 2, 3, TRUE, TRUE, FALSE, 'None', TRUE, 'Dentist',
-        TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE,
-        FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE,
-        TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE,
-        TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE),
-         (2, 1, 3, 4, FALSE, FALSE, TRUE, 'None', FALSE, NULL,
-        FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
-        FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
-        FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
-        FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE);
+        TRUE, FALSE, TRUE, FALSE, TRUE, FALSE);
+
+INSERT INTO dental (id, vid, clean_teeth_freq, sugar_consume_freq, past_year_decay, brush_teeth_pain, drink_other_water,
+                    dental_notes, referral_needed, referral_loc, tooth_15, tooth_28, tooth_33, tooth_41, tooth_48)
+VALUES (2, 1, 3, 4, FALSE, FALSE, TRUE, 'None', FALSE, NULL,
+        FALSE, FALSE, FALSE, FALSE, FALSE);
 
 INSERT INTO doctorsconsultation (id, vid, healthy, msk, cvs, respi, gu, git, eye, derm, others,
                                  consultation_notes, diagnosis, treatment, referral_needed,

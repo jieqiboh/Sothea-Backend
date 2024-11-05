@@ -165,20 +165,20 @@ A total score >= 8 is a 'High Risk' for fall
 
 #### Dental Category:
 
-| Attribute            | Type    | Description                                                                                                                                                      |
-|----------------------|---------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `id`                 | integer | Auto-incrementing primary key                                                                                                                                    |
-| `vid`                | integer | Auto-incrementing with each new visit created, for each respective patient                                                                                       |
+| Attribute            | Type    | Description                                                                                                                                                                |
+|----------------------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `id`                 | integer | Auto-incrementing primary key                                                                                                                                              |
+| `vid`                | integer | Auto-incrementing with each new visit created, for each respective patient                                                                                                 |
 | `clean_teeth_freq`   | integer | Integer range [1,7]. Oral Hygiene Question: How many days per week do you clean your child's teeth or supervise / monitor them brush with fluoride toothpaste twice a day? |
-| `sugar_consume_freq` | integer | Integer range [0,6]. Diet Question: On average, how many times daily does your child consume starch or sugar (food or drinks) between meals?                     |
-| `past_year_decay`    | boolean | Bacterial Exposure Question: Has anyone in the immediate family (including a caregiver) had tooth decay or lost a tooth from tooth decay in the past year?       |
-| `brush_teeth_pain`   | boolean | Oral Symptoms Question: Does your child complain of tooth pain or bleeding gums when they brush their teeth?                                                     |
-| `drink_other_water`  | boolean | Oral Hygiene Question: Does your child wake up to drink anything other than water throughout the night?                                                          |
-| `dental_notes`       | string  | Additional notes                                                                                                                                                 |
-| `referral_needed`    | boolean | Is additional referral needed                                                                                                                                    |
-| `referral_loc`       | string  | Referral location if applicable                                                                                                                                  |
-| `tooth_[FDI]`        | boolean | Indicates whether this tooth has a cavity. Defaults to false.                                                                                                    |
-Optional Fields: `dental_notes, referral_loc`
+| `sugar_consume_freq` | integer | Integer range [0,6]. Diet Question: On average, how many times daily does your child consume starch or sugar (food or drinks) between meals?                               |
+| `past_year_decay`    | boolean | Bacterial Exposure Question: Has anyone in the immediate family (including a caregiver) had tooth decay or lost a tooth from tooth decay in the past year?                 |
+| `brush_teeth_pain`   | boolean | Oral Symptoms Question: Does your child complain of tooth pain or bleeding gums when they brush their teeth?                                                               |
+| `drink_other_water`  | boolean | Oral Hygiene Question: Does your child wake up to drink anything other than water throughout the night?                                                                    |
+| `dental_notes`       | string  | Additional notes                                                                                                                                                           |
+| `referral_needed`    | boolean | Is additional referral needed                                                                                                                                              |
+| `referral_loc`       | string  | Referral location if applicable                                                                                                                                            |
+| `tooth_[FDI]`        | boolean | Indicates whether this tooth has a cavity. Defaults to null.                                                                                                               |
+Optional Fields: `dental_notes, referral_loc, tooth_[FDI]`
 Note: Tooth fields are named `tooth_[FDI]` where FDI is the FDI tooth notation. For example, tooth_11, tooth_12, tooth_13, etc.
 
 #### Doctors Consultation Category:
