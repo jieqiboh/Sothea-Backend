@@ -173,8 +173,7 @@ Example response:
     "hr1": 72,
     "hr2": 71,
     "averageHR": 71.5,
-    "randomBloodGlucoseMmolL": 5.4,
-    "randomBloodGlucoseMmolLp": 5.3
+    "randomBloodGlucoseMmolL": 5.4
   },
   "heightandweight": {
     "id": 1,
@@ -473,8 +472,7 @@ curl --location --request PATCH 'http://localhost:9090/patient/1/1' \
         "hr1": 72,
         "hr2": 71,
         "averageHR": 71.5,
-        "randomBloodGlucoseMmolL": 5.4,
-        "randomBloodGlucoseMmolLp": 5.3
+        "randomBloodGlucoseMmolL": 5.4
     },
     "heightAndWeight": {
         "height": 170,
