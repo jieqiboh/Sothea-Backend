@@ -72,6 +72,7 @@ var ValidPatientJson = `{
     "additionalIntervention": "VISUAL FIELD TEST REQUIRED"
   },
   "doctorsConsultation": {
+    "healthy": true,
     "msk": false,
     "cvs": false,
     "respi": true,
@@ -173,6 +174,7 @@ var visualacuity = entities.VisualAcuity{
 	AdditionalIntervention: entities.PtrTo("VISUAL FIELD TEST REQUIRED"),
 }
 var doctorsconsultation = entities.DoctorsConsultation{
+	Healthy:           entities.PtrTo(true),
 	Msk:               entities.PtrTo(false),
 	Cvs:               entities.PtrTo(false),
 	Respi:             entities.PtrTo(true),
@@ -248,6 +250,7 @@ var MissingAdminPatientJson = `{
     "additionalIntervention": "VISUAL FIELD TEST REQUIRED"
   },
   "doctorsConsultation": {
+    "healthy": true,
     "msk": false,
     "cvs": false,
     "respi": true,
@@ -339,6 +342,7 @@ var InvalidParametersPatientJson = `{
     "additionalIntervention": "VISUAL FIELD TEST REQUIRED"
   },
   "doctorsConsultation": {
+    "healthy": true,
     "msk": false,
     "cvs": false,
     "respi": true,
@@ -446,6 +450,7 @@ var JSONMarshallingErrorPatientJson = `{
 	"unsteadiness": b,
 }
   "doctorsConsultation": {
+    "healthy": true,
     "msk": false,
     "cvs": false,
     "respi": true,
