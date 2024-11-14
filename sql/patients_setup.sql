@@ -96,8 +96,8 @@ CREATE TABLE IF NOT EXISTS heightandweight
     weight       NUMERIC(5, 1) NOT NULL,
     bmi          NUMERIC(5, 1) NOT NULL,
     bmi_analysis TEXT          NOT NULL,
-    paeds_height NUMERIC(5, 1) NOT NULL,
-    paeds_weight NUMERIC(5, 1) NOT NULL,
+    paeds_height NUMERIC(5, 1),
+    paeds_weight NUMERIC(5, 1),
     PRIMARY KEY (id, vid),                                               -- Composite primary key
     CONSTRAINT fk_admin FOREIGN KEY (id, vid) REFERENCES admin (id, vid) -- Foreign key referencing the composite key in admin
 );
