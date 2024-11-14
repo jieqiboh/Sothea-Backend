@@ -233,7 +233,7 @@ func (p *postgresPatientRepository) GetPatientVisit(ctx context.Context, id int3
 	err = rows.Scan(
 		&doctorsconsultation.ID,
 		&doctorsconsultation.VID,
-		&doctorsconsultation.Healthy,
+		&doctorsconsultation.Well,
 		&doctorsconsultation.Msk,
 		&doctorsconsultation.Cvs,
 		&doctorsconsultation.Respi,
@@ -605,12 +605,12 @@ func (p *postgresPatientRepository) UpdatePatientVisit(ctx context.Context, id i
 	}
 	if dc != nil {
 		_, err = tx.ExecContext(ctx, `
-		INSERT INTO doctorsconsultation (id, vid, healthy, msk, cvs, respi, gu, git, eye, derm, others, 
+		INSERT INTO doctorsconsultation (id, vid, well, msk, cvs, respi, gu, git, eye, derm, others, 
 		consultation_notes, diagnosis, treatment, referral_needed, referral_loc, remarks) 
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) 
 		ON CONFLICT(id, vid) 
 		DO UPDATE SET
-			healthy = $3,
+			well = $3,
 			msk = $4,
 			cvs = $5,
 			respi = $6,
@@ -626,7 +626,7 @@ func (p *postgresPatientRepository) UpdatePatientVisit(ctx context.Context, id i
 			referral_loc = $16,
 			remarks = $17
 		`,
-			id, vid, dc.Healthy, dc.Msk, dc.Cvs, dc.Respi, dc.Gu, dc.Git, dc.Eye, dc.Derm, dc.Others, dc.ConsultationNotes,
+			id, vid, dc.Well, dc.Msk, dc.Cvs, dc.Respi, dc.Gu, dc.Git, dc.Eye, dc.Derm, dc.Others, dc.ConsultationNotes,
 			dc.Diagnosis, dc.Treatment, dc.ReferralNeeded, dc.ReferralLoc, dc.Remarks)
 
 		if err != nil {
@@ -873,7 +873,7 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context, inc
 		d.tooth_47,
 		d.tooth_48,  -- Right Lower
         -- Doctors Consultation
-        dc.healthy,
+        dc.well,
         dc.msk,
         dc.cvs,
         dc.respi,

@@ -130,7 +130,7 @@ var dental = entities.Dental{
 	Tooth48:          entities.PtrTo(true),
 }
 var doctorsconsultation = entities.DoctorsConsultation{
-	Healthy:           entities.PtrTo(true),
+	Well:              entities.PtrTo(true),
 	Msk:               entities.PtrTo(false),
 	Cvs:               entities.PtrTo(false),
 	Respi:             entities.PtrTo(true),

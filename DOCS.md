@@ -187,7 +187,7 @@ Note: Tooth fields are named `tooth_[FDI]` where FDI is the FDI tooth notation. 
 |----------------------|---------|----------------------------------------------------------------------------|
 | `id`                 | integer | Auto-incrementing primary key                                              |
 | `vid`                | integer | Auto-incrementing with each new visit created, for each respective patient |
-| `healthy`            | boolean | Boolean indicating if the patient is healthy                               |
+| `well`               | boolean | Boolean indicating if the patient is well                                  |
 | `msk`                | boolean | Boolean indicating if musculoskeletal system is healthy                    |
 | `cvs`                | boolean | Boolean indicating if cardiovascular system is healthy                     |
 | `respi`              | boolean | Boolean indicating if respiratory system is healthy                        |

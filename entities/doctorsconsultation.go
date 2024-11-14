@@ -7,7 +7,7 @@ import (
 type DoctorsConsultation struct {
 	ID                int32   `json:"id" binding:"-"`
 	VID               int32   `json:"vid" binding:"-"`
-	Healthy           *bool   `json:"healthy" binding:"required"`
+	Well              *bool   `json:"well" binding:"required"`
 	Msk               *bool   `json:"msk" binding:"required"`
 	Cvs               *bool   `json:"cvs" binding:"required"`
 	Respi             *bool   `json:"respi" binding:"required"`
@@ -36,7 +36,7 @@ func (dc DoctorsConsultation) String() string {
 	result := fmt.Sprintf("\nDOCTOR'S CONSULTATION\n")
 	result += fmt.Sprintf("ID: %d\n", dc.ID)
 	result += fmt.Sprintf("VID: %d\n", dc.VID)
-	result += fmt.Sprintf("Healthy: %t\n", *dc.Healthy)
+	result += fmt.Sprintf("Well: %t\n", *dc.Well)
 	result += fmt.Sprintf("Msk: %t\n", *dc.Msk)
 	result += fmt.Sprintf("Cvs: %t\n", *dc.Cvs)
 	result += fmt.Sprintf("Respi: %t\n", *dc.Respi)
