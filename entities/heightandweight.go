@@ -9,8 +9,8 @@ type HeightAndWeight struct {
 	Weight      *float64 `json:"weight" binding:"required"`
 	BMI         *float64 `json:"bmi" binding:"required"`
 	BMIAnalysis *string  `json:"bmiAnalysis" binding:"required"`
-	PaedsHeight *float64 `json:"paedsHeight" binding:"required"`
-	PaedsWeight *float64 `json:"paedsWeight" binding:"required"`
+	PaedsHeight *float64 `json:"paedsHeight"`
+	PaedsWeight *float64 `json:"paedsWeight"`
 	//AdminID      uint    `gorm:"uniqueIndex;not null"` // Foreign key referencing Admin's ID
 	//Admin        Admin
 }
