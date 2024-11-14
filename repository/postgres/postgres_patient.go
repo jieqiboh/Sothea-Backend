@@ -901,7 +901,7 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context, inc
     LEFT JOIN 
 		dental d ON a.id = d.id AND a.vid = d.vid
     LEFT JOIN
-        doctorsconsultation dc ON a.id = d.id AND a.vid = d.vid`
+        doctorsconsultation dc ON a.id = dc.id AND a.vid = dc.vid`
 
 	// Conditionally add the photo field to the query if includePhoto is true
 	if includePhoto {
