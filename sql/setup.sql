@@ -119,6 +119,7 @@
 -- (
 --     id                 INTEGER NOT NULL,                                 -- Use INTEGER to match the id type from admin
 --     vid                INTEGER NOT NULL,                                 -- Add vid to match the vid type from admin
+--     well            BOOLEAN NOT NULL,
 --     msk                BOOLEAN NOT NULL,
 --     cvs                BOOLEAN NOT NULL,
 --     respi              BOOLEAN NOT NULL,

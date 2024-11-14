@@ -77,6 +77,7 @@ var visualacuity = entities.VisualAcuity{
 	AdditionalIntervention: entities.PtrTo("VISUAL FIELD TEST REQUIRED"),
 }
 var doctorsconsultation = entities.DoctorsConsultation{
+	Well:              entities.PtrTo(true),
 	Msk:               entities.PtrTo(false),
 	Cvs:               entities.PtrTo(false),
 	Respi:             entities.PtrTo(true),

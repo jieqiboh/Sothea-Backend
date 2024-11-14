@@ -249,6 +249,7 @@ Example response:
   "doctorsconsultation": {
     "id": 1,
     "vid": 1,
+    "well": true,
     "msk": false,
     "cvs": false,
     "respi": true,
@@ -496,6 +497,7 @@ curl --location --request PATCH 'http://localhost:9090/patient/1/1' \
         "unsteadiness": "c"
     },
     "doctorsConsultation": {
+        "well": true,
         "msk": false,
         "cvs": false,
         "respi": true,
