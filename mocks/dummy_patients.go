@@ -55,8 +55,7 @@ var ValidPatientJson = `{
     "hr1": 72,
     "hr2": 71,
     "averageHR": 71.5,
-    "randomBloodGlucoseMmolL": 5.4,
-    "randomBloodGlucoseMmolLp": 5.3
+    "randomBloodGlucoseMmolL": 5.4
   },
   "heightAndWeight": {
     "height": 170,
@@ -146,19 +145,18 @@ var socialhistory = entities.SocialHistory{
 	HowRegular:            entities.PtrTo("A"),
 }
 var vitalstatistics = entities.VitalStatistics{
-	Temperature:              entities.PtrTo(36.5),
-	SpO2:                     entities.PtrTo(98.0),
-	SystolicBP1:              entities.PtrTo(120.0),
-	DiastolicBP1:             entities.PtrTo(80.0),
-	SystolicBP2:              entities.PtrTo(122.0),
-	DiastolicBP2:             entities.PtrTo(78.0),
-	AverageSystolicBP:        entities.PtrTo(121.0),
-	AverageDiastolicBP:       entities.PtrTo(79.0),
-	HR1:                      entities.PtrTo(72.0),
-	HR2:                      entities.PtrTo(71.0),
-	AverageHR:                entities.PtrTo(71.5),
-	RandomBloodGlucoseMmolL:  entities.PtrTo(5.4),
-	RandomBloodGlucoseMmolLp: entities.PtrTo(5.3),
+	Temperature:             entities.PtrTo(36.5),
+	SpO2:                    entities.PtrTo(98.0),
+	SystolicBP1:             entities.PtrTo(120.0),
+	DiastolicBP1:            entities.PtrTo(80.0),
+	SystolicBP2:             entities.PtrTo(122.0),
+	DiastolicBP2:            entities.PtrTo(78.0),
+	AverageSystolicBP:       entities.PtrTo(121.0),
+	AverageDiastolicBP:      entities.PtrTo(79.0),
+	HR1:                     entities.PtrTo(72.0),
+	HR2:                     entities.PtrTo(71.0),
+	AverageHR:               entities.PtrTo(71.5),
+	RandomBloodGlucoseMmolL: entities.PtrTo(5.4),
 }
 var heightandweight = entities.HeightAndWeight{
 	Height:      entities.PtrTo(170.0),
@@ -233,8 +231,7 @@ var MissingAdminPatientJson = `{
     "hr1": 72,
     "hr2": 71,
     "averageHR": 71.5,
-    "randomBloodGlucoseMmolL": 5.4,
-    "randomBloodGlucoseMmolLp": 5.3
+    "randomBloodGlucoseMmolL": 5.4
   },
   "heightAndWeight": {
     "height": 170,
@@ -325,8 +322,7 @@ var InvalidParametersPatientJson = `{
     "hr1": 72,
     "hr2": 71,
     "averageHR": 71.5,
-    "randomBloodGlucoseMmolL": 5.4,
-    "randomBloodGlucoseMmolLp": 5.3
+    "randomBloodGlucoseMmolL": 5.4
   },
   "heightAndWeight": {
     "height": 170,
@@ -426,8 +422,7 @@ var JSONMarshallingErrorPatientJson = `{
     "hr1": 72,
     "hr2": 71,
     "averageHR": 71.5,
-    "randomBloodGlucoseMmolL": 5.4,
-    "randomBloodGlucoseMmolLp": 5.3
+    "randomBloodGlucoseMmolL": 5.4
   },
   "heightAndWeight": {
     "height": 170,

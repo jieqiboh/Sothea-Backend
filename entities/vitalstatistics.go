@@ -3,21 +3,20 @@ package entities
 import "fmt"
 
 type VitalStatistics struct {
-	ID                       int32    `json:"id"`
-	VID                      int32    `json:"vid" binding:"-"`
-	Temperature              *float64 `json:"temperature" binding:"required"`
-	SpO2                     *float64 `json:"spO2" binding:"required"`
-	SystolicBP1              *float64 `json:"systolicBP1" binding:"required"`
-	DiastolicBP1             *float64 `json:"diastolicBP1" binding:"required"`
-	SystolicBP2              *float64 `json:"systolicBP2" binding:"required"`
-	DiastolicBP2             *float64 `json:"diastolicBP2" binding:"required"`
-	AverageSystolicBP        *float64 `json:"averageSystolicBP" binding:"required"`
-	AverageDiastolicBP       *float64 `json:"averageDiastolicBP" binding:"required"`
-	HR1                      *float64 `json:"hr1" binding:"required"`
-	HR2                      *float64 `json:"hr2" binding:"required"`
-	AverageHR                *float64 `json:"averageHR" binding:"required"`
-	RandomBloodGlucoseMmolL  *float64 `json:"randomBloodGlucoseMmolL" binding:"required"`
-	RandomBloodGlucoseMmolLp *float64 `json:"randomBloodGlucoseMmolLp" binding:"required"`
+	ID                      int32    `json:"id"`
+	VID                     int32    `json:"vid" binding:"-"`
+	Temperature             *float64 `json:"temperature" binding:"required"`
+	SpO2                    *float64 `json:"spO2" binding:"required"`
+	SystolicBP1             *float64 `json:"systolicBP1" binding:"required"`
+	DiastolicBP1            *float64 `json:"diastolicBP1" binding:"required"`
+	SystolicBP2             *float64 `json:"systolicBP2" binding:"required"`
+	DiastolicBP2            *float64 `json:"diastolicBP2" binding:"required"`
+	AverageSystolicBP       *float64 `json:"averageSystolicBP" binding:"required"`
+	AverageDiastolicBP      *float64 `json:"averageDiastolicBP" binding:"required"`
+	HR1                     *float64 `json:"hr1" binding:"required"`
+	HR2                     *float64 `json:"hr2" binding:"required"`
+	AverageHR               *float64 `json:"averageHR" binding:"required"`
+	RandomBloodGlucoseMmolL *float64 `json:"randomBloodGlucoseMmolL" binding:"required"`
 	//AdminID                  uint    `gorm:"uniqueIndex;not null"` // Foreign key referencing Admin's ID
 	//Admin                    Admin
 }
@@ -44,6 +43,5 @@ func (vs VitalStatistics) String() string {
 	result += fmt.Sprintf("HR2: %.1f\n", *vs.HR2)
 	result += fmt.Sprintf("AverageHR: %.1f\n", *vs.AverageHR)
 	result += fmt.Sprintf("RandomBloodGlucoseMmolL: %.1f\n", *vs.RandomBloodGlucoseMmolL)
-	result += fmt.Sprintf("RandomBloodGlucoseMmolLp: %.1f\n", *vs.RandomBloodGlucoseMmolLp)
 	return result
 }

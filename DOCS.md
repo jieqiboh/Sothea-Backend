@@ -120,7 +120,6 @@ Optional Fields: `no_of_years`, `cigarettes_per_day`, `how_regular`'
 | `hr2`                       | float   | Heart rate measurement 2                                                   |
 | `avg_hr`                    | float   | Average heart rate                                                         |
 | `rand_blood_glucose_mmolL`  | float   | Random blood glucose level in mmol/L                                       |
-| `rand_blood_glucose_mmolLp` | float   | Random blood glucose level in mmol/Lp                                      |
 Optional Fields: -
 
 #### Height and Weight Category:
