@@ -811,12 +811,12 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context, inc
 		vs.avg_hr AS vs_avg_hr,
 		vs.rand_blood_glucose_mmolL AS vs_rand_blood_glucose_mmolL,
         -- Height and Weight
-        haw.height,
-        haw.weight,
-        haw.bmi,
-        haw.bmi_analysis,
-        haw.paeds_height,
-        haw.paeds_weight,
+        haw.height AS haw_height,
+        haw.weight AS haw_weight,
+        haw.bmi AS haw_bmi,
+        haw.bmi_analysis AS haw_bmi_analysis,
+        haw.paeds_height AS haw_paeds_height,
+        haw.paeds_weight AS haw_paeds_weight,
         -- Visual Acuity
         va.l_eye_vision AS va_l_eye_vision,
         va.r_eye_vision AS va_r_eye_vision,
