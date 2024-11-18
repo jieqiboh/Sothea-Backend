@@ -361,9 +361,9 @@ VALUES (1, 2, 20, 20, 'VISUAL FIELD TEST REQUIRED'),
 INSERT INTO doctorsconsultation (id, vid, well, msk, cvs, respi, gu, git, eye, derm, others,
                                  consultation_notes, diagnosis, treatment, referral_needed,
                                  referral_loc, remarks)
-VALUES (1, 2, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, 'LEUKAEMIA',
+VALUES (1, 2, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, 'others',
         'CHEST PAIN, SHORTNESS OF BREATH, COUGH', 'ACUTE BRONCHITIS',
-        'REST, HYDRATION, COUGH SYRUP', FALSE, NULL, 'MONITOR FOR RESOLUTION');
+        'REST, HYDRATION, COUGH SYRUP', TRUE, NULL, 'MONITOR FOR RESOLUTION');
 INSERT INTO doctorsconsultation (id, vid, well, msk, cvs, respi, gu, git, eye, derm, others,
                                  consultation_notes, diagnosis, treatment, referral_needed,
                                  referral_loc, remarks)
