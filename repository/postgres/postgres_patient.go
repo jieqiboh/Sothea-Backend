@@ -698,7 +698,7 @@ func (p *postgresPatientRepository) GetAllPatientVisitMeta(ctx context.Context, 
 													LEFT JOIN 
 														doctorsconsultation dc
 													ON 
-														a.id = dc.id -- assuming the foreign key relationship
+														a.id = dc.id AND a.vid = dc.vid -- assuming the foreign key relationship
 													INNER JOIN 
 														LatestDates ld
 													ON 
@@ -720,7 +720,7 @@ func (p *postgresPatientRepository) GetAllPatientVisitMeta(ctx context.Context, 
 												LEFT JOIN 
 													doctorsconsultation dc
 												ON 
-													a.id = dc.id
+													a.id = dc.id AND a.vid = dc.vid
 												WHERE 
 													a.reg_date = $1
 												ORDER BY 
