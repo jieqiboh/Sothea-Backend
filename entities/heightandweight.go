@@ -29,7 +29,7 @@ func (haw HeightAndWeight) String() string {
 	result += fmt.Sprintf("Weight: %.2f\n", *haw.Weight)
 	result += fmt.Sprintf("BMI: %.2f\n", *haw.BMI)
 	result += fmt.Sprintf("BMI Analysis: %s\n", *haw.BMIAnalysis)
-	result += fmt.Sprintf("Paeds Height: %.2f\n", *haw.PaedsHeight)
-	result += fmt.Sprintf("Paeds Weight: %.2f\n", *haw.PaedsWeight)
+	result += fmt.Sprintf("Paeds Height: %.2f\n", SafeDeref(haw.PaedsHeight))
+	result += fmt.Sprintf("Paeds Weight: %.2f\n", SafeDeref(haw.PaedsWeight))
 	return result
 }
