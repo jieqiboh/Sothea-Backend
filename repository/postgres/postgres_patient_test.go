@@ -80,11 +80,13 @@ var visualacuity = entities.VisualAcuity{
 	AdditionalIntervention: entities.PtrTo("VISUAL FIELD TEST REQUIRED"),
 }
 var fallrisk = entities.FallRisk{
+	FallWorries:        entities.PtrTo("a"),
 	FallHistory:        entities.PtrTo("a"),
 	CognitiveStatus:    entities.PtrTo("b"),
 	ContinenceProblems: entities.PtrTo("c"),
 	SafetyAwareness:    entities.PtrTo("d"),
 	Unsteadiness:       entities.PtrTo("b"),
+	FallRiskScore:      entities.PtrTo(int32(6)),
 }
 var dental = entities.Dental{
 	CleanTeethFreq:   entities.PtrTo(1),

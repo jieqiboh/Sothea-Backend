@@ -117,11 +117,13 @@ CREATE TABLE IF NOT EXISTS fallrisk
 (
     id                  INTEGER NOT NULL,                                -- Use INTEGER to match the id type from admin
     vid                 INTEGER NOT NULL,                                -- Add vid to match the vid type from admin
+    fall_worries        VARCHAR(1) NOT NULL,                             -- How often do you worry about falling? (a, b, c, d)
     fall_history        VARCHAR(1) NOT NULL,                             -- History of fall within past 12 months (a, b, c, d)
     cognitive_status    VARCHAR(1) NOT NULL,                             -- Cognitive status (a, b, c, d)
     continence_problems VARCHAR(1) NOT NULL,                             -- Continence problems (a, b, c, d, e)
     safety_awareness    VARCHAR(1) NOT NULL,                             -- Safety awareness (a, b, c, d)
     unsteadiness        VARCHAR(1) NOT NULL,                             -- Unsteadiness when standing, transferring and/or walking (a, b, c, d)
+    fall_risk_score     INTEGER NOT NULL,                                -- Fall risk score
     PRIMARY KEY (id, vid),                                               -- Composite primary key
     CONSTRAINT fk_admin FOREIGN KEY (id, vid) REFERENCES admin (id, vid) -- Foreign key referencing the composite key in admin
 );
@@ -282,9 +284,9 @@ INSERT INTO visualacuity (id, vid, l_eye_vision, r_eye_vision, additional_interv
 VALUES (1, 1, 20, 20, 'VISUAL FIELD TEST REQUIRED'),
        (2, 1, 15, 20, 'REFERRED TO BOC');
 
-INSERT INTO fallrisk (id, vid, fall_history, cognitive_status, continence_problems, safety_awareness, unsteadiness)
-VALUES (1, 1, 'a', 'b', 'e', 'd', 'c'),
-       (2, 1, 'd', 'd', 'c', 'b', 'a');
+INSERT INTO fallrisk (id, vid, fall_worries, fall_history, cognitive_status, continence_problems, safety_awareness, unsteadiness, fall_risk_score)
+VALUES (1, 1, 'a', 'a', 'b', 'e', 'd', 'c', 6),
+       (2, 1, 'b', 'd', 'd', 'c', 'b', 'a', 10);
 
 INSERT INTO dental (id, vid, clean_teeth_freq, sugar_consume_freq, past_year_decay, brush_teeth_pain, drink_other_water,
                     dental_notes, referral_needed, referral_loc, tooth_11, tooth_21, tooth_22, tooth_35, tooth_47, tooth_48)

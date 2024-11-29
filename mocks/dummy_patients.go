@@ -438,11 +438,13 @@ var JSONMarshallingErrorPatientJson = `{
     "additionalIntervention": "VISUAL FIELD TEST REQUIRED"
   },
 "fallRisk": {
+	"fallWorries": a,
 	"fallHistory": a,
 	"cognitiveStatus": b,
 	"continenceProblems": c,
 	"safetyAwareness": d,
 	"unsteadiness": b,
+	"fallRiskScore": 6
 }
   "doctorsConsultation": {
     "well": true,
