@@ -825,12 +825,6 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context, inc
         va.l_eye_vision AS va_l_eye_vision,
         va.r_eye_vision AS va_r_eye_vision,
         va.additional_intervention AS va_additional_intervention,
-        -- Fall Risk
-        fr.fall_history AS fr_fall_history,
-        fr.cognitive_status AS fr_cognitive_status,
-        fr.continence_problems AS fr_continence_problems,
-        fr.safety_awareness AS fr_safety_awareness,
-        fr.unsteadiness AS fr_unsteadiness,
 		-- Dental
         d.clean_teeth_freq AS d_clean_teeth_freq,
         d.sugar_consume_freq AS d_sugar_consume_freq,
@@ -872,6 +866,14 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context, inc
         d.tooth_46 AS d_tooth_46,
         d.tooth_47 AS d_tooth_47,
         d.tooth_48 AS d_tooth_48,  -- Right Lower
+        -- Fall Risk
+        fr.fall_worries AS fr_fall_worries,
+        fr.fall_history AS fr_fall_history,
+        fr.cognitive_status AS fr_cognitive_status,
+        fr.continence_problems AS fr_continence_problems,
+        fr.safety_awareness AS fr_safety_awareness,
+        fr.unsteadiness AS fr_unsteadiness,
+        fr.fall_risk_score AS fr_fall_risk_score,
         -- Doctors Consultation
         dc.well AS dc_well,
         dc.msk AS dc_msk,
@@ -900,10 +902,10 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context, inc
         heightandweight haw ON a.id = haw.id AND a.vid = haw.vid
     LEFT JOIN
         visualacuity va ON a.id = va.id AND a.vid = va.vid
-    LEFT JOIN
-        fallrisk fr ON a.id = fr.id AND a.vid = fr.vid
     LEFT JOIN 
 		dental d ON a.id = d.id AND a.vid = d.vid
+    LEFT JOIN
+        fallrisk fr ON a.id = fr.id AND a.vid = fr.vid
     LEFT JOIN
         doctorsconsultation dc ON a.id = dc.id AND a.vid = dc.vid`
 

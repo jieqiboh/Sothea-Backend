@@ -113,21 +113,6 @@ CREATE TABLE IF NOT EXISTS visualacuity
     CONSTRAINT fk_admin FOREIGN KEY (id, vid) REFERENCES admin (id, vid) -- Foreign key referencing the composite key in admin
 );
 
-CREATE TABLE IF NOT EXISTS fallrisk
-(
-    id                  INTEGER NOT NULL,                                -- Use INTEGER to match the id type from admin
-    vid                 INTEGER NOT NULL,                                -- Add vid to match the vid type from admin
-    fall_worries        VARCHAR(1) NOT NULL,                             -- How often do you worry about falling? (a, b, c, d)
-    fall_history        VARCHAR(1) NOT NULL,                             -- History of fall within past 12 months (a, b, c, d)
-    cognitive_status    VARCHAR(1) NOT NULL,                             -- Cognitive status (a, b, c, d)
-    continence_problems VARCHAR(1) NOT NULL,                             -- Continence problems (a, b, c, d, e)
-    safety_awareness    VARCHAR(1) NOT NULL,                             -- Safety awareness (a, b, c, d)
-    unsteadiness        VARCHAR(1) NOT NULL,                             -- Unsteadiness when standing, transferring and/or walking (a, b, c, d)
-    fall_risk_score     INTEGER NOT NULL,                                -- Fall risk score
-    PRIMARY KEY (id, vid),                                               -- Composite primary key
-    CONSTRAINT fk_admin FOREIGN KEY (id, vid) REFERENCES admin (id, vid) -- Foreign key referencing the composite key in admin
-);
-
 CREATE TABLE IF NOT EXISTS dental
 (
     id                      INTEGER NOT NULL,                            -- Use INTEGER to match the id type from admin
@@ -178,6 +163,21 @@ CREATE TABLE IF NOT EXISTS dental
     tooth_47               BOOLEAN,
     tooth_48               BOOLEAN,
 
+    PRIMARY KEY (id, vid),                                               -- Composite primary key
+    CONSTRAINT fk_admin FOREIGN KEY (id, vid) REFERENCES admin (id, vid) -- Foreign key referencing the composite key in admin
+);
+
+CREATE TABLE IF NOT EXISTS fallrisk
+(
+    id                  INTEGER NOT NULL,                                -- Use INTEGER to match the id type from admin
+    vid                 INTEGER NOT NULL,                                -- Add vid to match the vid type from admin
+    fall_worries        VARCHAR(1) NOT NULL,                             -- How often do you worry about falling? (a, b, c, d)
+    fall_history        VARCHAR(1) NOT NULL,                             -- History of fall within past 12 months (a, b, c, d)
+    cognitive_status    VARCHAR(1) NOT NULL,                             -- Cognitive status (a, b, c, d)
+    continence_problems VARCHAR(1) NOT NULL,                             -- Continence problems (a, b, c, d, e)
+    safety_awareness    VARCHAR(1) NOT NULL,                             -- Safety awareness (a, b, c, d)
+    unsteadiness        VARCHAR(1) NOT NULL,                             -- Unsteadiness when standing, transferring and/or walking (a, b, c, d)
+    fall_risk_score     INTEGER NOT NULL,                                -- Fall risk score
     PRIMARY KEY (id, vid),                                               -- Composite primary key
     CONSTRAINT fk_admin FOREIGN KEY (id, vid) REFERENCES admin (id, vid) -- Foreign key referencing the composite key in admin
 );
