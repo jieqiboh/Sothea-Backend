@@ -163,11 +163,13 @@ func (p *postgresPatientRepository) GetPatientVisit(ctx context.Context, id int3
 	err = rows.Scan(
 		&fallrisk.ID,
 		&fallrisk.VID,
+		&fallrisk.FallWorries,
 		&fallrisk.FallHistory,
 		&fallrisk.CognitiveStatus,
 		&fallrisk.ContinenceProblems,
 		&fallrisk.SafetyAwareness,
 		&fallrisk.Unsteadiness,
+		&fallrisk.FallRiskScore,
 	)
 	if errors.Is(sql.ErrNoRows, err) { // no fallrisk found
 		fallrisk = nil
@@ -535,15 +537,17 @@ func (p *postgresPatientRepository) UpdatePatientVisit(ctx context.Context, id i
 	}
 	if fr != nil {
 		_, err = tx.ExecContext(ctx, `
-		INSERT INTO fallrisk (id, vid, fall_history, cognitive_status, continence_problems, safety_awareness, unsteadiness) 
-		VALUES ($1, $2, $3, $4, $5, $6, $7) 
+		INSERT INTO fallrisk (id, vid, fall_worries, fall_history, cognitive_status, continence_problems, safety_awareness, unsteadiness, fall_risk_score) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
 		ON CONFLICT (id, vid) DO UPDATE SET
-		    fall_history = $3,
-			cognitive_status = $4,
-			continence_problems = $5,
-			safety_awareness= $6,
-			unsteadiness = $7
-		`, id, vid, fr.FallHistory, fr.CognitiveStatus, fr.ContinenceProblems, fr.SafetyAwareness, fr.Unsteadiness)
+		    fall_worries = $3,
+		    fall_history = $4,
+			cognitive_status = $5,
+			continence_problems = $6,
+			safety_awareness= $7,
+			unsteadiness = $8,
+			fall_risk_score = $9
+		`, id, vid, fr.FallWorries, fr.FallHistory, fr.CognitiveStatus, fr.ContinenceProblems, fr.SafetyAwareness, fr.Unsteadiness, fr.FallRiskScore)
 
 		if err != nil {
 			return err
