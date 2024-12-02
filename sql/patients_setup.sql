@@ -70,20 +70,20 @@ CREATE TABLE IF NOT EXISTS socialhistory
 
 CREATE TABLE IF NOT EXISTS vitalstatistics
 (
-    id                        INTEGER       NOT NULL,                    -- Use INTEGER to match the id type from admin
-    vid                       INTEGER       NOT NULL,                    -- Add vid to match the vid type from admin
-    temperature               NUMERIC(5, 1) NOT NULL,
-    spo2                      NUMERIC(5, 1) NOT NULL,
-    systolic_bp1              NUMERIC(5, 1),
-    diastolic_bp1             NUMERIC(5, 1),
-    systolic_bp2              NUMERIC(5, 1),
-    diastolic_bp2             NUMERIC(5, 1),
-    avg_systolic_bp           NUMERIC(5, 1),
-    avg_diastolic_bp          NUMERIC(5, 1),
-    hr1                       NUMERIC(5, 1) NOT NULL,
-    hr2                       NUMERIC(5, 1) NOT NULL,
-    avg_hr                    NUMERIC(5, 1) NOT NULL,
-    rand_blood_glucose_mmolL  NUMERIC(5, 1) NOT NULL,
+    id                       INTEGER       NOT NULL,                     -- Use INTEGER to match the id type from admin
+    vid                      INTEGER       NOT NULL,                     -- Add vid to match the vid type from admin
+    temperature              NUMERIC(5, 1) NOT NULL,
+    spo2                     NUMERIC(5, 1) NOT NULL,
+    systolic_bp1             NUMERIC(5, 1),
+    diastolic_bp1            NUMERIC(5, 1),
+    systolic_bp2             NUMERIC(5, 1),
+    diastolic_bp2            NUMERIC(5, 1),
+    avg_systolic_bp          NUMERIC(5, 1),
+    avg_diastolic_bp         NUMERIC(5, 1),
+    hr1                      NUMERIC(5, 1) NOT NULL,
+    hr2                      NUMERIC(5, 1) NOT NULL,
+    avg_hr                   NUMERIC(5, 1) NOT NULL,
+    rand_blood_glucose_mmolL NUMERIC(5, 1) NOT NULL,
     PRIMARY KEY (id, vid),                                               -- Composite primary key
     CONSTRAINT fk_admin FOREIGN KEY (id, vid) REFERENCES admin (id, vid) -- Foreign key referencing the composite key in admin
 );
@@ -115,53 +115,53 @@ CREATE TABLE IF NOT EXISTS visualacuity
 
 CREATE TABLE IF NOT EXISTS dental
 (
-    id                      INTEGER NOT NULL,                            -- Use INTEGER to match the id type from admin
-    vid                     INTEGER NOT NULL,                            -- Add vid to match the vid type from admin
-    clean_teeth_freq        INTEGER NOT NULL CHECK (clean_teeth_freq BETWEEN 0 AND 7),
-    sugar_consume_freq      INTEGER NOT NULL CHECK (sugar_consume_freq BETWEEN 0 AND 6),
-    past_year_decay         BOOLEAN NOT NULL,
-    brush_teeth_pain        BOOLEAN NOT NULL,
-    drink_other_water       BOOLEAN NOT NULL,
-    dental_notes            TEXT,
-    referral_needed         BOOLEAN NOT NULL,
-    referral_loc            TEXT,
+    id                 INTEGER NOT NULL,                                 -- Use INTEGER to match the id type from admin
+    vid                INTEGER NOT NULL,                                 -- Add vid to match the vid type from admin
+    clean_teeth_freq   INTEGER NOT NULL CHECK (clean_teeth_freq BETWEEN 0 AND 7),
+    sugar_consume_freq INTEGER NOT NULL CHECK (sugar_consume_freq BETWEEN 0 AND 6),
+    past_year_decay    BOOLEAN NOT NULL,
+    brush_teeth_pain   BOOLEAN NOT NULL,
+    drink_other_water  BOOLEAN NOT NULL,
+    dental_notes       TEXT,
+    referral_needed    BOOLEAN NOT NULL,
+    referral_loc       TEXT,
 
     -- Teeth Chart (FDI numbering), True if cavity exists
-    tooth_11               BOOLEAN,  -- Right Upper
-    tooth_12               BOOLEAN,
-    tooth_13               BOOLEAN,
-    tooth_14               BOOLEAN,
-    tooth_15               BOOLEAN,
-    tooth_16               BOOLEAN,
-    tooth_17               BOOLEAN,
-    tooth_18               BOOLEAN,
+    tooth_11           BOOLEAN,                                          -- Right Upper
+    tooth_12           BOOLEAN,
+    tooth_13           BOOLEAN,
+    tooth_14           BOOLEAN,
+    tooth_15           BOOLEAN,
+    tooth_16           BOOLEAN,
+    tooth_17           BOOLEAN,
+    tooth_18           BOOLEAN,
 
-    tooth_21               BOOLEAN,  -- Left Upper
-    tooth_22               BOOLEAN,
-    tooth_23               BOOLEAN,
-    tooth_24               BOOLEAN,
-    tooth_25               BOOLEAN,
-    tooth_26               BOOLEAN,
-    tooth_27               BOOLEAN,
-    tooth_28               BOOLEAN,
+    tooth_21           BOOLEAN,                                          -- Left Upper
+    tooth_22           BOOLEAN,
+    tooth_23           BOOLEAN,
+    tooth_24           BOOLEAN,
+    tooth_25           BOOLEAN,
+    tooth_26           BOOLEAN,
+    tooth_27           BOOLEAN,
+    tooth_28           BOOLEAN,
 
-    tooth_31               BOOLEAN,  -- Left Lower
-    tooth_32               BOOLEAN,
-    tooth_33               BOOLEAN,
-    tooth_34               BOOLEAN,
-    tooth_35               BOOLEAN,
-    tooth_36               BOOLEAN,
-    tooth_37               BOOLEAN,
-    tooth_38               BOOLEAN,
+    tooth_31           BOOLEAN,                                          -- Left Lower
+    tooth_32           BOOLEAN,
+    tooth_33           BOOLEAN,
+    tooth_34           BOOLEAN,
+    tooth_35           BOOLEAN,
+    tooth_36           BOOLEAN,
+    tooth_37           BOOLEAN,
+    tooth_38           BOOLEAN,
 
-    tooth_41               BOOLEAN,  -- Right Lower
-    tooth_42               BOOLEAN,
-    tooth_43               BOOLEAN,
-    tooth_44               BOOLEAN,
-    tooth_45               BOOLEAN,
-    tooth_46               BOOLEAN,
-    tooth_47               BOOLEAN,
-    tooth_48               BOOLEAN,
+    tooth_41           BOOLEAN,                                          -- Right Lower
+    tooth_42           BOOLEAN,
+    tooth_43           BOOLEAN,
+    tooth_44           BOOLEAN,
+    tooth_45           BOOLEAN,
+    tooth_46           BOOLEAN,
+    tooth_47           BOOLEAN,
+    tooth_48           BOOLEAN,
 
     PRIMARY KEY (id, vid),                                               -- Composite primary key
     CONSTRAINT fk_admin FOREIGN KEY (id, vid) REFERENCES admin (id, vid) -- Foreign key referencing the composite key in admin
@@ -169,15 +169,32 @@ CREATE TABLE IF NOT EXISTS dental
 
 CREATE TABLE IF NOT EXISTS fallrisk
 (
-    id                  INTEGER NOT NULL,                                -- Use INTEGER to match the id type from admin
-    vid                 INTEGER NOT NULL,                                -- Add vid to match the vid type from admin
+    id                  INTEGER    NOT NULL,                             -- Use INTEGER to match the id type from admin
+    vid                 INTEGER    NOT NULL,                             -- Add vid to match the vid type from admin
     fall_worries        VARCHAR(1) NOT NULL,                             -- How often do you worry about falling? (a, b, c, d)
     fall_history        VARCHAR(1) NOT NULL,                             -- History of fall within past 12 months (a, b, c, d)
     cognitive_status    VARCHAR(1) NOT NULL,                             -- Cognitive status (a, b, c, d)
     continence_problems VARCHAR(1) NOT NULL,                             -- Continence problems (a, b, c, d, e)
     safety_awareness    VARCHAR(1) NOT NULL,                             -- Safety awareness (a, b, c, d)
     unsteadiness        VARCHAR(1) NOT NULL,                             -- Unsteadiness when standing, transferring and/or walking (a, b, c, d)
-    fall_risk_score     INTEGER NOT NULL,                                -- Fall risk score
+    fall_risk_score     INTEGER    NOT NULL,                             -- Fall risk score
+    PRIMARY KEY (id, vid),                                               -- Composite primary key
+    CONSTRAINT fk_admin FOREIGN KEY (id, vid) REFERENCES admin (id, vid) -- Foreign key referencing the composite key in admin
+);
+
+CREATE TABLE IF NOT EXISTS physiotherapy
+(
+    id                         INTEGER NOT NULL,                         -- Use INTEGER to match the id type from admin
+    vid                        INTEGER NOT NULL,                         -- Add vid to match the vid type from admin
+    pain_stiffness_day         INTEGER NOT NULL,                         -- Pain/stiffness during the day: How severe was your usual joint or muscle pain and/or stiffness overall during the day in the last 2 weeks? 0, 1, 2, 3, 4, 5
+    pain_stiffness_night       INTEGER NOT NULL,                         -- Pain/stiffness during the night: How severe was your usual joint or muscle pain and/or stiffness overall during the night in the last 2 weeks? 0, 1, 2, 3, 4, 5
+    symptoms_interfere_tasks   TEXT    NOT NULL,                         -- How much has your symptoms interfered with your ability to walk or do everyday tasks like cooking, cleaning or dressing in the last 2 weeks? Never, Rarely, Sometimes, Often, Always
+    symptoms_change            TEXT    NOT NULL,                         -- Have your symptoms improved, worsened, or stayed the same over the last 2 weeks? Never, Rarely, Sometimes, Often, Always
+    symptoms_need_help         TEXT    NOT NULL,                         -- How often have you needed help from others (including family, friends or carers) because of your joint or muscle symptoms in the last 2 weeks? Never, Rarely, Sometimes, Often, Always
+    trouble_sleep_symptoms     TEXT    NOT NULL,                         -- How often have you had trouble with either falling asleep or staying asleep because of your joint or muscle symptoms in the last 2 weeks? Never, Rarely, Sometimes, Often, Always
+    how_much_fatigue           INTEGER NOT NULL,                         -- How much fatigue or low energy have you felt in the last 2 weeks? 0, 1, 2, 3, 4, 5
+    anxious_low_mood           INTEGER NOT NULL,                         -- How much have you felt anxious or low in your mood because of your joint or muscle symptoms in the last 2 weeks? 0, 1, 2, 3, 4, 5
+    medication_manage_symptoms TEXT    NOT NULL,                         -- Have you used any medication to manage your symptoms in the last 2 weeks? If yes, how often? Never, Rarely, Sometimes, Often, Always
     PRIMARY KEY (id, vid),                                               -- Composite primary key
     CONSTRAINT fk_admin FOREIGN KEY (id, vid) REFERENCES admin (id, vid) -- Foreign key referencing the composite key in admin
 );
@@ -284,12 +301,14 @@ INSERT INTO visualacuity (id, vid, l_eye_vision, r_eye_vision, additional_interv
 VALUES (1, 1, 20, 20, 'VISUAL FIELD TEST REQUIRED'),
        (2, 1, 15, 20, 'REFERRED TO BOC');
 
-INSERT INTO fallrisk (id, vid, fall_worries, fall_history, cognitive_status, continence_problems, safety_awareness, unsteadiness, fall_risk_score)
+INSERT INTO fallrisk (id, vid, fall_worries, fall_history, cognitive_status, continence_problems, safety_awareness,
+                      unsteadiness, fall_risk_score)
 VALUES (1, 1, 'a', 'a', 'b', 'e', 'd', 'c', 6),
        (2, 1, 'b', 'd', 'd', 'c', 'b', 'a', 10);
 
 INSERT INTO dental (id, vid, clean_teeth_freq, sugar_consume_freq, past_year_decay, brush_teeth_pain, drink_other_water,
-                    dental_notes, referral_needed, referral_loc, tooth_11, tooth_21, tooth_22, tooth_35, tooth_47, tooth_48)
+                    dental_notes, referral_needed, referral_loc, tooth_11, tooth_21, tooth_22, tooth_35, tooth_47,
+                    tooth_48)
 VALUES (1, 1, 2, 3, TRUE, TRUE, FALSE, 'None', TRUE, 'Dentist',
         TRUE, FALSE, TRUE, FALSE, TRUE, FALSE);
 
@@ -297,6 +316,12 @@ INSERT INTO dental (id, vid, clean_teeth_freq, sugar_consume_freq, past_year_dec
                     dental_notes, referral_needed, referral_loc, tooth_15, tooth_28, tooth_33, tooth_41, tooth_48)
 VALUES (2, 1, 3, 4, FALSE, FALSE, TRUE, 'None', FALSE, NULL,
         FALSE, FALSE, FALSE, FALSE, FALSE);
+
+INSERT INTO physiotherapy (id, vid, pain_stiffness_day, pain_stiffness_night, symptoms_interfere_tasks, symptoms_change,
+                           symptoms_need_help, trouble_sleep_symptoms, how_much_fatigue, anxious_low_mood,
+                           medication_manage_symptoms)
+VALUES (1, 1, 3, 2, 'Sometimes', 'Often', 'Sometimes', 'Sometimes', 3, 2, 'Sometimes'),
+         (2, 1, 4, 3, 'Often', 'Always', 'Often', 'Often', 4, 3, 'Often');
 
 INSERT INTO doctorsconsultation (id, vid, well, msk, cvs, respi, gu, git, eye, derm, others,
                                  consultation_notes, diagnosis, treatment, referral_needed,
