@@ -889,8 +889,17 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context, inc
         dc.treatment AS dc_treatment,
         dc.referral_needed AS dc_referral_needed,
         dc.referral_loc AS dc_referral_loc,
-        dc.remarks AS dc_remarks
-    FROM
+        dc.remarks AS dc_remarks`
+
+	// Conditionally add the photo field at the end of the query
+	if includePhoto {
+		query += `, a.photo`
+	} else {
+		query += `, NULL AS a_photo`
+	}
+
+	// Now query will include a.photo at the end if includePhoto is true, or NULL if false
+	query += ` FROM
         admin a
     LEFT JOIN
         pastmedicalhistory pmh ON a.id = pmh.id AND a.vid = pmh.vid
@@ -908,12 +917,6 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context, inc
         fallrisk fr ON a.id = fr.id AND a.vid = fr.vid
     LEFT JOIN
         doctorsconsultation dc ON a.id = dc.id AND a.vid = dc.vid`
-
-	// Conditionally add the photo field to the query if includePhoto is true
-	if includePhoto {
-		query = `SELECT
-            a.photo, ` + query[7:] // Adds 'a.photo' to the select fields
-	}
 
 	// Execute the query
 	rows, err := p.Conn.QueryContext(ctx, query)
