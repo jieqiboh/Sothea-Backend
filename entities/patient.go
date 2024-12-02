@@ -15,6 +15,7 @@ type Patient struct {
 	VisualAcuity        *VisualAcuity        `json:"visualacuity"`
 	Dental              *Dental              `json:"dental"`
 	FallRisk            *FallRisk            `json:"fallrisk"`
+	Physiotherapy       *Physiotherapy       `json:"physiotherapy"`
 	DoctorsConsultation *DoctorsConsultation `json:"doctorsconsultation"`
 }
 
