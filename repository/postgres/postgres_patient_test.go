@@ -130,17 +130,6 @@ var dental = entities.Dental{
 	Tooth47:          entities.PtrTo(true),
 	Tooth48:          entities.PtrTo(true),
 }
-var physiotherapy = entities.Physiotherapy{
-	PainStiffnessDay:         entities.PtrTo(int32(1)),
-	PainStiffnessNight:       entities.PtrTo(int32(2)),
-	SymptomsInterfereTasks:   entities.PtrTo("Never"),
-	SymptomsChange:           entities.PtrTo("Rarely"),
-	SymptomsNeedHelp:         entities.PtrTo("Sometimes"),
-	TroubleSleepSymptoms:     entities.PtrTo("Often"),
-	HowMuchFatigue:           entities.PtrTo(int32(3)),
-	AnxiousLowMood:           entities.PtrTo(int32(4)),
-	MedicationManageSymptoms: entities.PtrTo("Always"),
-}
 var doctorsconsultation = entities.DoctorsConsultation{
 	Well:              entities.PtrTo(true),
 	Msk:               entities.PtrTo(false),
@@ -241,7 +230,6 @@ func TestPostgresPatientRepository_GetPatientVisit(t *testing.T) {
 	assert.NotNil(t, p.VisualAcuity)
 	assert.NotNil(t, p.FallRisk)
 	assert.NotNil(t, p.Dental)
-	assert.NotNil(t, p.Physiotherapy)
 	assert.NotNil(t, p.DoctorsConsultation)
 
 	// Get patient that doesn't exist
@@ -340,7 +328,6 @@ func TestPostgresPatientRepository_UpdatePatientVisit(t *testing.T) {
 	visualacuity.ID = id
 	fallrisk.ID = id
 	dental.ID = id
-	physiotherapy.ID = id
 	doctorsconsultation.ID = id
 	admin.VID = vid
 	pastmedicalhistory.VID = vid
@@ -350,7 +337,6 @@ func TestPostgresPatientRepository_UpdatePatientVisit(t *testing.T) {
 	visualacuity.VID = vid
 	fallrisk.VID = vid
 	dental.VID = vid
-	physiotherapy.VID = vid
 	doctorsconsultation.VID = vid
 
 	updatePatient := entities.Patient{
@@ -362,7 +348,6 @@ func TestPostgresPatientRepository_UpdatePatientVisit(t *testing.T) {
 		VisualAcuity:        &visualacuity,
 		FallRisk:            &fallrisk,
 		Dental:              &dental,
-		Physiotherapy:       &physiotherapy,
 		DoctorsConsultation: nil,
 	}
 
@@ -381,7 +366,6 @@ func TestPostgresPatientRepository_UpdatePatientVisit(t *testing.T) {
 		VisualAcuity:        &visualacuity,
 		FallRisk:            &fallrisk,
 		Dental:              &dental,
-		Physiotherapy:       &physiotherapy,
 		DoctorsConsultation: nil,
 	}
 
@@ -393,7 +377,6 @@ func TestPostgresPatientRepository_UpdatePatientVisit(t *testing.T) {
 	assert.Equal(t, p.VisualAcuity, expectedPatient.VisualAcuity)
 	assert.Equal(t, p.FallRisk, expectedPatient.FallRisk)
 	assert.Equal(t, p.Dental, expectedPatient.Dental)
-	assert.Equal(t, p.Physiotherapy, expectedPatient.Physiotherapy)
 	assert.Nil(t, p.DoctorsConsultation)
 
 	// Update patient that doesn't exist
