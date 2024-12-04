@@ -229,27 +229,6 @@ func (p *postgresPatientRepository) GetPatientVisit(ctx context.Context, id int3
 		return nil, err
 	}
 
-	rows = tx.QueryRowContext(ctx, "SELECT * FROM physiotherapy WHERE physiotherapy.id = $1 AND physiotherapy.vid = $2;", id, vid)
-	physiotherapy := &entities.Physiotherapy{}
-	err = rows.Scan(
-		&physiotherapy.ID,
-		&physiotherapy.VID,
-		&physiotherapy.PainStiffnessDay,
-		&physiotherapy.PainStiffnessNight,
-		&physiotherapy.SymptomsInterfereTasks,
-		&physiotherapy.SymptomsChange,
-		&physiotherapy.SymptomsNeedHelp,
-		&physiotherapy.TroubleSleepSymptoms,
-		&physiotherapy.HowMuchFatigue,
-		&physiotherapy.AnxiousLowMood,
-		&physiotherapy.MedicationManageSymptoms,
-	)
-	if errors.Is(sql.ErrNoRows, err) { // no physiotherapy found
-		physiotherapy = nil
-	} else if err != nil { // unknown error
-		return nil, err
-	}
-
 	rows = tx.QueryRowContext(ctx, "SELECT * FROM doctorsconsultation WHERE doctorsconsultation.id = $1 AND doctorsconsultation.vid = $2;", id, vid)
 	doctorsconsultation := &entities.DoctorsConsultation{}
 	err = rows.Scan(
@@ -286,7 +265,6 @@ func (p *postgresPatientRepository) GetPatientVisit(ctx context.Context, id int3
 		VisualAcuity:        visualacuity,
 		FallRisk:            fallrisk,
 		Dental:              dental,
-		Physiotherapy:       physiotherapy,
 		DoctorsConsultation: doctorsconsultation,
 	}
 
@@ -406,10 +384,6 @@ func (p *postgresPatientRepository) DeletePatientVisit(ctx context.Context, id i
 	if err != nil {
 		return err
 	}
-	_, err = tx.Exec("DELETE FROM physiotherapy WHERE physiotherapy.id = $1 AND physiotherapy.vid = $2;", id, vid)
-	if err != nil {
-		return err
-	}
 	_, err = tx.Exec("DELETE FROM doctorsconsultation WHERE doctorsconsultation.id = $1 AND doctorsconsultation.vid = $2;", id, vid)
 	if err != nil {
 		return err
@@ -454,7 +428,6 @@ func (p *postgresPatientRepository) UpdatePatientVisit(ctx context.Context, id i
 	va := patient.VisualAcuity
 	fr := patient.FallRisk
 	d := patient.Dental
-	phy := patient.Physiotherapy
 	dc := patient.DoctorsConsultation
 	if a != nil { // Update admin
 		_, err = tx.ExecContext(ctx, `UPDATE admin SET family_group = $1, reg_date = $2, queue_no = $3, name = $4, khmer_name = $5, dob = $6, age = $7, 
@@ -630,27 +603,6 @@ func (p *postgresPatientRepository) UpdatePatientVisit(ctx context.Context, id i
 			tooth_47 = $41,
 			tooth_48 = $42
 		`, id, vid, d.CleanTeethFreq, d.SugarConsumeFreq, d.PastYearDecay, d.BrushTeethPain, d.DrinkOtherWater, d.DentalNotes, d.ReferralNeeded, d.ReferralLoc, d.Tooth11, d.Tooth12, d.Tooth13, d.Tooth14, d.Tooth15, d.Tooth16, d.Tooth17, d.Tooth18, d.Tooth21, d.Tooth22, d.Tooth23, d.Tooth24, d.Tooth25, d.Tooth26, d.Tooth27, d.Tooth28, d.Tooth31, d.Tooth32, d.Tooth33, d.Tooth34, d.Tooth35, d.Tooth36, d.Tooth37, d.Tooth38, d.Tooth41, d.Tooth42, d.Tooth43, d.Tooth44, d.Tooth45, d.Tooth46, d.Tooth47, d.Tooth48)
-	}
-	if phy != nil {
-		_, err = tx.ExecContext(ctx, `
-		INSERT INTO physiotherapy (id, vid, pain_stiffness_day, pain_stiffness_night, symptoms_interfere_tasks, symptoms_change, 
-		symptoms_need_help, trouble_sleep_symptoms, how_much_fatigue, anxious_low_mood, medication_manage_symptoms) 
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) 
-		ON CONFLICT (id, vid) DO UPDATE SET
-			pain_stiffness_day = $3,
-			pain_stiffness_night = $4,
-			symptoms_interfere_tasks = $5,
-			symptoms_change = $6,
-			symptoms_need_help = $7,
-			trouble_sleep_symptoms = $8,
-			how_much_fatigue = $9,
-			anxious_low_mood = $10,
-			medication_manage_symptoms = $11
-		`, id, vid, phy.PainStiffnessDay, phy.PainStiffnessNight, phy.SymptomsInterfereTasks, phy.SymptomsChange, phy.SymptomsNeedHelp, phy.TroubleSleepSymptoms, phy.HowMuchFatigue, phy.AnxiousLowMood, phy.MedicationManageSymptoms)
-
-		if err != nil {
-			return err
-		}
 	}
 	if dc != nil {
 		_, err = tx.ExecContext(ctx, `
@@ -922,16 +874,6 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context, inc
         fr.safety_awareness AS fr_safety_awareness,
         fr.unsteadiness AS fr_unsteadiness,
         fr.fall_risk_score AS fr_fall_risk_score,
-		-- Physiotherapy
-		phy.pain_stiffness_day AS phy_pain_stiffness_day,
-		phy.pain_stiffness_night AS phy_pain_stiffness_night,
-		phy.symptoms_interfere_tasks AS phy_symptoms_interfere_tasks,
-		phy.symptoms_change AS phy_symptoms_change,
-		phy.symptoms_need_help AS phy_symptoms_need_help,
-		phy.trouble_sleep_symptoms AS phy_trouble_sleep_symptoms,
-		phy.how_much_fatigue AS phy_how_much_fatigue,
-		phy.anxious_low_mood AS phy_anxious_low_mood,
-		phy.medication_manage_symptoms AS phy_medication_manage_symptoms,
         -- Doctors Consultation
         dc.well AS dc_well,
         dc.msk AS dc_msk,
@@ -973,8 +915,6 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context, inc
 		dental d ON a.id = d.id AND a.vid = d.vid
     LEFT JOIN
         fallrisk fr ON a.id = fr.id AND a.vid = fr.vid
-	LEFT JOIN
-		physiotherapy phy ON a.id = phy.id AND a.vid = phy.vid
     LEFT JOIN
         doctorsconsultation dc ON a.id = dc.id AND a.vid = dc.vid`
 
