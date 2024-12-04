@@ -482,7 +482,7 @@ func (p *postgresPatientRepository) UpdatePatientVisit(ctx context.Context, id i
 	if vs != nil {
 		_, err = tx.ExecContext(ctx, `
 		INSERT INTO vitalstatistics (id, vid, temperature, spO2, systolic_bp1, diastolic_bp1, systolic_bp2, diastolic_bp2, 
-		avg_systolic_bp, avg_diastolic_bp, hr1, hr2, avg_hr, rand_blood_glucose_mmolL) 
+		avg_systolic_bp, avg_diastolic_bp, hr1, hr2, avg_hr, rand_blood_glucose_mmoll) 
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) 
 		ON CONFLICT (id, vid) DO UPDATE SET
 			temperature = $3,
@@ -496,7 +496,7 @@ func (p *postgresPatientRepository) UpdatePatientVisit(ctx context.Context, id i
 			hr1 = $11,
 			hr2 = $12,
 			avg_hr = $13,
-			rand_blood_glucose_mmolL = $14
+			rand_blood_glucose_mmoll = $14
 		`, id, vid, vs.Temperature, vs.SpO2, vs.SystolicBP1, vs.DiastolicBP1, vs.SystolicBP2, vs.DiastolicBP2,
 			vs.AverageSystolicBP, vs.AverageDiastolicBP, vs.HR1, vs.HR2, vs.AverageHR, vs.RandomBloodGlucoseMmolL)
 
@@ -813,7 +813,7 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context, inc
 		vs.hr1 AS vs_hr1,
 		vs.hr2 AS vs_hr2,
 		vs.avg_hr AS vs_avg_hr,
-		vs.rand_blood_glucose_mmolL AS vs_rand_blood_glucose_mmoll,
+		vs.rand_blood_glucose_mmoll AS vs_rand_blood_glucose_mmoll,
         -- Height and Weight
         haw.height AS haw_height,
         haw.weight AS haw_weight,
