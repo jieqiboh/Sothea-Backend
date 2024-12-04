@@ -84,7 +84,7 @@
 --     hr1                       NUMERIC(5, 1) NOT NULL,
 --     hr2                       NUMERIC(5, 1) NOT NULL,
 --     avg_hr                    NUMERIC(5, 1) NOT NULL,
---     rand_blood_glucose_mmolL  NUMERIC(5, 1) NOT NULL,
+--     rand_blood_glucose_mmoll  NUMERIC(5, 1) NOT NULL,
 --     PRIMARY KEY (id, vid),                                               -- Composite primary key
 --     CONSTRAINT fk_admin FOREIGN KEY (id, vid) REFERENCES admin (id, vid) -- Foreign key referencing the composite key in admin
 -- );

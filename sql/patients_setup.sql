@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS vitalstatistics
     hr1                       NUMERIC(5, 1) NOT NULL,
     hr2                       NUMERIC(5, 1) NOT NULL,
     avg_hr                    NUMERIC(5, 1) NOT NULL,
-    rand_blood_glucose_mmolL  NUMERIC(5, 1) NOT NULL,
+    rand_blood_glucose_mmoll  NUMERIC(5, 1) NOT NULL,
     PRIMARY KEY (id, vid),                                               -- Composite primary key
     CONSTRAINT fk_admin FOREIGN KEY (id, vid) REFERENCES admin (id, vid) -- Foreign key referencing the composite key in admin
 );
@@ -269,7 +269,7 @@ VALUES (1, 1, TRUE, 15, FALSE, NULL, TRUE, 'A'),
        (5, 1, FALSE, NULL, FALSE, NULL, FALSE, NULL);
 
 INSERT INTO vitalstatistics (id, vid, temperature, spo2, systolic_bp1, diastolic_bp1, systolic_bp2, diastolic_bp2,
-                             avg_systolic_bp, avg_diastolic_bp, hr1, hr2, avg_hr, rand_blood_glucose_mmolL)
+                             avg_systolic_bp, avg_diastolic_bp, hr1, hr2, avg_hr, rand_blood_glucose_mmoll)
 VALUES (1, 1, 36.5, 98, 120, 80, 122, 78, 121, 79, 72, 71, 71.5, 5.4),
        (2, 1, 37.0, 97, 130, 85, 128, 82, 129, 83, 68, 70, 69, 5.7),
        (3, 1, 36.8, 99, 118, 78, 120, 76, 119, 77, 75, 76, 75.5, 5.6),
@@ -348,7 +348,7 @@ VALUES (1, 2, TRUE, 15, FALSE, NULL, TRUE, 'A'),
        (2, 2, FALSE, NULL, TRUE, 10, TRUE, 'D');
 
 INSERT INTO vitalstatistics (id, vid, temperature, spo2, systolic_bp1, diastolic_bp1, systolic_bp2, diastolic_bp2,
-                             avg_systolic_bp, avg_diastolic_bp, hr1, hr2, avg_hr, rand_blood_glucose_mmolL)
+                             avg_systolic_bp, avg_diastolic_bp, hr1, hr2, avg_hr, rand_blood_glucose_mmoll)
 VALUES (1, 2, 36.5, 98, 120, 80, 122, 78, 121, 79, 72, 71, 71.5, 5.4),
        (2, 2, 37.0, 97, 130, 85, 128, 82, 129, 83, 68, 70, 69, 5.7);
 
