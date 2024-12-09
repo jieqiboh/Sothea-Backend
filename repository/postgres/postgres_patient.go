@@ -922,16 +922,6 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context, inc
         fr.safety_awareness AS fr_safety_awareness,
         fr.unsteadiness AS fr_unsteadiness,
         fr.fall_risk_score AS fr_fall_risk_score,
-		-- Physiotherapy
-		p.pain_stiffness_day AS p_pain_stiffness_day,
-		p.pain_stiffness_night AS p_pain_stiffness_night,
-		p.symptoms_interfere_tasks AS p_symptoms_interfere_tasks,
-		p.symptoms_change AS p_symptoms_change,
-		p.symptoms_need_help AS p_symptoms_need_help,
-		p.trouble_sleep_symptoms AS p_trouble_sleep_symptoms,
-		p.how_much_fatigue AS p_how_much_fatigue,
-		p.anxious_low_mood AS p_anxious_low_mood,
-		p.medication_manage_symptoms AS p_medication_manage_symptoms,
         -- Doctors Consultation
         dc.well AS dc_well,
         dc.msk AS dc_msk,
@@ -947,7 +937,17 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context, inc
         dc.treatment AS dc_treatment,
         dc.referral_needed AS dc_referral_needed,
         dc.referral_loc AS dc_referral_loc,
-        dc.remarks AS dc_remarks`
+        dc.remarks AS dc_remarks,
+		-- Physiotherapy
+		p.pain_stiffness_day AS p_pain_stiffness_day,
+		p.pain_stiffness_night AS p_pain_stiffness_night,
+		p.symptoms_interfere_tasks AS p_symptoms_interfere_tasks,
+		p.symptoms_change AS p_symptoms_change,
+		p.symptoms_need_help AS p_symptoms_need_help,
+		p.trouble_sleep_symptoms AS p_trouble_sleep_symptoms,
+		p.how_much_fatigue AS p_how_much_fatigue,
+		p.anxious_low_mood AS p_anxious_low_mood,
+		p.medication_manage_symptoms AS p_medication_manage_symptoms`
 
 	// Conditionally add the photo field at the end of the query
 	if includePhoto {
