@@ -923,15 +923,15 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context, inc
         fr.unsteadiness AS fr_unsteadiness,
         fr.fall_risk_score AS fr_fall_risk_score,
 		-- Physiotherapy
-		phy.pain_stiffness_day AS phy_pain_stiffness_day,
-		phy.pain_stiffness_night AS phy_pain_stiffness_night,
-		phy.symptoms_interfere_tasks AS phy_symptoms_interfere_tasks,
-		phy.symptoms_change AS phy_symptoms_change,
-		phy.symptoms_need_help AS phy_symptoms_need_help,
-		phy.trouble_sleep_symptoms AS phy_trouble_sleep_symptoms,
-		phy.how_much_fatigue AS phy_how_much_fatigue,
-		phy.anxious_low_mood AS phy_anxious_low_mood,
-		phy.medication_manage_symptoms AS phy_medication_manage_symptoms,
+		p.pain_stiffness_day AS p_pain_stiffness_day,
+		p.pain_stiffness_night AS p_pain_stiffness_night,
+		p.symptoms_interfere_tasks AS p_symptoms_interfere_tasks,
+		p.symptoms_change AS p_symptoms_change,
+		p.symptoms_need_help AS p_symptoms_need_help,
+		p.trouble_sleep_symptoms AS p_trouble_sleep_symptoms,
+		p.how_much_fatigue AS p_how_much_fatigue,
+		p.anxious_low_mood AS p_anxious_low_mood,
+		p.medication_manage_symptoms AS p_medication_manage_symptoms,
         -- Doctors Consultation
         dc.well AS dc_well,
         dc.msk AS dc_msk,
@@ -974,7 +974,7 @@ func (p *postgresPatientRepository) ExportDatabaseToCSV(ctx context.Context, inc
     LEFT JOIN
         fallrisk fr ON a.id = fr.id AND a.vid = fr.vid
 	LEFT JOIN
-		physiotherapy phy ON a.id = phy.id AND a.vid = phy.vid
+		physiotherapy p ON a.id = p.id AND a.vid = p.vid
     LEFT JOIN
         doctorsconsultation dc ON a.id = dc.id AND a.vid = dc.vid`
 

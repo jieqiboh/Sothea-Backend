@@ -24,18 +24,18 @@ func (Physiotherapy) TableName() string {
 }
 
 // ToString generates a simple string representation of the Physiotherapy struct.
-func (phy Physiotherapy) String() string {
+func (p Physiotherapy) String() string {
 	result := fmt.Sprintf("\nPHYSIOTHERAPY\n")
-	result += fmt.Sprintf("ID: %d\n", phy.ID)
-	result += fmt.Sprintf("VID: %d\n", phy.VID)
-	result += fmt.Sprintf("PainStiffnessDay: %d\n", *phy.PainStiffnessDay)
-	result += fmt.Sprintf("PainStiffnessNight: %d\n", *phy.PainStiffnessNight)
-	result += fmt.Sprintf("SymptomsInterfereTasks: %s\n", *phy.SymptomsInterfereTasks)
-	result += fmt.Sprintf("SymptomsChange: %s\n", *phy.SymptomsChange)
-	result += fmt.Sprintf("SymptomsNeedHelp: %s\n", *phy.SymptomsNeedHelp)
-	result += fmt.Sprintf("TroubleSleepSymptoms: %s\n", *phy.TroubleSleepSymptoms)
-	result += fmt.Sprintf("HowMuchFatigue: %d\n", *phy.HowMuchFatigue)
-	result += fmt.Sprintf("AnxiousLowMood: %d\n", *phy.AnxiousLowMood)
-	result += fmt.Sprintf("MedicationManageSymptoms: %s\n", *phy.MedicationManageSymptoms)
+	result += fmt.Sprintf("ID: %d\n", p.ID)
+	result += fmt.Sprintf("VID: %d\n", p.VID)
+	result += fmt.Sprintf("PainStiffnessDay: %d\n", *p.PainStiffnessDay)
+	result += fmt.Sprintf("PainStiffnessNight: %d\n", *p.PainStiffnessNight)
+	result += fmt.Sprintf("SymptomsInterfereTasks: %s\n", *p.SymptomsInterfereTasks)
+	result += fmt.Sprintf("SymptomsChange: %s\n", *p.SymptomsChange)
+	result += fmt.Sprintf("SymptomsNeedHelp: %s\n", *p.SymptomsNeedHelp)
+	result += fmt.Sprintf("TroubleSleepSymptoms: %s\n", *p.TroubleSleepSymptoms)
+	result += fmt.Sprintf("HowMuchFatigue: %d\n", *p.HowMuchFatigue)
+	result += fmt.Sprintf("AnxiousLowMood: %d\n", *p.AnxiousLowMood)
+	result += fmt.Sprintf("MedicationManageSymptoms: %s\n", *p.MedicationManageSymptoms)
 	return result
 }
