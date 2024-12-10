@@ -412,42 +412,4 @@ CREATE TABLE users
 INSERT INTO users (username, password_hash)
 VALUES ('admin', '$2a$10$Y/FMxVZsuiPcVutd0O3kfuWEyWyqZUb4HC5yXF7.xVxNCt9GUfOPe');
 INSERT INTO users (username, password_hash)
-VALUES ('dr1', '$2a$10$QJVQuKDvgYI7h1bdZ7FeVuo6W/osv1D0QKS80Z49wPYCwl7JM7XYm');
-INSERT INTO users (username, password_hash)
-VALUES ('dr2', '$2a$10$YBdJa9dV2GjlbW6To7oWfunZzKm1gUWwa7rRL9oNqai5XPurvXfGu');
-INSERT INTO users (username, password_hash)
-VALUES ('dr3', '$2a$10$7AUA6j4Gssu1NeedfH/.nu8qi3mkR/bo3kQ1PQIZgh0CL3J7YqQAW');
-INSERT INTO users (username, password_hash)
-VALUES ('dr4', '$2a$10$yVvSf9HcrOCKU20iI3KFMOraUeMeZFz.YAaxy7bC22BiPEUK604C2');
-INSERT INTO users (username, password_hash)
-VALUES ('dr5', '$2a$10$KY442JFYtKJQST31XYwJquoD61qhWgpL2ee743oQnLV0IRLY8.sUi');
-INSERT INTO users (username, password_hash)
-VALUES ('dr6', '$2a$10$fW.NoRoM6Nxgx/lBLR/s5.Wp4dM2AtecwT.W.QqOj2fu04z2ED4BS');
-INSERT INTO users (username, password_hash)
-VALUES ('dr7', '$2a$10$oPJxh3X2nGXqrbuy98tapeBrZ2tIvhvdxSrwo3eZ7BD88Q.gav8MS');
-INSERT INTO users (username, password_hash)
-VALUES ('dr8', '$2a$10$eivqzqXzgEdu42kl3w9mveqW03UhEtCdJewRUDncFEfBPDxdfNeGi');
-INSERT INTO users (username, password_hash)
-VALUES ('dr9', '$2a$10$iSD4RiAOHsNM90DeA2mkcejotEoQtIfFx5tDfIIwIobgCzncsE0ka');
-INSERT INTO users (username, password_hash)
-VALUES ('dr10', '$2a$10$810uwCZxg3PMLmfF2hLSeeYIYTKM5ND3pqd/ui1ZPYO2SfgMTFSdK');
-INSERT INTO users (username, password_hash)
-VALUES ('dr11', '$2a$10$WDe8w9bbz7RyBftb.ybamOvRUmpyON79mb6tXM/g7sN77QZY8VLMC');
-INSERT INTO users (username, password_hash)
-VALUES ('dr12', '$2a$10$SJroXorL7Bj98/qRE6/FYORtdChWveQIyMjUhOO29xi/z8MYOnGba');
-INSERT INTO users (username, password_hash)
-VALUES ('dr13', '$2a$10$UkbEtCJdeGuX/FHLTTlCE.OsrQ7xjVl0rY3Bo8NWY3SOkJK/KT0G.');
-INSERT INTO users (username, password_hash)
-VALUES ('dr14', '$2a$10$I0f4b7QtrS4eH9SNETGUsOcwoqQqlQKRbUD2DITs6y5lB/cdlqOzC');
-INSERT INTO users (username, password_hash)
-VALUES ('dr15', '$2a$10$UhtnHUmTU4DJTUXVaBR.5OFaS2fiimN6YWhOYTzaofZwMtKF/PKDC');
-INSERT INTO users (username, password_hash)
-VALUES ('dr16', '$2a$10$gYTT5hStXUKrpK0Tv9sTluvsK3dwIa8vEJMzPeIuaZ6.MV1YCuJ9O');
-INSERT INTO users (username, password_hash)
-VALUES ('dr17', '$2a$10$aIXgj2VmQuyih/KOMxvxeudRI6DRgiYUy1IMvZ3e.xFh2xZcyWpzq');
-INSERT INTO users (username, password_hash)
-VALUES ('dr18', '$2a$10$xJQIZNVos4y5LkYekDRHV.KeSgKnEzV71uYN3tYRZ3vaJoDPNGSBK');
-INSERT INTO users (username, password_hash)
-VALUES ('dr19', '$2a$10$pvo3eKjP4ZFNx.bE1l9mwuFT87Wnm.FqDHvlJSFbmokP7DkYwy9Oq');
-INSERT INTO users (username, password_hash)
-VALUES ('dr20', '$2a$10$7ZKQ56ckZ2Z9Jye1em62iOrKeMLggM5oI2V1Jpjw52Cmg4nKTmNOG');
+VALUES ('user', '$2a$10$cqFdRzsZVwGF6fI4N.YEYOOEZL7B/93RmEZRkVPVHHqyBMfNwy48i');
