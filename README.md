@@ -39,6 +39,9 @@ To facilitate easy setup of the patients database with preloaded data, we've opt
 
 4. To stop the container, run `docker stop sothea-db`
 
+Running with a volume:
+In this project's root directory, run the Postgres database container with `docker run --name sothea-db -d -p 5432:5432 -v $(pwd)/data:/var/lib/postgresql/data sothea-db`
+
 ### Modes of Operation
 When running the Go binary, you can specify the mode of operation using the `--mode` flag. The available modes are:  
 - `dev` - Development mode, using config.json for configuration. This mode will run the server on port 9090.
@@ -48,6 +51,7 @@ Do ensure that the frontend is appropriately configured to make requests to the 
 ### Common Issues
 - Database role not found / Authentication Failed
 This usually happens if there are already pre-existing Postgres instances running on port 5432. To resolve this, stop check the processes running on port 5432, and stop the existing Postgres processes.
+If on Windows, do `Win` + `R`, then type `services.msc`, search for the Postgres service and stop it.
 
 ### API Endpoints
 API endpoints are detailed below:
